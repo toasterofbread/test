@@ -29,7 +29,7 @@ fun placeTrainInSimulation(train: TrainServiceInfo, position: TrainPosition) {
                 }
             }
             else {
-                distance = bogey.distanceFromBogey(prev_bogey)
+                distance_from_last_bogey = bogey.distanceFromBogey(prev_bogey)
             }
 
             val intersections: List<Float> = track_section.intersectCircle(center = prev_bogey_position, radius = distance)
