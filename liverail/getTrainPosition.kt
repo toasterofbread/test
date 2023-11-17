@@ -1,5 +1,9 @@
 fun getTrainPosition(train: TrainServiceInfo, current_time: Time): TrainPosition? {
-    val schedule: Map<Time, Station> = applyOffsetsToTrainScedule(train.schedule, train.arrival_offsets, train.departure_offsets)
+    val schedule: Map<Time, Station> = applyOffsetsToTrainScedule(
+        train.schedule, 
+        train.arrival_offsets, 
+        train.departure_offsets
+    )
 
     val previous_station: Station? = null
     val previous_time: Time
@@ -70,12 +74,11 @@ fun getTrainPosition(train: TrainServiceInfo, current_time: Time): TrainPosition
         current_distance = acceleration_distance + distance_since_acceleration
     }
 
-    val train_position = TrainPosition()
-    train_position.previous_station = previous_station
-    train_position.next_station = next_station
-    train_position.progress = current_distance / total_distance
-
-    return train_position
+    return TrainPosition(
+        previous_station = previous_station
+        next_station = next_station
+        progress = current_distance / total_distance
+    )
 }
 
 class TrainService { 
