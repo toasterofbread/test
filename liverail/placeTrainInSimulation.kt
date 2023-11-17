@@ -1,8 +1,3 @@
-fun placeBogeyOnTrack(bogey: Bogey, track_section: TrackSection, progress: Float) {
-    bogey.position = track_section.getPointAt(progress)
-    bogey.rotation = track_section.getTangentAt(progress).rotation
-}
-
 fun placeTrainInSimulation(train: TrainServiceInfo, position: TrainPosition) {
     val model: TrainModel = getOrCreateTrainModel(train)
     val track_section: TrackSection = getTrackSection(position.previous_station, position.next_station)
@@ -53,4 +48,9 @@ fun placeTrainInSimulation(train: TrainServiceInfo, position: TrainPosition) {
             prev_bogey = bogey
         }
     }
+}
+
+fun placeBogeyOnTrack(bogey: Bogey, track_section: TrackSection, progress: Float) {
+    bogey.position = track_section.getPointAt(progress)
+    bogey.rotation = track_section.getTangentAt(progress).rotation
 }
