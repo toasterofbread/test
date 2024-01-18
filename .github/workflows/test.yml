@@ -26,7 +26,6 @@ jobs:
     - run: unzip spms-linux-debug.kexe.zip
 
     - run: sudo apt install libmpv-dev
-    - run: ls /usr/lib | grep mpv
 
     - run: chmod +x ./spmp-server.kexe
     - run: ./spmp-server.kexe
