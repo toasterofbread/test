@@ -9,23 +9,16 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-18.04
     steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: recursive
+    - uses: actions/checkout@v1
+    - name: Install Archlinux
+      run: curl -L https://github.com/zaoqi/github-actions-archlinux/raw/master/install.sh | sh
+    - name: Docker hello-world
+      run: |
+        sudo pacman --noconfirm -Syu docker
+        sudo systemctl start docker
+        docker run --rm hello-world
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-    
-    - run: wget https://nightly.link/toasterofbread/spmp-server/actions/runs/7282568410/spms-linux-debug.kexe.zip
-    - run: unzip spms-linux-debug.kexe.zip
-
-    - run: sudo apt install libmpv-dev libappindicator3-dev mpv
-
-    - run: chmod +x ./spmp-server.kexe
-    - run: ./spmp-server.kexe
+    - name: test
+      run: sudo pacman -Sy mpv libappindicator-gtk3
