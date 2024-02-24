@@ -23,4 +23,4 @@ jobs:
       - uses: discord-actions/message@v2
         with:
           webhookUrl: https://discord.com/api/webhooks/1210912462547845191/AU-lpdK9ui4PAZ_L3wdYvJ82JNmko7gpeivuMwP6t4jEGdTU2aXvDY3ewz1p0qOt5OTK
-          message: "[Build workflow](<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}>) completed for commit [${{ env.COMMIT_SHA }}](<${{ github.event.head_commit.url }}>) - ${{ github.event.head_commit.message }} [[ [Downloads](https://nightly.link/${{ github.repository }}/actions/runs/${{ github.run_id }}) ]]"
+          message: "[Build workflow](<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}>) completed for commit - [${{ env.COMMIT_SHA }}](<${{ github.event.head_commit.url }}>) ${{ github.event.head_commit.message }} - [Downloads](https://nightly.link/${{ github.repository }}/actions/runs/${{ github.run_id }})"
