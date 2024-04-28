@@ -11,6 +11,7 @@ on:
 jobs:
   issue-manager:
     runs-on: ubuntu-latest
+    permissions: write-all
     steps:
       - uses: tiangolo/issue-manager@0.4.0
         with:
