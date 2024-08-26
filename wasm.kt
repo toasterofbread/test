@@ -1,3 +1,3 @@
 Hello
 From
-not Kotlin/WASM...
+Kotlin/WASM!
