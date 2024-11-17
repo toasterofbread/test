@@ -28,6 +28,7 @@ pluginManagement {
 dependencyResolutionManagement {
     repositories {
         mavenLocal()
+        maven("https://maven.toastbits.dev/")
 
         gradlePluginPortal()
         google()
