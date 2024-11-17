@@ -1,0 +1,22 @@
+image: gradle:jdk17
+
+before_script:
+  - export GRADLE_USER_HOME=$(pwd)/.gradle
+  - chmod +x ./gradlew
+
+cache:
+  key: "$CI_COMMIT_REF_NAME"
+  paths:
+    - .gradle/
+
+deploy:
+  stage: deploy
+  only:
+    - main
+  script:
+    - ./gradlew application:app:wasmJsBrowserDistribution
+    - mv application/app/build/dist/wasmJs/productionExecutable/ public/
+  pages: true
+  artifacts:
+    paths:
+      - public

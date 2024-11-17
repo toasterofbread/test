@@ -1,0 +1,23 @@
+workflow:
+  name: "LifeLog"
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+build-android:
+  stage: build
+  trigger:
+    include: .gitlab/pipelines/build-android.yml
+    strategy: depend
+
+build-linux:
+  stage: build
+  trigger:
+    include: .gitlab/pipelines/build-linux.yml
+    strategy: depend
+
+deploy-wasm:
+  stage: build
+  trigger:
+    include: .gitlab/pipelines/deploy-wasm.yml
+    strategy: depend

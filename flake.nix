@@ -21,6 +21,7 @@
         pkgs.mkShell {
           packages = with pkgs; [
             libxcrypt-legacy
+            libGL
           ];
 
           shellHook = ''

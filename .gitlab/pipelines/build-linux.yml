@@ -1,0 +1,20 @@
+image: gradle:jdk17
+
+before_script:
+  - export GRADLE_USER_HOME=$(pwd)/.gradle
+  - chmod +x ./gradlew
+
+cache:
+  key: "$CI_COMMIT_REF_NAME"
+  paths:
+    - .gradle/
+
+build:
+  stage: build
+  only:
+    - main
+  script:
+    - ./gradlew packageUberJarForCurrentOS
+  artifacts:
+    paths:
+      - application/app/build/compose/jars/*.jar

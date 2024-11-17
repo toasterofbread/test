@@ -1,0 +1,23 @@
+image: inovex/gitlab-ci-android
+
+variables:
+  ANDROID_COMPILE_SDK: "34"
+  ANDROID_BUILD_TOOLS: "34.0.0"
+  ANDROID_SDK_TOOLS: "11076708"
+
+before_script:
+  - export GRADLE_USER_HOME=$(pwd)/.gradle
+  - chmod +x ./gradlew
+
+cache:
+  key: "$CI_COMMIT_REF_NAME"
+  paths:
+    - .gradle/
+
+build:
+  stage: build
+  script:
+    - ./gradlew application:app:packageDebug
+  artifacts:
+    paths:
+      - application/app/build/outputs/apk/debug/*.apk

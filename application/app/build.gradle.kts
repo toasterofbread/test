@@ -50,35 +50,29 @@ kotlin {
             }
         }
 
-//        val allJvmMain by getting {
-//            dependencies {
-//                runtimeOnly("com.catppuccin:catppuccin-kotlin-jvm:1.0.3-dev")
-//            }
-//        }
-//
-//        val wasmJsMain by getting {
-//            dependencies {
-//                runtimeOnly("com.catppuccin:catppuccin-kotlin-wasm-js:1.0.3-dev")
-//            }
-//        }
-
         val jvmMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
             }
         }
-
-//        val androidMain by getting {
-//            dependencies {
-//                implementation(libs.library("androidx.activity.compose"))
-//            }
-//        }
-//
-//        val wasmJsMain by getting {
-//            dependencies {
-//            }
-//        }
     }
+}
+
+compose.desktop {
+    application {
+        mainClass = "MainKt"
+
+        buildTypes.release {
+            proguard {
+                // TODO
+                isEnabled = false
+            }
+        }
+    }
+}
+
+tasks.withType<AbstractCopyTask> {
+    exclude("META-INF/*.SF", "META-INF/*.RSA", "META-INF/*.DSA")
 }
 
 tasks.named {
