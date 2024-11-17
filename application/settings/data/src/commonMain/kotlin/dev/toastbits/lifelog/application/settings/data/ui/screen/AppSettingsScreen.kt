@@ -9,6 +9,7 @@ import org.jetbrains.compose.resources.stringResource
 
 fun AppSettingsScreen(settings: AppSettings): PreferencesTopScreen =
     PreferencesTopScreen(
+        settings.prefs,
         settings.allGroups,
         { stringResource(Res.string.screen_app_settings) },
         initialStartPaneRatioSource =
