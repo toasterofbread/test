@@ -1,4 +1,5 @@
 import com.android.build.api.dsl.ApkSigningConfig
+import util.CommonConventions
 import util.configureAndroid
 import java.io.FileInputStream
 import java.util.Properties
@@ -44,6 +45,13 @@ android {
     }
 
     buildTypes {
+        all {
+            setProperty(
+                "archivesBaseName",
+                CommonConventions.OutputPlatform.ANDROID_UNIVERSAL.getBaseOutputFileName(project, null)
+            )
+        }
+
         getByName("release") {
             isMinifyEnabled = true
 

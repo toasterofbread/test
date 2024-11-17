@@ -9,7 +9,7 @@ cache:
   paths:
     - .gradle/
 
-build:
+build-linux:
   stage: build
   only:
     - main
@@ -17,4 +17,4 @@ build:
     - ./gradlew packageUberJarForCurrentOS
   artifacts:
     paths:
-      - application/app/build/compose/jars/*.jar
+      - application/app/build/outputs/jar/*.jar

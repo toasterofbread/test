@@ -1,5 +1,8 @@
+import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinWasmJsTargetDsl
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
+import util.CommonConventions
+import util.buildTasks
 import util.configureAllComposeTargets
 
 plugins {
@@ -68,11 +71,19 @@ compose.desktop {
                 isEnabled = false
             }
         }
+
+        nativeDistributions {
+            outputBaseDir = project.layout.buildDirectory.dir("outputs")
+        }
     }
 }
 
-tasks.withType<AbstractCopyTask> {
-    exclude("META-INF/*.SF", "META-INF/*.RSA", "META-INF/*.DSA")
+afterEvaluate {
+    tasks.buildTasks<Jar>("packageReleaseUberJarForCurrentOS", "packageUberJarForCurrentOS") { isDebug ->
+        exclude("META-INF/*.SF", "META-INF/*.RSA", "META-INF/*.DSA")
+        archiveFileName = CommonConventions.OutputPlatform.LINUX_X86_64.getBaseOutputFileName(project, isDebug) + ".jar"
+        destinationDirectory = CommonConventions.getOutputDirectory(project).dir("jar")
+    }
 }
 
 tasks.named {
@@ -83,24 +94,26 @@ tasks.named {
     }
 }
 
-tasks.named("wasmJsBrowserDistribution") {
-    dependOnTaskAndCopyOutputDirectory(":application:worker:wasmJsBrowserDistribution", "productionExecutable")
+tasks.buildTasks<Copy>("wasmJsBrowserDistribution", "wasmJsBrowserDevelopmentExecutableDistribution") { isDebug ->
+    val outputDirectoryName: String =
+        CommonConventions.OutputPlatform.WASM.getBaseOutputFileName(project, isDebug)
+    val outputDirectory: Directory =
+        CommonConventions.getOutputDirectory(project).dir("wasmDistribution/$outputDirectoryName")
+    into(outputDirectory)
+
+    dependOnTaskAndCopyOutputDirectory(
+        ":application:worker:$name",
+        outputDirectory.asFile,
+        if (isDebug) "developmentExecutable"
+        else "productionExecutable"
+    )
     printOutputsOnCompletion()
 }
 
-tasks.named("wasmJsBrowserDevelopmentExecutableDistribution") {
-    dependOnTaskAndCopyOutputDirectory(":application:worker:wasmJsBrowserDevelopmentExecutableDistribution", "developmentExecutable")
-    printOutputsOnCompletion()
-}
-
-fun Task.dependOnTaskAndCopyOutputDirectory(taskPath: String, dirName: String) {
+fun Task.dependOnTaskAndCopyOutputDirectory(taskPath: String, distributionDirectory: File, defaultOutputName: String) {
     dependsOn(taskPath)
 
-    outputs.upToDateWhen { false }
-
     doLast {
-        val appProductionExecutable: File = outputs.files.single { it.name == dirName }
-
         val taskParts: List<String> = taskPath.split(':').filter { it.isNotBlank() }
         var currentProject = rootProject
         for (i in 0 until taskParts.size - 1) {
@@ -108,10 +121,10 @@ fun Task.dependOnTaskAndCopyOutputDirectory(taskPath: String, dirName: String) {
         }
 
         val workerBuildTask: Task by currentProject.tasks.named(taskParts.last())
-        val workerProductionExecutable: File = workerBuildTask.outputs.files.single { it.name == dirName }
+        val workerProductionExecutable: File = workerBuildTask.outputs.files.single { it.name == defaultOutputName }
 
         for (file in workerProductionExecutable.listFiles().orEmpty()) {
-            file.copyRecursively(appProductionExecutable.resolve(file.name), overwrite = true)
+            file.copyRecursively(distributionDirectory.resolve(file.name), overwrite = true)
         }
     }
 }

@@ -9,13 +9,13 @@ cache:
   paths:
     - .gradle/
 
-deploy:
+deploy-wasm:
   stage: deploy
   only:
     - main
   script:
     - ./gradlew application:app:wasmJsBrowserDistribution
-    - mv application/app/build/dist/wasmJs/productionExecutable/ public/
+    - mv application/app/build/outputs/wasmDistribution/* public
   pages: true
   artifacts:
     paths:

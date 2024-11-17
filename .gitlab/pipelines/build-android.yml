@@ -14,7 +14,7 @@ cache:
   paths:
     - .gradle/
 
-build:
+build-android:
   stage: build
   script:
     - ./gradlew application:app:packageDebug
