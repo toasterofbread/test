@@ -1,8 +1,8 @@
 package dev.toastbits.lifelog.core.accessor.impl
 
+import dev.toastbits.kogit.core.filestructure.toPath
 import dev.toastbits.lifelog.core.accessor.DatabaseFileStructureProvider
 import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguration
-import dev.toastbits.lifelog.core.filestructure.toPath
 import dev.toastbits.lifelog.core.specification.converter.alert.LogParseAlert
 import dev.toastbits.lifelog.core.specification.converter.alert.SpecificationLogParseAlert
 import dev.toastbits.lifelog.core.specification.converter.validate

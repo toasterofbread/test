@@ -14,10 +14,10 @@ kotlin {
                 api(projects.application.worker)
                 implementation(projects.core.specification)
                 implementation(projects.core.accessor)
-                implementation(projects.core.git.core)
 
-                 implementation(libs.composekit.util)
-                 implementation(libs.composekit.settings)
+                implementation(libs.kogit.core)
+                implementation(libs.composekit.util)
+                implementation(libs.composekit.settings)
                 implementation(libs.ktor.core)
             }
         }

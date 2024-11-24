@@ -1,7 +1,7 @@
 package dev.toastbits.lifelog.core.accessor.impl
 
-import dev.toastbits.lifelog.core.filestructure.FileStructure
-import dev.toastbits.lifelog.core.filestructure.MutableFileStructure
+import dev.toastbits.kogit.core.filestructure.FileStructure
+import dev.toastbits.kogit.core.filestructure.MutableFileStructure
 import okio.FileSystem
 import okio.Path
 

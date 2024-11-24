@@ -1,7 +1,7 @@
 package dev.toastbits.lifelog.core.accessor.reference
 
+import dev.toastbits.kogit.core.filestructure.toPath
 import dev.toastbits.lifelog.core.accessor.DatabaseFileStructureProvider
-import dev.toastbits.lifelog.core.filestructure.toPath
 import dev.toastbits.lifelog.core.specification.converter.alert.LogGenerateAlert
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityPath
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReference

@@ -1,8 +1,8 @@
 package dev.toastbits.lifelog.application.dbsource.inmemorygit.mapper
 
+import dev.toastbits.kogit.memory.handler.stage.GitHandlerStage
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor.LoadProgress
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.create
-import dev.toastbits.lifelog.core.git.memory.handler.stage.GitHandlerStage
 import lifelog.application.dbsource.inmemorygit.generated.resources.Res
 import lifelog.application.dbsource.inmemorygit.generated.resources.accessor_progress_clone_pulling
 import lifelog.application.dbsource.inmemorygit.generated.resources.accessor_progress_clone_retrieving_ref

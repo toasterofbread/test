@@ -15,8 +15,8 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(projects.core.specification)
-                api(projects.core.filestructure)
 
+                api(libs.kogit.core)
                 api(libs.kotlinx.coroutines.core)
                 api(libs.okio)
             }
@@ -24,7 +24,7 @@ kotlin {
 
         val jvmAndNativeMain by getting {
             dependencies {
-                implementation(projects.core.git.system)
+                implementation(libs.kogit.system)
             }
         }
 

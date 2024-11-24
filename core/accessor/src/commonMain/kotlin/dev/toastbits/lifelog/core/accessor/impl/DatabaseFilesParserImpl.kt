@@ -1,17 +1,17 @@
 package dev.toastbits.lifelog.core.accessor.impl
 
+import dev.toastbits.kogit.core.filestructure.FileStructure
+import dev.toastbits.kogit.core.filestructure.readLines
+import dev.toastbits.kogit.core.filestructure.walkFiles
 import dev.toastbits.lifelog.core.accessor.DatabaseFileStructureProvider
 import dev.toastbits.lifelog.core.accessor.DatabaseFilesParser
-import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguration
 import dev.toastbits.lifelog.core.accessor.extension.DatabaseFileStructureExtension
-import dev.toastbits.lifelog.core.filestructure.FileStructure
-import dev.toastbits.lifelog.core.filestructure.readLines
-import dev.toastbits.lifelog.core.filestructure.walkFiles
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverter
 import dev.toastbits.lifelog.core.specification.converter.ParseAlertData
 import dev.toastbits.lifelog.core.specification.converter.alert.SpecificationLogParseAlert
 import dev.toastbits.lifelog.core.specification.database.LogDataFile
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
+import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguration
 import dev.toastbits.lifelog.core.specification.extension.SpecificationExtension
 import dev.toastbits.lifelog.core.specification.impl.model.entity.date.LogDateImpl
 import dev.toastbits.lifelog.core.specification.model.entity.date.LogDate

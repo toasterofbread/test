@@ -43,6 +43,9 @@ composekit-navigation = { module = "dev.toastbits:composekit-navigation", versio
 composekit-components = { module = "dev.toastbits:composekit-components", version.ref = "composekit" }
 composekit-commonsettings = { module = "dev.toastbits:composekit-commonsettings", version.ref = "composekit" }
 composekit-application = { module = "dev.toastbits:composekit-application", version.ref = "composekit" }
+kogit-core = { module = "dev.toastbits:kogit-core", version.ref = "kogit" }
+kogit-memory = { module = "dev.toastbits:kogit-memory", version.ref = "kogit" }
+kogit-system = { module = "dev.toastbits:kogit-system", version.ref = "kogit" }
 
 kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }

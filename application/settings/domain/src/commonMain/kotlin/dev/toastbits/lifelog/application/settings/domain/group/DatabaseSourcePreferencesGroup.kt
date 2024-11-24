@@ -2,9 +2,9 @@ package dev.toastbits.lifelog.application.settings.domain.group
 
 import dev.toastbits.composekit.settings.PlatformSettingsGroup
 import dev.toastbits.composekit.settings.PlatformSettingsProperty
+import dev.toastbits.kogit.core.model.GitCredentials
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceTypeRegistry
 import dev.toastbits.lifelog.application.settings.domain.model.SerialisedDatabaseSourceConfiguration
-import dev.toastbits.lifelog.core.git.core.model.GitCredentials
 
 @Suppress("PropertyName")
 interface DatabaseSourcePreferencesGroup: PlatformSettingsGroup {

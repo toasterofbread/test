@@ -1,17 +1,16 @@
 package dev.toastbits.lifelog.extension.media.impl
 
+import dev.toastbits.kogit.core.filestructure.FileStructure
+import dev.toastbits.kogit.core.filestructure.MutableFileStructure
+import dev.toastbits.kogit.core.filestructure.readLines
+import dev.toastbits.kogit.core.filestructure.walkFiles
 import dev.toastbits.lifelog.core.accessor.DatabaseFileStructureProvider
 import dev.toastbits.lifelog.core.accessor.extension.DatabaseFileStructurePreprocessor
-import dev.toastbits.lifelog.core.filestructure.FileStructure
-import dev.toastbits.lifelog.core.filestructure.MutableFileStructure
-import dev.toastbits.lifelog.core.filestructure.readLines
-import dev.toastbits.lifelog.core.filestructure.walkFiles
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverterStrings
 import dev.toastbits.lifelog.core.specification.converter.ParseAlertData
 import dev.toastbits.lifelog.core.specification.converter.alert.LogParseAlert
 import dev.toastbits.lifelog.core.specification.converter.alert.SpecificationLogParseAlert
 import dev.toastbits.lifelog.core.specification.extension.ExtensionRegistry
-import dev.toastbits.lifelog.core.specification.extension.SpecificationExtension
 import dev.toastbits.lifelog.core.specification.impl.converter.DateLineParser
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReference
 import dev.toastbits.lifelog.extension.media.GDocsExtensionStrings
@@ -21,7 +20,6 @@ import dev.toastbits.lifelog.extension.media.model.ImageData
 import dev.toastbits.lifelog.extension.media.model.reference.MediaReference
 import dev.toastbits.lifelog.extension.media.model.reference.MediaReferenceType
 import kotlinx.datetime.LocalDate
-import okio.FileSystem
 import okio.Path
 
 class GDocsDatabaseFileStructurePreprocessor(

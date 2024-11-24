@@ -59,12 +59,8 @@ include(":application:dbsource:inmemorygit")
 include(":application:logview:data")
 include(":application:cache")
 
-include(":core:filestructure")
 include(":core:specification")
 include(":core:accessor")
-include(":core:git:core")
-include(":core:git:system")
-include(":core:git:memory")
 include(":core:test")
 
 include(":extension:media")

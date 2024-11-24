@@ -1,13 +1,13 @@
 package dev.toastbits.lifelog.core.accessor.impl
 
-import dev.toastbits.lifelog.core.accessor.DatabaseFilesGenerator
+import dev.toastbits.kogit.core.filestructure.FileStructure
+import dev.toastbits.kogit.core.filestructure.MutableFileStructure
 import dev.toastbits.lifelog.core.accessor.DatabaseFileStructureProvider
-import dev.toastbits.lifelog.core.filestructure.FileStructure
-import dev.toastbits.lifelog.core.filestructure.MutableFileStructure
+import dev.toastbits.lifelog.core.accessor.DatabaseFilesGenerator
 import dev.toastbits.lifelog.core.specification.converter.GenerateAlertData
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverter
-import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.database.LogDataFile
+import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.database.LogFileSplitStrategy
 import dev.toastbits.lifelog.core.specification.database.splitDaysIntoGroups
 import dev.toastbits.lifelog.core.specification.model.entity.date.LogDate

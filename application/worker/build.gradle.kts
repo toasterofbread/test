@@ -31,7 +31,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(projects.core.git.memory)
+                api(libs.library("kogit.memory"))
 
                 implementation(libs.library("kotlinx.coroutines.core"))
                 implementation(libs.library("kotlinx.serialization.json"))

@@ -6,7 +6,7 @@ import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguratio
 import dev.toastbits.lifelog.core.accessor.impl.DatabaseFileStructureProviderImpl
 import dev.toastbits.lifelog.core.accessor.impl.DatabaseFilesParserImpl
 import dev.toastbits.lifelog.core.accessor.reference.LogEntityReferenceGeneratorImpl
-import dev.toastbits.lifelog.core.filestructure.FileStructure
+import dev.toastbits.kogit.core.filestructure.FileStructure
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverter
 import dev.toastbits.lifelog.core.specification.converter.ParseAlertData
 import dev.toastbits.lifelog.core.specification.database.LogDatabase

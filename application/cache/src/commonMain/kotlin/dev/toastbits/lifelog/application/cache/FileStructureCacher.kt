@@ -1,6 +1,6 @@
 package dev.toastbits.lifelog.application.cache
 
-import dev.toastbits.lifelog.core.filestructure.FileStructure
+import dev.toastbits.kogit.core.filestructure.FileStructure
 
 interface FileStructureCacher {
     suspend fun load(): Result<FileStructure?>

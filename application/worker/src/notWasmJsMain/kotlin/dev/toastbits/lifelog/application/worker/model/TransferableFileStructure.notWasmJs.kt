@@ -1,6 +1,6 @@
 package dev.toastbits.lifelog.application.worker.model
 
-import dev.toastbits.lifelog.core.filestructure.FileStructure
+import dev.toastbits.kogit.core.filestructure.FileStructure
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind

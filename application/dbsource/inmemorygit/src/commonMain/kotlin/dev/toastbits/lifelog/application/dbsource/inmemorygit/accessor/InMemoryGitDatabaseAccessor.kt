@@ -1,5 +1,7 @@
 package dev.toastbits.lifelog.application.dbsource.inmemorygit.accessor
 
+import dev.toastbits.kogit.core.filestructure.FileStructure
+import dev.toastbits.kogit.core.model.GitCredentials
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor.LoadProgress
 import dev.toastbits.lifelog.application.dbsource.domain.model.LogDatabaseParseResult
@@ -9,12 +11,10 @@ import dev.toastbits.lifelog.application.worker.WorkerClient
 import dev.toastbits.lifelog.application.worker.command.WorkerCommandInMemoryGitClone
 import dev.toastbits.lifelog.application.worker.mapper.deserialise
 import dev.toastbits.lifelog.application.worker.model.getOrThrow
-import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguration
 import dev.toastbits.lifelog.core.accessor.helper.LogDatabaseParseHelper
-import dev.toastbits.lifelog.core.filestructure.FileStructure
-import dev.toastbits.lifelog.core.git.core.model.GitCredentials
 import dev.toastbits.lifelog.core.specification.converter.ParseAlertData
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
+import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguration
 import kotlinx.coroutines.CoroutineDispatcher
 
 class InMemoryGitDatabaseAccessor(

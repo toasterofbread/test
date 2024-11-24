@@ -15,8 +15,8 @@ kotlin {
                 implementation(projects.application.dbsource.domain)
                 api(projects.core.specification)
                 api(projects.core.accessor)
-                api(projects.core.git.core)
 
+                api(libs.kogit.core)
                 api(libs.composekit.commonsettings)
                 implementation(libs.kotlinx.serialization.json)
             }

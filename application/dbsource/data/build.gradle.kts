@@ -18,8 +18,8 @@ kotlin {
                 implementation(projects.application.settings.data)
                 implementation(projects.application.logview.data)
                 implementation(projects.core.specification)
-                implementation(projects.core.git.core)
 
+                implementation(libs.kogit.core)
                 implementation(libs.composekit.theme)
                 implementation(libs.composekit.util)
                 implementation(libs.composekit.navigation)

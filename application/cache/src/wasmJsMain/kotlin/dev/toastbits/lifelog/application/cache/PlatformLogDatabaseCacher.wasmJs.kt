@@ -1,6 +1,6 @@
 package dev.toastbits.lifelog.application.cache
 
-import dev.toastbits.lifelog.core.filestructure.FileStructure
+import dev.toastbits.kogit.core.filestructure.FileStructure
 import dev.toastbits.lifelog.core.filestructure.SerialisableFileStructure
 import dev.toastbits.lifelog.core.filestructure.countFiles
 import dev.toastbits.lifelog.core.filestructure.toSerialisable
