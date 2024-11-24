@@ -23,6 +23,7 @@
             libxcrypt-legacy
             libGL
             gtk3
+            jdk17
           ];
 
           shellHook = ''

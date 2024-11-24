@@ -25,13 +25,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyColumn
+import dev.toastbits.composekit.components.utils.composable.animatedvisibility.NullableValueAnimatedVisibility
 import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.Screen
-import dev.toastbits.composekit.platform.composable.ScrollBarLazyColumn
-import dev.toastbits.composekit.platform.composable.theme.LocalApplicationTheme
-import dev.toastbits.composekit.settings.ui.ThemeValues
+import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
+import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.composekit.settings.ui.component.item.SettingsItem
-import dev.toastbits.composekit.utils.composable.animatedvisibility.NullableValueAnimatedVisibility
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.type.getLazyListConfigurationItems
 import lifelog.application.dbsource.data.generated.resources.Res
@@ -48,7 +48,7 @@ internal class DatabaseSourceConfigurationScreen<T: DatabaseSourceConfiguration>
 ): Screen {
     @Composable
     override fun Content(navigator: Navigator, modifier: Modifier, contentPadding: PaddingValues) {
-        val theme: ThemeValues = LocalApplicationTheme.current
+        val theme: ThemeValues = LocalComposeKitTheme.current
         var currentConfiguration: T by remember { mutableStateOf(initialConfiguration) }
         var saved: Boolean by remember { mutableStateOf(false) }
         var autoOpen: Boolean by remember { mutableStateOf(false) }

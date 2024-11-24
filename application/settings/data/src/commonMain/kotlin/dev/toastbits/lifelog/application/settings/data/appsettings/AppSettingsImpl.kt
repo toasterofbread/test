@@ -1,6 +1,6 @@
 package dev.toastbits.lifelog.application.settings.data.appsettings
 
-import dev.toastbits.composekit.platform.preferences.PlatformPreferences
+import dev.toastbits.composekit.settings.PlatformSettings
 import dev.toastbits.lifelog.application.settings.data.group.DatabasePreferencesGroupImpl
 import dev.toastbits.lifelog.application.settings.domain.appsettings.AppSettings
 import dev.toastbits.lifelog.application.settings.domain.group.DatabaseSourcePreferencesGroup
@@ -12,7 +12,7 @@ import dev.toastbits.lifelog.application.settings.domain.group.DisplayPreference
 import dev.toastbits.lifelog.application.settings.domain.group.InterfacePreferencesGroup
 
 class AppSettingsImpl(
-    override val prefs: PlatformPreferences
+    override val prefs: PlatformSettings
 ): AppSettings {
     override val Database: DatabasePreferencesGroup = DatabasePreferencesGroupImpl(prefs)
     override val DatabaseSource: DatabaseSourcePreferencesGroup = DatabaseSourcePreferencesGroupImpl(prefs)

@@ -22,21 +22,20 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
+import dev.toastbits.composekit.application.ApplicationTheme
+import dev.toastbits.composekit.components.LocalContext
+import dev.toastbits.composekit.components.platform.composable.onWindowBackPressed
+import dev.toastbits.composekit.context.PlatformContext
 import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
 import dev.toastbits.composekit.navigation.navigator.BaseNavigator
 import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.Screen
-import dev.toastbits.composekit.platform.LocalContext
-import dev.toastbits.composekit.platform.PlatformContext
-import dev.toastbits.composekit.platform.composable.onWindowBackPressed
-import dev.toastbits.composekit.platform.composable.theme.ApplicationTheme
-import dev.toastbits.composekit.platform.preferences.PlatformPreferences
-import dev.toastbits.composekit.platform.preferences.impl.LocalComposeKitSettings
-import dev.toastbits.composekit.settings.ui.ThemeValuesData
-import dev.toastbits.composekit.settings.ui.getDefaultCatppuccinThemes
-import dev.toastbits.composekit.utils.common.copy
-import dev.toastbits.composekit.utils.common.plus
-import dev.toastbits.composekit.utils.common.thenIf
+import dev.toastbits.composekit.settings.PlatformSettings
+import dev.toastbits.composekit.theme.external.getDefaultCatppuccinThemes
+import dev.toastbits.composekit.theme.model.ThemeValuesData
+import dev.toastbits.composekit.util.copy
+import dev.toastbits.composekit.util.plus
+import dev.toastbits.composekit.util.thenIf
 import dev.toastbits.lifelog.application.app.ui.PersistentTopBar
 import dev.toastbits.lifelog.application.core.FullContentScreen
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourcelist.DatabaseSourceListScreen
@@ -57,7 +56,7 @@ import dev.toastbits.lifelog.extension.mediawatch.MediaWatchExtension
 class Application(
     private val context: PlatformContext,
     private val workerClient: WorkerClient,
-    preferences: PlatformPreferences,
+    preferences: PlatformSettings,
     private val settings: AppSettings = AppSettingsImpl(preferences)
 ) {
     private val navigator: Navigator =
@@ -84,10 +83,9 @@ class Application(
             LocalContext provides context,
             LocalWorkerClient provides workerClient,
             LocalSettings provides settings,
-            LocalComposeKitSettings provides settings,
             LocalNavigator provides navigator
         ) {
-            theme.ApplicationTheme(context) {
+            theme.ApplicationTheme(context, settings) {
                 Scaffold { padding ->
                     RootContent(padding)
                 }

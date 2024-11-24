@@ -18,12 +18,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.toastbits.composekit.components.platform.composable.BackHandler
+import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyColumn
+import dev.toastbits.composekit.components.utils.composable.PlatformClickableIconButton
+import dev.toastbits.composekit.components.utils.composable.pane.model.InitialPaneRatioSource
 import dev.toastbits.composekit.navigation.screen.ResponsiveTwoPaneScreen
-import dev.toastbits.composekit.platform.composable.BackHandler
-import dev.toastbits.composekit.platform.composable.ScrollBarLazyColumn
-import dev.toastbits.composekit.utils.common.copy
-import dev.toastbits.composekit.utils.composable.PlatformClickableIconButton
-import dev.toastbits.composekit.utils.composable.pane.model.InitialPaneRatioSource
+import dev.toastbits.composekit.util.copy
 import dev.toastbits.lifelog.application.core.FullContentScreen
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.VerticalLogTimeline
 import dev.toastbits.lifelog.core.specification.database.LogDatabase

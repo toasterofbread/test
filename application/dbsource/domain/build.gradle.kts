@@ -16,7 +16,8 @@ kotlin {
                 implementation(projects.core.accessor)
                 implementation(projects.core.git.core)
 
-                implementation(libs.composekit)
+                 implementation(libs.composekit.util)
+                 implementation(libs.composekit.settings)
                 implementation(libs.ktor.core)
             }
         }

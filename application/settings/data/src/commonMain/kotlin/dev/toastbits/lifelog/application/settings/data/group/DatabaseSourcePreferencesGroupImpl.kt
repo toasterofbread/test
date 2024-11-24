@@ -4,9 +4,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import dev.toastbits.composekit.platform.preferences.PlatformPreferences
-import dev.toastbits.composekit.platform.preferences.PreferencesGroupImpl
-import dev.toastbits.composekit.platform.preferences.PreferencesProperty
+import dev.toastbits.composekit.settings.PlatformSettings
+import dev.toastbits.composekit.settings.PlatformSettingsGroupImpl
+import dev.toastbits.composekit.settings.PlatformSettingsProperty
 import dev.toastbits.composekit.settings.ui.component.item.SettingsItem
 import dev.toastbits.composekit.settings.ui.component.item.TextFieldSettingsItem
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceTypeRegistry
@@ -23,8 +23,8 @@ import lifelog.application.settings.data.generated.resources.pref_database_sourc
 import org.jetbrains.compose.resources.stringResource
 
 open class DatabaseSourcePreferencesGroupImpl(
-    preferences: PlatformPreferences
-): PreferencesGroupImpl("DATABASE_SOURCE", preferences), DatabaseSourcePreferencesGroup {
+    preferences: PlatformSettings
+): PlatformSettingsGroupImpl("DATABASE_SOURCE", preferences), DatabaseSourcePreferencesGroup {
     @Composable
     override fun getTitle(): String = stringResource(Res.string.prefs_group_database_source_title)
 
@@ -41,27 +41,27 @@ open class DatabaseSourcePreferencesGroupImpl(
             )
         )
 
-    override val AUTO_OPEN_SOURCE_INDEX: PreferencesProperty<Int> by property(
+    override val AUTO_OPEN_SOURCE_INDEX: PlatformSettingsProperty<Int> by property(
         getName = { throw IllegalStateException("Internal property") },
         getDescription = { throw IllegalStateException("Internal property") },
         getDefaultValue = { -1 }
     )
 
-    override val DATABASE_SOURCES: PreferencesProperty<List<SerialisedDatabaseSourceConfiguration>> by
+    override val DATABASE_SOURCES: PlatformSettingsProperty<List<SerialisedDatabaseSourceConfiguration>> by
         serialisableProperty(
             getName = { throw IllegalStateException("Internal property") },
             getDescription = { throw IllegalStateException("Internal property") },
             getDefaultValue = { emptyList() }
         )
 
-    override val GIT_USERNAME: PreferencesProperty<String> by
+    override val GIT_USERNAME: PlatformSettingsProperty<String> by
         property(
             getName = { stringResource(Res.string.pref_database_source_git_username_title) },
             getDescription = { stringResource(Res.string.pref_database_source_git_username_description) },
             getDefaultValue = { "" }
         )
 
-    override val GIT_PASSWORD: PreferencesProperty<String> by
+    override val GIT_PASSWORD: PlatformSettingsProperty<String> by
         property(
             getName = { stringResource(Res.string.pref_database_source_git_password_title) },
             getDescription = { stringResource(Res.string.pref_database_source_git_password_description) },

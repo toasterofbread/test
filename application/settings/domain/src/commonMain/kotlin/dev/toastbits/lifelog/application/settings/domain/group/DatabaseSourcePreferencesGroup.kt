@@ -1,20 +1,20 @@
 package dev.toastbits.lifelog.application.settings.domain.group
 
-import dev.toastbits.composekit.platform.preferences.PreferencesGroup
-import dev.toastbits.composekit.platform.preferences.PreferencesProperty
+import dev.toastbits.composekit.settings.PlatformSettingsGroup
+import dev.toastbits.composekit.settings.PlatformSettingsProperty
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceTypeRegistry
 import dev.toastbits.lifelog.application.settings.domain.model.SerialisedDatabaseSourceConfiguration
 import dev.toastbits.lifelog.core.git.core.model.GitCredentials
 
 @Suppress("PropertyName")
-interface DatabaseSourcePreferencesGroup: PreferencesGroup {
+interface DatabaseSourcePreferencesGroup: PlatformSettingsGroup {
     val sourceTypeRegistry: DatabaseSourceTypeRegistry
 
-    val AUTO_OPEN_SOURCE_INDEX: PreferencesProperty<Int>
-    val DATABASE_SOURCES: PreferencesProperty<List<SerialisedDatabaseSourceConfiguration>>
+    val AUTO_OPEN_SOURCE_INDEX: PlatformSettingsProperty<Int>
+    val DATABASE_SOURCES: PlatformSettingsProperty<List<SerialisedDatabaseSourceConfiguration>>
 
-    val GIT_USERNAME: PreferencesProperty<String>
-    val GIT_PASSWORD: PreferencesProperty<String>
+    val GIT_USERNAME: PlatformSettingsProperty<String>
+    val GIT_PASSWORD: PlatformSettingsProperty<String>
 }
 
 suspend fun DatabaseSourcePreferencesGroup.getGitCredentials(): GitCredentials? {

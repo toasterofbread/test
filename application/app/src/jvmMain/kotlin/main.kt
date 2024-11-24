@@ -1,8 +1,7 @@
 import androidx.compose.ui.window.singleWindowApplication
-import dev.toastbits.composekit.platform.PlatformContext
-import dev.toastbits.composekit.platform.PlatformContextImpl
-import dev.toastbits.composekit.platform.preferences.PlatformPreferences
-import dev.toastbits.composekit.platform.preferences.PlatformPreferencesJson
+import dev.toastbits.composekit.context.PlatformContext
+import dev.toastbits.composekit.settings.PlatformSettings
+import dev.toastbits.composekit.settings.PlatformSettingsJson
 import dev.toastbits.lifelog.application.app.Application
 import dev.toastbits.lifelog.application.worker.WorkerClient
 import dev.toastbits.lifelog.application.worker.mapper.WorkerExecutionContext
@@ -16,8 +15,8 @@ import org.jetbrains.compose.resources.getString
 
 fun main() = runBlocking {
     val coroutineScope: CoroutineScope = CoroutineScope(Job())
-    val context: PlatformContext = PlatformContextImpl(getString(Res.string.app_name), coroutineScope)
-    val prefs: PlatformPreferences = PlatformPreferencesJson(context.getFilesDir()!!.resolve("settings.json"))
+    val context: PlatformContext = PlatformContext(getString(Res.string.app_name), coroutineScope)
+    val prefs: PlatformSettings = PlatformSettingsJson(context.getFilesDir()!!.resolve("settings.json"))
 
     val workerExecutionContext: WorkerExecutionContext = WorkerExecutionContext.default(context)
     val workerClient: WorkerClient = WorkerClient(workerExecutionContext)

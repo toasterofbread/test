@@ -1,8 +1,8 @@
 package dev.toastbits.lifelog.application.settings.domain.appsettings
 
-import dev.toastbits.composekit.platform.preferences.PlatformPreferences
-import dev.toastbits.composekit.platform.preferences.PreferencesGroup
-import dev.toastbits.composekit.platform.preferences.impl.ComposeKitSettings
+import dev.toastbits.composekit.settings.PlatformSettings
+import dev.toastbits.composekit.settings.PlatformSettingsGroup
+import dev.toastbits.composekit.commonsettings.impl.ComposeKitSettings
 import dev.toastbits.lifelog.application.settings.domain.group.DatabasePreferencesGroup
 import dev.toastbits.lifelog.application.settings.domain.group.DatabaseSourcePreferencesGroup
 import dev.toastbits.lifelog.application.settings.domain.group.DisplayPreferencesGroup
@@ -10,7 +10,7 @@ import dev.toastbits.lifelog.application.settings.domain.group.InterfacePreferen
 
 @Suppress("PropertyName")
 interface AppSettings: ComposeKitSettings {
-    val allGroups: List<PreferencesGroup> get() =
+    val allGroups: List<PlatformSettingsGroup> get() =
         listOf(
             Database,
             DatabaseSource,
@@ -18,7 +18,7 @@ interface AppSettings: ComposeKitSettings {
             Display
         )
 
-    val prefs: PlatformPreferences
+    val prefs: PlatformSettings
 
     val Database: DatabasePreferencesGroup
     val DatabaseSource: DatabaseSourcePreferencesGroup

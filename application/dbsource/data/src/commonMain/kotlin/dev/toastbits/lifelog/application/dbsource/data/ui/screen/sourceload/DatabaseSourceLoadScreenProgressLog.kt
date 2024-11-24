@@ -17,10 +17,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dev.toastbits.composekit.platform.composable.ScrollBarLazyColumn
-import dev.toastbits.composekit.platform.composable.theme.LocalApplicationTheme
-import dev.toastbits.composekit.settings.ui.ThemeValues
-import dev.toastbits.composekit.utils.composable.wave.WaveLineArea
+import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyColumn
+import dev.toastbits.composekit.components.utils.composable.wave.WaveLineArea
+import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
+import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.model.LogDatabaseParseResult
 import dev.toastbits.lifelog.core.specification.converter.ParseAlertData
@@ -38,7 +38,7 @@ internal fun DatabaseSourceLoadScreenProgressLog(
     loadException: Throwable?,
     modifier: Modifier = Modifier
 ) {
-    val theme: ThemeValues = LocalApplicationTheme.current
+    val theme: ThemeValues = LocalComposeKitTheme.current
     val scrollState: LazyListState = rememberLazyListState()
 
     LaunchedEffect(result) {
@@ -94,7 +94,7 @@ internal fun DatabaseSourceLoadScreenProgressLog(
                             style = MaterialTheme.typography.labelLarge,
                             color =
                             when (alert.alert.severity) {
-                                LogConvertAlert.Severity.WARNING -> theme.on_background
+                                LogConvertAlert.Severity.WARNING -> theme.onBackground
                                 LogConvertAlert.Severity.ERROR -> theme.error
                             }
                         )

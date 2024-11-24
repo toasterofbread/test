@@ -11,10 +11,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
-import dev.toastbits.composekit.platform.composable.theme.LocalApplicationTheme
-import dev.toastbits.composekit.platform.composable.theme.ThemedLinearProgressIndicator
-import dev.toastbits.composekit.settings.ui.ThemeValues
-import dev.toastbits.composekit.utils.composable.animatedvisibility.NullableValueAnimatedVisibility
+import dev.toastbits.composekit.components.platform.composable.theme.ThemedLinearProgressIndicator
+import dev.toastbits.composekit.components.utils.composable.animatedvisibility.NullableValueAnimatedVisibility
+import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
+import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import org.jetbrains.compose.resources.stringResource
 
@@ -24,7 +24,7 @@ internal fun LoadProgressDisplay(
     modifier: Modifier = Modifier,
     done: Boolean = false
 ) {
-    val theme: ThemeValues = LocalApplicationTheme.current
+    val theme: ThemeValues = LocalComposeKitTheme.current
 
     Row(
         modifier,
@@ -34,7 +34,7 @@ internal fun LoadProgressDisplay(
         Text(
             stringResource(progress.getMessageResource()),
             style = MaterialTheme.typography.labelLarge,
-            color = if (progress.isError) theme.error else theme.on_background
+            color = if (progress.isError) theme.error else theme.onBackground
         )
 
         NullableValueAnimatedVisibility(

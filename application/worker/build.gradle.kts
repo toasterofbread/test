@@ -36,8 +36,8 @@ kotlin {
                 implementation(libs.library("kotlinx.coroutines.core"))
                 implementation(libs.library("kotlinx.serialization.json"))
                 implementation(libs.library("ktor.core"))
-                implementation(libs.library("composekit"))
                 implementation(libs.library("sqldelight.extension.coroutines"))
+                implementation(libs.library("composekit.context"))
             }
         }
 

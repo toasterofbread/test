@@ -1,10 +1,10 @@
 package dev.toastbits.lifelog.application.settings.domain.group
 
-import dev.toastbits.composekit.platform.preferences.PreferencesGroup
-import dev.toastbits.composekit.platform.preferences.PreferencesProperty
+import dev.toastbits.composekit.settings.PlatformSettingsGroup
+import dev.toastbits.composekit.settings.PlatformSettingsProperty
 import dev.toastbits.lifelog.application.settings.domain.model.DisplayDateFormat
 
 @Suppress("PropertyName")
-interface DisplayPreferencesGroup: PreferencesGroup {
-    val DATE_FORMAT: PreferencesProperty<DisplayDateFormat>
+interface DisplayPreferencesGroup: PlatformSettingsGroup {
+    val DATE_FORMAT: PlatformSettingsProperty<DisplayDateFormat>
 }

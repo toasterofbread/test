@@ -4,7 +4,7 @@ import app.cash.sqldelight.async.coroutines.awaitCreate
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.worker.WebWorkerDriver
 import app.cash.sqldelight.driver.worker.WebWorkerException
-import dev.toastbits.composekit.platform.PlatformContext
+import dev.toastbits.composekit.context.PlatformContext
 import dev.toastbits.lifelog.application.worker.GitDatabase
 import org.w3c.dom.Worker
 

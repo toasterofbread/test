@@ -1,6 +1,3 @@
-workflow:
-  name: "LifeLog"
-
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
 

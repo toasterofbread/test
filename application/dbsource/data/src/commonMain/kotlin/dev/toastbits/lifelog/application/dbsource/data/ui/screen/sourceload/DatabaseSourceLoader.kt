@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
 import dev.toastbits.composekit.navigation.navigator.Navigator
-import dev.toastbits.composekit.platform.composable.theme.LocalApplicationTheme
-import dev.toastbits.composekit.settings.ui.ThemeValues
+import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
+import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.lifelog.application.dbsource.data.ui.component.DatabaseSourceConfigurationPreview
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step.LoadStep
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step.LoadStepCheckIfUpToDate
@@ -54,7 +54,7 @@ internal fun DatabaseSourceLoader(
     autoProceed: Boolean = false
 ) {
     val navigator: Navigator = LocalNavigator.current
-    val theme: ThemeValues = LocalApplicationTheme.current
+    val theme: ThemeValues = LocalComposeKitTheme.current
 
     var loadException: Throwable? by remember { mutableStateOf(null) }
     var currentStep: LoadStep =

@@ -11,9 +11,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
 import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.Screen
-import dev.toastbits.composekit.platform.preferences.PlatformPreferences
-import dev.toastbits.composekit.platform.preferences.PreferencesGroupImpl
-import dev.toastbits.composekit.platform.preferences.PreferencesProperty
+import dev.toastbits.composekit.settings.PlatformSettings
+import dev.toastbits.composekit.settings.PlatformSettingsGroupImpl
+import dev.toastbits.composekit.settings.PlatformSettingsProperty
 import dev.toastbits.composekit.settings.ui.component.item.ComposableSettingsItem
 import dev.toastbits.composekit.settings.ui.component.item.DropdownSettingsItem
 import dev.toastbits.composekit.settings.ui.component.item.SettingsItem
@@ -30,7 +30,7 @@ import lifelog.application.settings.data.generated.resources.pref_database_split
 import lifelog.application.settings.data.generated.resources.pref_database_split_strategy_title
 import org.jetbrains.compose.resources.stringResource
 
-class DatabasePreferencesGroupImpl(preferences: PlatformPreferences): PreferencesGroupImpl("DATABASE_SOURCE", preferences), DatabasePreferencesGroup {
+class DatabasePreferencesGroupImpl(preferences: PlatformSettings): PlatformSettingsGroupImpl("DATABASE_SOURCE", preferences), DatabasePreferencesGroup {
     @Composable
     override fun getTitle(): String = stringResource(Res.string.prefs_group_database_title)
 
@@ -43,7 +43,7 @@ class DatabasePreferencesGroupImpl(preferences: PlatformPreferences): Preference
     override val extensionRegistry: ExtensionRegistry = ExtensionRegistryImpl()
     override val logFileConverterStrings: LogFileConverterStrings = LogFileConverterStringsImpl()
 
-    override val SPLIT_STRATEGY: PreferencesProperty<LogFileSplitStrategy> by
+    override val SPLIT_STRATEGY: PlatformSettingsProperty<LogFileSplitStrategy> by
         enumProperty(
             getName = { stringResource(Res.string.pref_database_split_strategy_title) },
             getDescription = { stringResource(Res.string.pref_database_split_strategy_description) },

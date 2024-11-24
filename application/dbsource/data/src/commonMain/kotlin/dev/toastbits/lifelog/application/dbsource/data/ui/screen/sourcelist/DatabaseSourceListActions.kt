@@ -19,10 +19,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
-import dev.toastbits.composekit.platform.composable.ScrollBarLazyRow
-import dev.toastbits.composekit.platform.composable.theme.LocalApplicationTheme
-import dev.toastbits.composekit.settings.ui.ThemeValues
-import dev.toastbits.composekit.utils.composable.wave.WaveLineArea
+import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyRow
+import dev.toastbits.composekit.components.utils.composable.wave.WaveLineArea
 import dev.toastbits.lifelog.application.dbsource.data.ui.component.DatabaseSourceTypePreview
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
 import lifelog.application.dbsource.data.generated.resources.Res

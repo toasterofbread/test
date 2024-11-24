@@ -6,9 +6,9 @@ import app.cash.sqldelight.async.coroutines.awaitCreate
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
-import dev.toastbits.composekit.platform.PlatformContext
-import dev.toastbits.lifelog.application.worker.GitDatabase
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
+import dev.toastbits.composekit.context.PlatformContext
+import dev.toastbits.lifelog.application.worker.GitDatabase
 
 internal actual suspend fun GitDatabase.Companion.createInstance(
     context: PlatformContext

@@ -17,7 +17,7 @@ kotlin {
                 api(projects.core.accessor)
                 api(projects.core.git.core)
 
-                implementation(libs.composekit)
+                api(libs.composekit.commonsettings)
                 implementation(libs.kotlinx.serialization.json)
             }
         }

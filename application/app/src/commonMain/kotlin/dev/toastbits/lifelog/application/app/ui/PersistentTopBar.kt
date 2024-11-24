@@ -23,12 +23,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.text.style.TextOverflow
+import dev.toastbits.composekit.components.utils.composable.animatedvisibility.NullableValueAnimatedVisibility
 import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
 import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.StandardButton
-import dev.toastbits.composekit.settings.ui.screen.PreferencesGroupScreen
-import dev.toastbits.composekit.settings.ui.screen.PreferencesTopScreen
-import dev.toastbits.composekit.utils.composable.animatedvisibility.NullableValueAnimatedVisibility
+import dev.toastbits.composekit.settings.ui.screen.PlatformSettingsGroupScreen
+import dev.toastbits.composekit.settings.ui.screen.PlatformSettingsScreen
 import dev.toastbits.lifelog.application.settings.data.compositionlocal.LocalSettings
 import dev.toastbits.lifelog.application.settings.data.ui.screen.AppSettingsScreen
 import dev.toastbits.lifelog.application.settings.domain.appsettings.AppSettings
@@ -83,7 +83,7 @@ internal fun PersistentTopBar(modifier: Modifier) {
 
         val inSettings: Boolean =
             navigator.getMostRecentOfOrNull {
-                it is PreferencesTopScreen || it is PreferencesGroupScreen
+                it is PlatformSettingsScreen || it is PlatformSettingsGroupScreen
             } != null
 
         AnimatedVisibility(!inSettings) {

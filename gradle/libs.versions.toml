@@ -12,7 +12,8 @@ kotlin = "2.1.0-RC"
 compose = "1.8.0-dev1905"
 agp = "8.7.2"
 vanniktech-publish = "0.29.0"
-composekit = "fb7ce50a"
+composekit = "d3543085"
+kogit = "0.0.1"
 ktor = "3.0.0"
 kgit = "1.0.6"
 okio = "3.9.1"
@@ -34,7 +35,14 @@ androidx-activity-compose = "1.9.3"
 navigation-common-ktx = "2.8.4"
 
 [libraries]
-composekit = { module = "dev.toastbits:composekit", version.ref = "composekit" }
+composekit-util = { module = "dev.toastbits:composekit-util", version.ref = "composekit" }
+composekit-context = { module = "dev.toastbits:composekit-context", version.ref = "composekit" }
+composekit-settings = { module = "dev.toastbits:composekit-settings", version.ref = "composekit" }
+composekit-theme = { module = "dev.toastbits:composekit-theme", version.ref = "composekit" }
+composekit-navigation = { module = "dev.toastbits:composekit-navigation", version.ref = "composekit" }
+composekit-components = { module = "dev.toastbits:composekit-components", version.ref = "composekit" }
+composekit-commonsettings = { module = "dev.toastbits:composekit-commonsettings", version.ref = "composekit" }
+composekit-application = { module = "dev.toastbits:composekit-application", version.ref = "composekit" }
 
 kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }

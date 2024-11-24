@@ -1,5 +1,4 @@
-import dev.toastbits.composekit.platform.PlatformContext
-import dev.toastbits.composekit.platform.PlatformContextImpl
+import dev.toastbits.composekit.context.PlatformContext
 import dev.toastbits.lifelog.application.worker.WorkerServer
 import dev.toastbits.lifelog.application.worker.mapper.WorkerExecutionContext
 import kotlinx.coroutines.CoroutineScope
@@ -11,7 +10,7 @@ private external val self: DedicatedWorkerGlobalScope
 
 fun main() {
     val coroutineScope: CoroutineScope = CoroutineScope(Job())
-    val context: PlatformContext = PlatformContextImpl(coroutineScope)
+    val context: PlatformContext = PlatformContext(coroutineScope)
 
     val workerExecutionContext: WorkerExecutionContext =
         WorkerExecutionContext(

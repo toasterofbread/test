@@ -1,19 +1,13 @@
 package dev.toastbits.lifelog.application.app
 
 import android.os.Bundle
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.systemBars
-import androidx.core.view.WindowCompat
-import dev.toastbits.composekit.platform.ApplicationContext
-import dev.toastbits.composekit.platform.PlatformContext
-import dev.toastbits.composekit.platform.PlatformContextImpl
-import dev.toastbits.composekit.platform.preferences.PlatformPreferences
-import dev.toastbits.composekit.platform.preferences.PlatformPreferencesImpl
+import dev.toastbits.composekit.context.ApplicationContext
+import dev.toastbits.composekit.context.PlatformContext
+import dev.toastbits.composekit.settings.PlatformSettings
+import dev.toastbits.composekit.settings.PlatformSettingsImpl
 import dev.toastbits.lifelog.application.worker.WorkerClient
 import dev.toastbits.lifelog.application.worker.mapper.WorkerExecutionContext
 import dev.toastbits.lifelog.application.worker.mapper.default
@@ -30,7 +24,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val context: PlatformContext =
-            PlatformContextImpl(
+            PlatformContext(
                 this,
                 coroutineScope,
                 ApplicationContext(this)
@@ -41,7 +35,7 @@ class MainActivity : ComponentActivity() {
                 WorkerExecutionContext.default(context)
             )
 
-        val prefs: PlatformPreferences = PlatformPreferencesImpl.getInstance(this, Json)
+        val prefs: PlatformSettings = PlatformSettingsImpl.getInstance(this, Json)
 
         val currentApplication: Application =
             Application(

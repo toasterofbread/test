@@ -1,14 +1,14 @@
 package dev.toastbits.lifelog.application.settings.data.ui.screen
 
-import dev.toastbits.composekit.settings.ui.screen.PreferencesTopScreen
-import dev.toastbits.composekit.utils.composable.pane.model.InitialPaneRatioSource
+import dev.toastbits.composekit.components.utils.composable.pane.model.InitialPaneRatioSource
+import dev.toastbits.composekit.settings.ui.screen.PlatformSettingsScreen
 import dev.toastbits.lifelog.application.settings.domain.appsettings.AppSettings
 import lifelog.application.settings.data.generated.resources.Res
 import lifelog.application.settings.data.generated.resources.screen_app_settings
 import org.jetbrains.compose.resources.stringResource
 
-fun AppSettingsScreen(settings: AppSettings): PreferencesTopScreen =
-    PreferencesTopScreen(
+fun AppSettingsScreen(settings: AppSettings): PlatformSettingsScreen =
+    PlatformSettingsScreen(
         settings.prefs,
         settings.allGroups,
         { stringResource(Res.string.screen_app_settings) },

@@ -4,9 +4,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import dev.toastbits.composekit.platform.preferences.PlatformPreferences
-import dev.toastbits.composekit.platform.preferences.PreferencesGroupImpl
-import dev.toastbits.composekit.platform.preferences.PreferencesProperty
+import dev.toastbits.composekit.settings.PlatformSettings
+import dev.toastbits.composekit.settings.PlatformSettingsGroupImpl
+import dev.toastbits.composekit.settings.PlatformSettingsProperty
 import dev.toastbits.composekit.settings.ui.component.item.DropdownSettingsItem
 import dev.toastbits.composekit.settings.ui.component.item.SettingsItem
 import dev.toastbits.lifelog.application.settings.domain.group.DisplayPreferencesGroup
@@ -17,7 +17,7 @@ import lifelog.application.settings.data.generated.resources.prefs_group_display
 import lifelog.application.settings.data.generated.resources.prefs_group_display_title
 import org.jetbrains.compose.resources.stringResource
 
-class DisplayPreferencesGroupImpl(preferences: PlatformPreferences): PreferencesGroupImpl("DISPLAY", preferences), DisplayPreferencesGroup {
+class DisplayPreferencesGroupImpl(preferences: PlatformSettings): PlatformSettingsGroupImpl("DISPLAY", preferences), DisplayPreferencesGroup {
     @Composable
     override fun getTitle(): String = stringResource(Res.string.prefs_group_display_title)
 
@@ -27,7 +27,7 @@ class DisplayPreferencesGroupImpl(preferences: PlatformPreferences): Preferences
     @Composable
     override fun getIcon(): ImageVector = Icons.Default.Visibility
 
-    override val DATE_FORMAT: PreferencesProperty<DisplayDateFormat> by
+    override val DATE_FORMAT: PlatformSettingsProperty<DisplayDateFormat> by
         enumProperty(
             getName = { stringResource(Res.string.pref_display_date_format_title) },
             getDescription = { null },

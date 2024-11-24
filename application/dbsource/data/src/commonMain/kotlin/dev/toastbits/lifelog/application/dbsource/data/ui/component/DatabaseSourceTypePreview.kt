@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import dev.toastbits.composekit.utils.common.thenWith
+import dev.toastbits.composekit.util.thenWith
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
 
 @Composable

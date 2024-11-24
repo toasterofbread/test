@@ -44,12 +44,12 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import dev.toastbits.composekit.platform.composable.ScrollBarLazyColumn
-import dev.toastbits.composekit.platform.composable.theme.LocalApplicationTheme
-import dev.toastbits.composekit.settings.ui.ThemeValues
-import dev.toastbits.composekit.utils.common.thenIf
-import dev.toastbits.composekit.utils.common.thenWith
-import dev.toastbits.composekit.utils.composable.stickyHeaderContentPaddingAware
+import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyColumn
+import dev.toastbits.composekit.components.utils.composable.stickyHeaderContentPaddingAware
+import dev.toastbits.composekit.theme.ThemeValues
+import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
+import dev.toastbits.composekit.util.thenIf
+import dev.toastbits.composekit.util.thenWith
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.item.DateTimelineItem
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.item.EventTimelineItem
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.item.TimelineItem
@@ -78,7 +78,7 @@ internal fun VerticalLogTimeline(
     onCurrentDateIndexChanged: ((Int) -> Unit)? = null,
     onEventSelected: ((LogEventReference) -> Unit)? = null
 ) {
-    val theme: ThemeValues = LocalApplicationTheme.current
+    val theme: ThemeValues = LocalComposeKitTheme.current
     val density: Density = LocalDensity.current
     val coroutineScope: CoroutineScope = rememberCoroutineScope()
 

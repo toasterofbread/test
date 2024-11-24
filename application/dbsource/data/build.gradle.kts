@@ -20,7 +20,10 @@ kotlin {
                 implementation(projects.core.specification)
                 implementation(projects.core.git.core)
 
-                implementation(libs.composekit)
+                implementation(libs.composekit.theme)
+                implementation(libs.composekit.util)
+                implementation(libs.composekit.navigation)
+                implementation(libs.composekit.components)
                 implementation(libs.ktor.core)
                 implementation(libs.kotlinx.serialization.json)
             }

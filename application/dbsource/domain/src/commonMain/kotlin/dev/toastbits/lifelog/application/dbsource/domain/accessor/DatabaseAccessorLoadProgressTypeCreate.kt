@@ -1,7 +1,7 @@
 package dev.toastbits.lifelog.application.dbsource.domain.accessor
 
 import androidx.compose.runtime.Composable
-import dev.toastbits.composekit.utils.common.roundTo
+import dev.toastbits.composekit.util.roundTo
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor.LoadProgress
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor.LoadProgress.Absolute
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor.LoadProgress.Type.GENERIC

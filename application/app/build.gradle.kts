@@ -47,7 +47,12 @@ kotlin {
                 implementation(projects.extension.mediawatch)
                 implementation(projects.extension.gdocs)
 
-                implementation(libs.composekit)
+                implementation(libs.composekit.application)
+                implementation(libs.composekit.context)
+                implementation(libs.composekit.components)
+                implementation(libs.composekit.navigation)
+                implementation(libs.composekit.theme)
+                implementation(libs.composekit.util)
 
                 implementation(libs.okio)
             }

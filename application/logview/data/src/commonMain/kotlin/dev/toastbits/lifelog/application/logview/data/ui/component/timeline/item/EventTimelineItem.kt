@@ -12,8 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
-import dev.toastbits.composekit.platform.composable.theme.LocalApplicationTheme
-import dev.toastbits.composekit.settings.ui.ThemeValues
+import dev.toastbits.composekit.theme.ThemeValues
+import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
 import dev.toastbits.lifelog.application.logview.data.ui.screen.LogEventReference
 import dev.toastbits.lifelog.application.logview.data.ui.screen.get
 import dev.toastbits.lifelog.application.logview.data.ui.toImageVector
@@ -41,7 +41,7 @@ data class EventTimelineItem(
 
     @Composable
     override fun IconContent(modifier: Modifier) {
-        val theme: ThemeValues = LocalApplicationTheme.current
+        val theme: ThemeValues = LocalComposeKitTheme.current
         val shape: Shape = CircleShape
 
         Box(

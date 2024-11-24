@@ -1,6 +1,6 @@
 package dev.toastbits.lifelog.application.worker.mapper
 
-import dev.toastbits.composekit.platform.PlatformContext
+import dev.toastbits.composekit.context.PlatformContext
 import kotlinx.coroutines.Dispatchers
 
 fun WorkerExecutionContext.Companion.default(context: PlatformContext): WorkerExecutionContext =
