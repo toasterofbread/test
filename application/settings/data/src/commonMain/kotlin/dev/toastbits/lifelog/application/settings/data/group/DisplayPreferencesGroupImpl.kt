@@ -36,7 +36,7 @@ class DisplayPreferencesGroupImpl(preferences: PlatformSettings): PlatformSettin
 
     override fun getConfigurationItems(): List<SettingsItem> =
         listOf(
-            DropdownSettingsItem(DATE_FORMAT) {
+            DropdownSettingsItem.ofEnumState(DATE_FORMAT) {
                 it.toString()
             }
         )

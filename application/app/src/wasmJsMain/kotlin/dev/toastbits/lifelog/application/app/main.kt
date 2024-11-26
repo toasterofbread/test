@@ -14,7 +14,7 @@ fun main() {
 
     val context: PlatformContext = PlatformContext(coroutineScope)
     val workerClient: WorkerClient = WorkerClient()
-    val prefs: PlatformSettings = CookiesPlatformSettings(BrowserCookies)
+    val prefs: PlatformSettings = CookiesPlatformSettings(BrowserCookies())
 
     val application: Application = Application(context, workerClient, prefs)
 
