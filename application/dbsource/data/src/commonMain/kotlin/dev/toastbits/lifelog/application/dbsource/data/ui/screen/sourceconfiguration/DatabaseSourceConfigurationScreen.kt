@@ -29,11 +29,12 @@ import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyColu
 import dev.toastbits.composekit.components.utils.composable.animatedvisibility.NullableValueAnimatedVisibility
 import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.Screen
-import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
-import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.composekit.settings.ui.component.item.SettingsItem
+import dev.toastbits.composekit.theme.ThemeValues
+import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.type.getLazyListConfigurationItems
+import dev.toastbits.lifelog.application.settings.data.compositionlocal.LocalSettings
 import lifelog.application.dbsource.data.generated.resources.Res
 import lifelog.application.dbsource.data.generated.resources.button_database_source_auto_open
 import lifelog.application.dbsource.data.generated.resources.button_database_source_auto_open_toggle
@@ -41,6 +42,7 @@ import org.jetbrains.compose.resources.stringResource
 
 internal class DatabaseSourceConfigurationScreen<T: DatabaseSourceConfiguration>(
     private val initialConfiguration: T,
+    private val index: Int,
     private val onSaved: (configuration: T, autoOpen: Boolean) -> Unit,
     private val onCancelled: () -> Unit,
     private val getSaveText: @Composable () -> String,
@@ -48,10 +50,12 @@ internal class DatabaseSourceConfigurationScreen<T: DatabaseSourceConfiguration>
 ): Screen {
     @Composable
     override fun Content(navigator: Navigator, modifier: Modifier, contentPadding: PaddingValues) {
+        val autoOpenIndex: Int by LocalSettings.current.DatabaseSource.AUTO_OPEN_SOURCE_INDEX.observe()
+
         val theme: ThemeValues = LocalComposeKitTheme.current
         var currentConfiguration: T by remember { mutableStateOf(initialConfiguration) }
         var saved: Boolean by remember { mutableStateOf(false) }
-        var autoOpen: Boolean by remember { mutableStateOf(false) }
+        var autoOpen: Boolean by remember { mutableStateOf(autoOpenIndex == index) }
 
         val invalidReasonMessages: Map<Int, String> = currentConfiguration.getInvalidReasonMessages()
 

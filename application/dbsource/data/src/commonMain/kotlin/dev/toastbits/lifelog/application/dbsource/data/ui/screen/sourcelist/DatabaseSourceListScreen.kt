@@ -68,12 +68,16 @@ class DatabaseSourceListScreen: Screen {
                 navigator.pushScreen(
                     DatabaseSourceConfigurationScreen(
                         source,
+                        index,
                         onSaved = { configuration, autoOpen ->
                             val serialised: SerialisedDatabaseSourceConfiguration = settings.DatabaseSource.sourceTypeRegistry.serialiseConfiguration(configuration)
                             settings.DatabaseSource.DATABASE_SOURCES.set(serialisedSourceConfigurations.toMutableList().apply { set(index, serialised) })
 
                             if (autoOpen) {
                                 settings.DatabaseSource.AUTO_OPEN_SOURCE_INDEX.set(index)
+                            }
+                            else if (settings.DatabaseSource.AUTO_OPEN_SOURCE_INDEX.get() == index) {
+                                settings.DatabaseSource.AUTO_OPEN_SOURCE_INDEX.reset()
                             }
 
                             navigator.navigateBackward()
@@ -91,6 +95,7 @@ class DatabaseSourceListScreen: Screen {
                 navigator.pushScreen(
                     DatabaseSourceConfigurationScreen(
                         type.createNewConfiguration(),
+                        serialisedSourceConfigurations.size,
                         onSaved = { configuration, autoOpen ->
                             val newItemIndex: Int = serialisedSourceConfigurations.size
                             val serialised: SerialisedDatabaseSourceConfiguration = settings.DatabaseSource.sourceTypeRegistry.serialiseConfiguration(configuration)
