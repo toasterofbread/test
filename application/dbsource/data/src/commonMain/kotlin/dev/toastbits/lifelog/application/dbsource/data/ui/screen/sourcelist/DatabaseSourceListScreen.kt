@@ -57,9 +57,6 @@ class DatabaseSourceListScreen: Screen {
                     )
                 )
             },
-            onDisableAutoOpenRequested = {
-                settings.DatabaseSource.AUTO_OPEN_SOURCE_INDEX.set(-1)
-            },
             onRemoveRequested = { index ->
                 serialisedSourceConfigurations = serialisedSourceConfigurations.toMutableList().apply { removeAt(index) }
             },

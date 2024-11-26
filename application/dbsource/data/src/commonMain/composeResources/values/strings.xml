@@ -7,7 +7,6 @@
 
     <string name="button_database_source_auto_open_toggle">Toggle open at startup</string>
     <string name="button_database_source_auto_open">Open at startup</string>
-    <string name="button_database_source_disable_auto_open">Disable open at startup</string>
 
     <string name="button_new_database_source_add">Add</string>
     <string name="button_new_database_source_cancel">Cancel</string>

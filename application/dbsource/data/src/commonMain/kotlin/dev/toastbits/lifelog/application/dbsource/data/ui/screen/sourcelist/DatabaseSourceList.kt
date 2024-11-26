@@ -1,9 +1,7 @@
 package dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourcelist
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
@@ -19,21 +17,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyColumn
+import dev.toastbits.lifelog.application.dbsource.data.ui.component.DatabaseSourceConfigurationPreview
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
-import dev.toastbits.lifelog.application.dbsource.data.ui.component.DatabaseSourceConfigurationPreview
 import lifelog.application.dbsource.data.generated.resources.Res
-import lifelog.application.dbsource.data.generated.resources.database_source_list_no_sources_added
 import lifelog.application.dbsource.data.generated.resources.button_delete_database_source
-import lifelog.application.dbsource.data.generated.resources.edit_delete_database_source
 import lifelog.application.dbsource.data.generated.resources.button_delete_database_source_cancel
-import lifelog.application.dbsource.data.generated.resources.dialog_delete_database_source_title
 import lifelog.application.dbsource.data.generated.resources.button_delete_database_source_confirm
+import lifelog.application.dbsource.data.generated.resources.database_source_list_no_sources_added
+import lifelog.application.dbsource.data.generated.resources.dialog_delete_database_source_title
+import lifelog.application.dbsource.data.generated.resources.edit_delete_database_source
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -46,8 +42,7 @@ internal fun DatabaseSourceList(
     onSelected: ((Int) -> Unit)? = null,
     onRemoveRequested: ((Int) -> Unit)? = null,
     onEditRequested: ((Int) -> Unit)? = null,
-    onTypeAddRequested: ((Int) -> Unit)? = null,
-    onDisableAutoOpenRequested: (() -> Unit)? = null
+    onTypeAddRequested: ((Int) -> Unit)? = null
 ) {
     var confirmingRemovalOfIndex: Int? by remember { mutableStateOf(null) }
 
@@ -90,20 +85,17 @@ internal fun DatabaseSourceList(
                     sourceConfiguration,
                     Modifier.fillMaxWidth(),
                     autoOpens = index == autoOpenConfigurationIndex,
-                    onDisableAutoOpen = onDisableAutoOpenRequested,
                     onSelected = onSelected?.let { { it(index) } },
-                    tailContent = {
-                        Row(Modifier.align(Alignment.CenterVertically).alpha(0.75f)) {
-                            if (onEditRequested != null) {
-                                IconButton({ onEditRequested(index) }) {
-                                    Icon(Icons.Default.Edit, stringResource(Res.string.edit_delete_database_source))
-                                }
+                    tailItems = {
+                        if (onEditRequested != null) {
+                            IconButton({ onEditRequested(index) }) {
+                                Icon(Icons.Default.Edit, stringResource(Res.string.edit_delete_database_source))
                             }
+                        }
 
-                            if (onRemoveRequested != null) {
-                                IconButton({ confirmingRemovalOfIndex = index }) {
-                                    Icon(Icons.Default.Delete, stringResource(Res.string.button_delete_database_source))
-                                }
+                        if (onRemoveRequested != null) {
+                            IconButton({ confirmingRemovalOfIndex = index }) {
+                                Icon(Icons.Default.Delete, stringResource(Res.string.button_delete_database_source))
                             }
                         }
                     }
