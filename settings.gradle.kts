@@ -57,6 +57,7 @@ include(":application:dbsource:domain")
 include(":application:dbsource:data")
 include(":application:dbsource:inmemorygit")
 include(":application:logview:data")
+include(":application:usercontent")
 include(":application:cache")
 
 include(":core:specification")

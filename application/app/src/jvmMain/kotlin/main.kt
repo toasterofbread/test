@@ -1,3 +1,4 @@
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.window.singleWindowApplication
 import dev.toastbits.composekit.context.PlatformContext
 import dev.toastbits.composekit.settings.PlatformSettings
@@ -12,6 +13,7 @@ import kotlinx.coroutines.runBlocking
 import lifelog.application.app.generated.resources.Res
 import lifelog.application.app.generated.resources.app_name
 import org.jetbrains.compose.resources.getString
+import java.awt.Dimension
 
 fun main() = runBlocking {
     val coroutineScope: CoroutineScope = CoroutineScope(Job())
@@ -25,6 +27,9 @@ fun main() = runBlocking {
     singleWindowApplication(
         onKeyEvent = application::onKeyEvent
     ) {
+        LaunchedEffect(Unit) {
+            window.size = Dimension(1280, 900)
+        }
         application.Main()
     }
 

@@ -25,8 +25,11 @@ import dev.toastbits.composekit.components.utils.composable.pane.model.InitialPa
 import dev.toastbits.composekit.navigation.screen.ResponsiveTwoPaneScreen
 import dev.toastbits.composekit.util.copy
 import dev.toastbits.lifelog.application.core.FullContentScreen
+import dev.toastbits.lifelog.application.core.usercontent.UserContentDisplay
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.VerticalLogTimeline
+import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.VerticalLogTimelineState
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
+import dev.toastbits.lifelog.core.specification.model.UserContent
 
 class TopLogViewScreen(
     private val logDatabase: LogDatabase
@@ -38,6 +41,7 @@ class TopLogViewScreen(
         ),
     alwaysShowEndPane = true
 ), FullContentScreen {
+    private var timelineState: VerticalLogTimelineState = VerticalLogTimelineState()
     private var viewingEvent: LogEventReference? by mutableStateOf(null)
 
     @Composable
@@ -48,11 +52,17 @@ class TopLogViewScreen(
         var currentDateIndex: Int? by remember { mutableStateOf(null) }
         var scrollTargetDateIndex: Int? by remember { mutableStateOf(null) }
 
+        val currentTimelineState: VerticalLogTimelineState =
+            remember {
+                VerticalLogTimelineState(timelineState).also { timelineState = it }
+            }
+
         Column(
             modifier,
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             VerticalLogTimeline(
+                currentTimelineState,
                 logDatabase,
                 Modifier.fillMaxHeight().weight(1f),
                 contentPadding = contentPadding.copy(bottom = 0.dp),
@@ -105,7 +115,14 @@ class TopLogViewScreen(
         ScrollBarLazyColumn(modifier, contentPadding = contentPadding) {
             item {
                 Text("Secondary $data")
-                Text(logDatabase[data].toString())
+
+                val content: UserContent? = logDatabase[data].content
+                if (content == null) {
+                    Text("No content")
+                }
+                else {
+                    UserContentDisplay(content)
+                }
             }
         }
     }

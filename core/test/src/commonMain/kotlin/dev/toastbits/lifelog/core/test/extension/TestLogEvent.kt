@@ -10,5 +10,5 @@ class TestLogEvent(
     override var content: UserContent? = null,
     override var aboveComment: UserContent? = null
 ) : LogEvent {
-    override fun getIcon(): LogEvent.Icon = LogEvent.Icon.Chat
+    override fun getIcon(): LogEvent.Icon = LogEvent.Icon.Comment
 }
