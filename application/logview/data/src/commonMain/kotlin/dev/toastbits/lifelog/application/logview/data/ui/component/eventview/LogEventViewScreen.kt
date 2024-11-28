@@ -18,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,13 +43,38 @@ import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+
+private val CHANGES_UPDATE_DELAY: Duration = 500.milliseconds
+
+data class LogEventChanges(
+    val content: UserContent? = null
+) {
+    fun hasChanges(): Boolean =
+        this != EMPTY
+
+    companion object {
+        val EMPTY: LogEventChanges = LogEventChanges()
+    }
+}
 
 class LogEventViewScreen(
     private val eventReference: LogEventReference,
-    private val logDatabase: LogDatabase
+    private val logDatabase: LogDatabase,
+    initialChanges: LogEventChanges?,
+    private val updateChanges: (LogEventChanges) -> Unit
 ): Screen {
-    private var state: LogEventViewScreenState by mutableStateOf(LogEventViewScreenState.Previewing(logDatabase[eventReference].content ?: UserContent.EMPTY))
+    private val event: LogEvent = logDatabase[eventReference]
+
+    private var state: LogEventViewScreenState by mutableStateOf(
+        LogEventViewScreenState.Previewing(
+            initialChanges?.content ?: event.content ?: UserContent.EMPTY
+        )
+    )
     private var loadingNextStateType: LogEventViewScreenState.Type? by mutableStateOf(null)
+    private var changes: LogEventChanges by mutableStateOf(initialChanges ?: LogEventChanges.EMPTY)
 
     @Composable
     override fun Content(navigator: Navigator, modifier: Modifier, contentPadding: PaddingValues) {
@@ -81,6 +107,29 @@ class LogEventViewScreen(
             }
         }
 
+        LaunchedEffect(state) {
+            val state: LogEventViewScreenState = state
+            if (state is LogEventViewScreenState.Editing) {
+                delay(CHANGES_UPDATE_DELAY)
+            }
+
+            val newContent: UserContent =
+                when (state) {
+                    is LogEventViewScreenState.Editing ->
+                        logDatabase.converter.userContentParser.parseUserContent(
+                            state.content,
+                            logDatabase.converter.referenceParser,
+                            onAlert = { _, _ -> }
+                        )
+                    is LogEventViewScreenState.Previewing -> state.content
+                }
+
+            changes = changes.copy(
+                content = if (newContent == event.content) null else newContent
+            )
+            updateChanges(changes)
+        }
+
         Box(modifier) {
             CompositionLocalProvider(
                 LocalBringIntoViewSpec provides object : BringIntoViewSpec {
@@ -105,7 +154,12 @@ class LogEventViewScreen(
 
                             val content: UserContent? = event.content
                             if (content != null) {
-                                LogEventUserContent(state, loadingNextStateType)
+                                LogEventUserContent(
+                                    state,
+                                    loadingNextStateType
+                                ) {
+                                    state = it
+                                }
                             }
                             else {
                                 Text("No content")

@@ -1,0 +1,6 @@
+<resources>
+    <plurals name="log_view_screen_changes_made_popup_$x">
+        <item quantity="one">$x change made</item>
+        <item quantity="other">$x changes made</item>
+    </plurals>
+</resources>

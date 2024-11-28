@@ -29,11 +29,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -58,10 +62,14 @@ import dev.toastbits.composekit.theme.onAccent
 import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
 import dev.toastbits.composekit.util.copy
 import dev.toastbits.lifelog.application.core.FullContentScreen
+import dev.toastbits.lifelog.application.logview.data.ui.component.eventview.LogEventChanges
 import dev.toastbits.lifelog.application.logview.data.ui.component.eventview.LogEventViewScreen
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.VerticalLogTimeline
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.VerticalLogTimelineState
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
+import lifelog.application.logview.data.generated.resources.Res
+import lifelog.application.logview.data.generated.resources.`log_view_screen_changes_made_popup_$x`
+import org.jetbrains.compose.resources.pluralStringResource
 
 class TopLogViewScreen(
     private val logDatabase: LogDatabase
@@ -76,6 +84,8 @@ class TopLogViewScreen(
     private var timelineState: VerticalLogTimelineState = VerticalLogTimelineState()
     private var viewingEventScreen: LogEventViewScreen? by mutableStateOf(null)
     private var showSearchBar: Boolean by mutableStateOf(false)
+
+    private val eventChanges: MutableMap<LogEventReference, LogEventChanges> = mutableStateMapOf()
 
     @Composable
     override fun getCurrentData(): LogEventViewScreen? = viewingEventScreen
@@ -102,44 +112,73 @@ class TopLogViewScreen(
                     .fillMaxSize()
                     .weight(1f)
             ) {
-                var searchBarHeight: Dp by remember { mutableStateOf(0.dp) }
+                var bottomContentHeight: Dp by remember { mutableStateOf(0.dp) }
 
                 VerticalLogTimeline(
                     currentTimelineState,
                     logDatabase,
                     Modifier.matchParentSize(),
-                    contentPadding = contentPadding.copy(bottom = searchBarHeight),
+                    contentPadding = contentPadding.copy(bottom = bottomContentHeight),
                     scrollTargetDateIndex = scrollTargetDateIndex,
                     onCurrentDateIndexChanged = {
                         currentDateIndex = it
                         scrollTargetDateIndex = null
                     }
-                ) { event ->
-                    viewingEventScreen = LogEventViewScreen(event, logDatabase)
+                ) { eventReference ->
+                    viewingEventScreen =
+                        LogEventViewScreen(
+                            eventReference,
+                            logDatabase,
+                            initialChanges = eventChanges[eventReference],
+                            updateChanges = { newChanges ->
+                                if (newChanges.hasChanges()) {
+                                    eventChanges[eventReference] = newChanges
+                                }
+                                else {
+                                    eventChanges.remove(eventReference)
+                                }
+                            }
+                        )
                 }
 
-                androidx.compose.animation.AnimatedVisibility(
-                    showSearchBar,
-                    Modifier.align(Alignment.BottomCenter),
-                    enter = slideInVertically { it / 2 } + fadeIn(),
-                    exit = slideOutVertically { it / 2 } + fadeOut()
+                Column(
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .onSizeChanged {
+                            with (density) {
+                                bottomContentHeight = it.height.toDp()
+                            }
+                        }
                 ) {
-                    SearchField(
-                        shouldFocusSearchBar,
-                        onClose = {
-                            showSearchBar = false
-                            timelineState.filterText = null
-                        },
-                        modifier =
+                    androidx.compose.animation.AnimatedVisibility(
+                        eventChanges.isNotEmpty(),
+                        enter = slideInVertically { it / 2 } + fadeIn(),
+                        exit = slideOutVertically { it / 2 } + fadeOut()
+                    ) {
+                        ChangesBar(
                             Modifier
                                 .fillMaxWidth()
                                 .padding(contentPadding.horizontal)
-                                .onSizeChanged {
-                                    with (density) {
-                                        searchBarHeight = it.height.toDp()
-                                    }
-                                }
-                    )
+                        )
+                    }
+
+                    androidx.compose.animation.AnimatedVisibility(
+                        showSearchBar,
+                        enter = slideInVertically { it / 2 } + fadeIn(),
+                        exit = slideOutVertically { it / 2 } + fadeOut()
+                    ) {
+                        SearchField(
+                            shouldFocusSearchBar,
+                            onClose = {
+                                showSearchBar = false
+                                timelineState.filterText = null
+                            },
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(contentPadding.horizontal)
+                        )
+                    }
                 }
             }
 
@@ -156,6 +195,34 @@ class TopLogViewScreen(
                     shouldFocusSearchBar = true
                 },
                 modifier = Modifier.padding(contentPadding.copy(top = 0.dp))
+            )
+        }
+    }
+
+    @Composable
+    private fun ChangesBar(modifier: Modifier = Modifier) {
+        val theme: ThemeValues = LocalComposeKitTheme.current
+        Surface(
+            onClick = {
+                println("AAA")
+            },
+            modifier = modifier.padding(15.dp),
+            shape = MaterialTheme.shapes.small,
+            color = theme.accent,
+            contentColor = theme.onAccent
+        ) {
+            var changeCount: Int by remember { mutableStateOf(eventChanges.size.coerceAtLeast(1)) }
+            LaunchedEffect(eventChanges.size) {
+                if (eventChanges.isNotEmpty()) {
+                    changeCount = eventChanges.size
+                }
+            }
+
+            Text(
+                pluralStringResource(Res.plurals.`log_view_screen_changes_made_popup_$x`, changeCount)
+                    .replace("\$x", changeCount.toString()),
+                Modifier.padding(10.dp),
+                color = theme.onAccent
             )
         }
     }

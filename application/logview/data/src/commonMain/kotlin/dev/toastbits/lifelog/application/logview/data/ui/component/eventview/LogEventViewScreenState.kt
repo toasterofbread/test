@@ -1,6 +1,5 @@
 package dev.toastbits.lifelog.application.logview.data.ui.component.eventview
 
-import androidx.compose.foundation.text.input.TextFieldState
 import dev.toastbits.lifelog.application.logview.data.ui.screen.LogEventReference
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverter
 import dev.toastbits.lifelog.core.specification.model.UserContent
@@ -13,9 +12,8 @@ internal sealed interface LogEventViewScreenState {
     data class Previewing(val content: UserContent): LogEventViewScreenState {
         override val type: Type = Type.PREVIEW
     }
-    data class Editing(val initialContent: String): LogEventViewScreenState {
+    data class Editing(val content: String): LogEventViewScreenState {
         override val type: Type = Type.EDIT
-        val textFieldState: TextFieldState = TextFieldState(initialContent)
     }
 
     enum class Type {
@@ -37,11 +35,9 @@ internal suspend fun LogEventViewScreenState.getNext(
         is LogEventViewScreenState.Editing ->
             LogEventViewScreenState.Previewing(
                 converter.userContentParser.parseUserContent(
-                    textFieldState.text.toString(),
+                    content,
                     converter.referenceParser,
-                    onAlert = { alert, line ->
-                        println("ALERT 2 $alert $line")
-                    }
+                    onAlert = { _, _ -> }
                 )
             )
         is LogEventViewScreenState.Previewing ->
@@ -49,9 +45,7 @@ internal suspend fun LogEventViewScreenState.getNext(
                 converter.userContentGenerator.generateUserContent(
                     content,
                     converter.referenceGeneratorProvider(eventReference.date.date),
-                    onAlert = { alert, line ->
-                        println("ALERT $alert $line")
-                    }
+                    onAlert = { _, _ -> }
                 )
             )
     }
