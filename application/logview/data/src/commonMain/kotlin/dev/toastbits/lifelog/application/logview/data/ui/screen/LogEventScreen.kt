@@ -1,4 +1,4 @@
-package dev.toastbits.lifelog.application.logview.data.ui.component.eventview
+package dev.toastbits.lifelog.application.logview.data.ui.screen
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.gestures.BringIntoViewSpec
@@ -37,8 +37,14 @@ import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.Screen
 import dev.toastbits.composekit.util.launchSingle
 import dev.toastbits.composekit.util.plus
-import dev.toastbits.lifelog.application.logview.data.ui.screen.LogEventReference
-import dev.toastbits.lifelog.application.logview.data.ui.screen.get
+import dev.toastbits.lifelog.application.logview.data.ui.component.event.LogEventMetadata
+import dev.toastbits.lifelog.application.logview.data.ui.component.event.LogEventUserContent
+import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventChanges
+import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventReference
+import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventViewScreenState
+import dev.toastbits.lifelog.application.logview.data.ui.model.get
+import dev.toastbits.lifelog.application.logview.data.ui.model.getNext
+import dev.toastbits.lifelog.application.logview.data.ui.model.getNextType
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
@@ -49,18 +55,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 private val CHANGES_UPDATE_DELAY: Duration = 500.milliseconds
 
-data class LogEventChanges(
-    val content: UserContent? = null
-) {
-    fun hasChanges(): Boolean =
-        this != EMPTY
-
-    companion object {
-        val EMPTY: LogEventChanges = LogEventChanges()
-    }
-}
-
-class LogEventViewScreen(
+class LogEventScreen(
     private val eventReference: LogEventReference,
     private val logDatabase: LogDatabase,
     initialChanges: LogEventChanges?,
@@ -162,7 +157,7 @@ class LogEventViewScreen(
                                 }
                             }
                             else {
-                                Text("No content")
+                                Text("No content // TODO")
                             }
                         }
                     }
@@ -189,7 +184,7 @@ class LogEventViewScreen(
 
     @Composable
     private fun EditToggleButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
-        FilledIconButton(onClick) {
+        FilledIconButton(onClick, modifier) {
             Crossfade(loadingNextStateType ?: state.type) {
                 when (it) {
                     LogEventViewScreenState.Type.EDIT -> Icon(Icons.Default.Visibility, null) // TODO

@@ -1,4 +1,4 @@
-package dev.toastbits.lifelog.application.logview.data.ui.component.eventview
+package dev.toastbits.lifelog.application.logview.data.ui.component.event
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.selection.SelectionContainer

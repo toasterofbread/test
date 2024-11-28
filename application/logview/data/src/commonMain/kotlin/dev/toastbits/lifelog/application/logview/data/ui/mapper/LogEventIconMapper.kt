@@ -1,4 +1,4 @@
-package dev.toastbits.lifelog.application.logview.data.ui
+package dev.toastbits.lifelog.application.logview.data.ui.mapper
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook

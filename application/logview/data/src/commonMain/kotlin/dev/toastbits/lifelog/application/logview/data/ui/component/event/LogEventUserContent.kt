@@ -1,4 +1,4 @@
-package dev.toastbits.lifelog.application.logview.data.ui.component.eventview
+package dev.toastbits.lifelog.application.logview.data.ui.component.event
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.components.utils.composable.SubtleLoadingIndicator
 import dev.toastbits.composekit.util.composable.AlignableCrossfade
+import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventViewScreenState
 import dev.toastbits.lifelog.application.usercontent.UserContentDisplay
 
 @Composable

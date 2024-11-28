@@ -33,7 +33,7 @@ import dev.toastbits.composekit.util.thenIf
 import dev.toastbits.composekit.util.thenWith
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.item.EventTimelineItem
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.item.TimelineItem
-import dev.toastbits.lifelog.application.logview.data.ui.screen.LogEventReference
+import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventReference
 
 internal val ICON_COLUMN_WIDTH: Dp = 40.dp
 internal const val START_COLUMN_FILL_RATIO: Float = 0.4f

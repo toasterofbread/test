@@ -62,18 +62,18 @@ import dev.toastbits.composekit.theme.onAccent
 import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
 import dev.toastbits.composekit.util.copy
 import dev.toastbits.lifelog.application.core.FullContentScreen
-import dev.toastbits.lifelog.application.logview.data.ui.component.eventview.LogEventChanges
-import dev.toastbits.lifelog.application.logview.data.ui.component.eventview.LogEventViewScreen
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.VerticalLogTimeline
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.VerticalLogTimelineState
+import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventChanges
+import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventReference
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import lifelog.application.logview.data.generated.resources.Res
 import lifelog.application.logview.data.generated.resources.`log_view_screen_changes_made_popup_$x`
 import org.jetbrains.compose.resources.pluralStringResource
 
-class TopLogViewScreen(
+class LogListScreen(
     private val logDatabase: LogDatabase
-): ResponsiveTwoPaneScreen<LogEventViewScreen>(
+): ResponsiveTwoPaneScreen<LogEventScreen>(
     initialStartPaneRatioSource =
         InitialPaneRatioSource.Remembered(
             "logview.data.ui.screen.TopLogViewScreen",
@@ -82,16 +82,16 @@ class TopLogViewScreen(
     alwaysShowEndPane = true
 ), FullContentScreen {
     private var timelineState: VerticalLogTimelineState = VerticalLogTimelineState()
-    private var viewingEventScreen: LogEventViewScreen? by mutableStateOf(null)
+    private var viewingEventScreen: LogEventScreen? by mutableStateOf(null)
     private var showSearchBar: Boolean by mutableStateOf(false)
 
     private val eventChanges: MutableMap<LogEventReference, LogEventChanges> = mutableStateMapOf()
 
     @Composable
-    override fun getCurrentData(): LogEventViewScreen? = viewingEventScreen
+    override fun getCurrentData(): LogEventScreen? = viewingEventScreen
 
     @Composable
-    override fun PrimaryPane(data: LogEventViewScreen?, contentPadding: PaddingValues, modifier: Modifier) {
+    override fun PrimaryPane(data: LogEventScreen?, contentPadding: PaddingValues, modifier: Modifier) {
         val density: Density = LocalDensity.current
 
         var currentDateIndex: Int? by remember { mutableStateOf(null) }
@@ -126,7 +126,7 @@ class TopLogViewScreen(
                     }
                 ) { eventReference ->
                     viewingEventScreen =
-                        LogEventViewScreen(
+                        LogEventScreen(
                             eventReference,
                             logDatabase,
                             initialChanges = eventChanges[eventReference],
@@ -353,7 +353,7 @@ class TopLogViewScreen(
     }
 
     @Composable
-    override fun SecondaryPane(data: LogEventViewScreen?, contentPadding: PaddingValues, modifier: Modifier) {
+    override fun SecondaryPane(data: LogEventScreen?, contentPadding: PaddingValues, modifier: Modifier) {
         if (data == null) {
             return
         }

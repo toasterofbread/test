@@ -1,6 +1,5 @@
-package dev.toastbits.lifelog.application.logview.data.ui.component.eventview
+package dev.toastbits.lifelog.application.logview.data.ui.model
 
-import dev.toastbits.lifelog.application.logview.data.ui.screen.LogEventReference
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverter
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import kotlinx.coroutines.Dispatchers

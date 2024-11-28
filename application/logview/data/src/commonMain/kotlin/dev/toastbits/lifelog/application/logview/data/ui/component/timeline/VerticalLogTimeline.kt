@@ -36,7 +36,7 @@ import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.item
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.item.EventTimelineItem
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.item.TimelineItem
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.item.rememberTimelineItems
-import dev.toastbits.lifelog.application.logview.data.ui.screen.LogEventReference
+import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventReference
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.model.containsText
 import dev.toastbits.lifelog.core.specification.model.entity.LogDisplayText

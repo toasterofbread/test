@@ -1,4 +1,4 @@
-package dev.toastbits.lifelog.application.logview.data.ui.screen
+package dev.toastbits.lifelog.application.logview.data.ui.model
 
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.model.entity.date.LogDate
