@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -20,15 +21,16 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
 import dev.toastbits.composekit.util.rememberAsLocalisedValue
 import dev.toastbits.composekit.util.thenIf
-import dev.toastbits.lifelog.application.usercontent.UserContentDisplay
 import dev.toastbits.lifelog.application.logview.data.ui.screen.LogEventReference
 import dev.toastbits.lifelog.application.logview.data.ui.screen.get
 import dev.toastbits.lifelog.application.logview.data.ui.toImageVector
+import dev.toastbits.lifelog.application.usercontent.UserContentDisplay
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.model.entity.LogDisplayText
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogCommentEvent
@@ -39,10 +41,13 @@ fun (suspend (String) -> LogDisplayText).rememberAsLogDisplayText(getDefault: ()
     this.rememberAsLocalisedValue { LogDisplayText.OfString(getDefault()) }
 
 @Composable
-fun LogDisplayText.Display(modifier: Modifier = Modifier) {
+fun LogDisplayText.Display(
+    modifier: Modifier = Modifier,
+    textStyle: TextStyle = LocalTextStyle.current
+) {
     when (this) {
-        is LogDisplayText.OfString -> Text(string, modifier)
-        is LogDisplayText.OfUserContent -> UserContentDisplay(userContent, modifier)
+        is LogDisplayText.OfString -> Text(string, modifier, style = textStyle)
+        is LogDisplayText.OfUserContent -> UserContentDisplay(userContent, modifier, textStyle = textStyle)
     }
 }
 

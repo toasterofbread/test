@@ -64,7 +64,9 @@ class MarkdownUserContentParser: UserContentParser {
                 "HTML_TAG",
                 "SETEXT_2",
                 "SETEXT_CONTENT",
-                "BACKTICK" -> return node.children.getParts()
+                "BACKTICK",
+                "ATX_CONTENT",
+                "ATX_HEADER" -> return node.children.getParts()
                 "TEXT", "WHITE_SPACE", "CODE_FENCE_CONTENT" -> {
                     val nodeText: String = node.getTextInNode(text).toString()
                     return listOf(UserContent.Part.Single(nodeText))
@@ -109,6 +111,21 @@ class MarkdownUserContentParser: UserContentParser {
                     }
 
                     return listOfNotNull(UserContent.Part.Image(linkNode?.getTextInNode(text).toString()))
+                }
+                "ATX_1", "ATX_2", "ATX_3", "ATX_4", "ATX_5", "ATX_6" -> {
+                    val level: Int = node.type.name.last().digitToInt()
+
+                    return listOf(
+                        UserContent.Part.Composite(
+                            node.children
+                                .drop(1)
+                                .getParts()
+                                .dropWhile {
+                                    it is UserContent.Part.Single && it.text.isBlank()
+                                },
+                            setOf(UserContent.Mod.Heading(level))
+                        )
+                    )
                 }
                 "GFM_AUTOLINK" -> {
                     val link: String = node.getTextInNode(text).toString()

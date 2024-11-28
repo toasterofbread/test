@@ -29,7 +29,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -49,25 +48,24 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.components.platform.composable.BackHandler
-import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyColumn
 import dev.toastbits.composekit.components.utils.composable.PlatformClickableIconButton
 import dev.toastbits.composekit.components.utils.composable.pane.model.InitialPaneRatioSource
 import dev.toastbits.composekit.components.utils.modifier.horizontal
+import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
 import dev.toastbits.composekit.navigation.screen.ResponsiveTwoPaneScreen
 import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.composekit.theme.onAccent
 import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
 import dev.toastbits.composekit.util.copy
 import dev.toastbits.lifelog.application.core.FullContentScreen
+import dev.toastbits.lifelog.application.logview.data.ui.component.eventview.LogEventViewScreen
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.VerticalLogTimeline
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.VerticalLogTimelineState
-import dev.toastbits.lifelog.application.usercontent.UserContentDisplay
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
-import dev.toastbits.lifelog.core.specification.model.UserContent
 
 class TopLogViewScreen(
     private val logDatabase: LogDatabase
-): ResponsiveTwoPaneScreen<LogEventReference>(
+): ResponsiveTwoPaneScreen<LogEventViewScreen>(
     initialStartPaneRatioSource =
         InitialPaneRatioSource.Remembered(
             "logview.data.ui.screen.TopLogViewScreen",
@@ -76,14 +74,14 @@ class TopLogViewScreen(
     alwaysShowEndPane = true
 ), FullContentScreen {
     private var timelineState: VerticalLogTimelineState = VerticalLogTimelineState()
-    private var viewingEvent: LogEventReference? by mutableStateOf(null)
+    private var viewingEventScreen: LogEventViewScreen? by mutableStateOf(null)
     private var showSearchBar: Boolean by mutableStateOf(false)
 
     @Composable
-    override fun getCurrentData(): LogEventReference? = viewingEvent
+    override fun getCurrentData(): LogEventViewScreen? = viewingEventScreen
 
     @Composable
-    override fun PrimaryPane(data: LogEventReference?, contentPadding: PaddingValues, modifier: Modifier) {
+    override fun PrimaryPane(data: LogEventViewScreen?, contentPadding: PaddingValues, modifier: Modifier) {
         val density: Density = LocalDensity.current
 
         var currentDateIndex: Int? by remember { mutableStateOf(null) }
@@ -117,7 +115,7 @@ class TopLogViewScreen(
                         scrollTargetDateIndex = null
                     }
                 ) { event ->
-                    viewingEvent = event
+                    viewingEventScreen = LogEventViewScreen(event, logDatabase)
                 }
 
                 androidx.compose.animation.AnimatedVisibility(
@@ -288,27 +286,15 @@ class TopLogViewScreen(
     }
 
     @Composable
-    override fun SecondaryPane(data: LogEventReference?, contentPadding: PaddingValues, modifier: Modifier) {
+    override fun SecondaryPane(data: LogEventViewScreen?, contentPadding: PaddingValues, modifier: Modifier) {
         if (data == null) {
             return
         }
 
         BackHandler(!isDisplayingBothPanes) {
-            viewingEvent = null
+            viewingEventScreen = null
         }
 
-        ScrollBarLazyColumn(modifier, contentPadding = contentPadding) {
-            item {
-                Text("Secondary $data")
-
-                val content: UserContent? = logDatabase[data].content
-                if (content == null) {
-                    Text("No content")
-                }
-                else {
-                    UserContentDisplay(content)
-                }
-            }
-        }
+        data.Content(LocalNavigator.current, modifier, contentPadding)
     }
 }

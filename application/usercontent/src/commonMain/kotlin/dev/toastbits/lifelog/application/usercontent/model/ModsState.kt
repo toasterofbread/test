@@ -8,6 +8,7 @@ internal data class ModsState(
     var italic: Boolean = false,
     var strikethrough: Boolean = false,
     var container: Container? = null,
+    var headingLevel: Int = 0,
     var reference: LogEntityReference? = null
 ) {
     fun updateContainer(newContainer: Container) {
@@ -31,6 +32,7 @@ internal fun Collection<UserContent.Mod>.getState(): ModsState {
             UserContent.Mod.Strikethrough -> state.strikethrough = true
             UserContent.Mod.Code -> state.updateContainer(ModsState.Container.CODE_LINE)
             UserContent.Mod.CodeBlock -> state.updateContainer(ModsState.Container.CODE_BLOCK)
+            is UserContent.Mod.Heading -> state.headingLevel = mod.level
             is UserContent.Mod.Reference -> state.reference = mod.reference
         }
     }

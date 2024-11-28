@@ -51,6 +51,7 @@ data class UserContent(
         data object Strikethrough: Mod
         data object Code: Mod
         data object CodeBlock: Mod
+        data class Heading(val level: Int): Mod
         data class Reference(val reference: LogEntityReference): Mod
     }
 
@@ -64,6 +65,9 @@ data class UserContent(
     companion object {
         fun single(text: String, mods: Set<Mod> = emptySet()): UserContent =
             UserContent(listOf(Part.Single(text, mods)))
+
+        val EMPTY: UserContent
+            get() = UserContent(emptyList())
     }
 }
 
@@ -97,7 +101,8 @@ fun Iterable<Mod>.sorted(): List<Mod> =
             Mod.Strikethrough -> 2
             Mod.Code -> 3
             Mod.CodeBlock -> 4
-            is Mod.Reference -> 5
+            is Mod.Heading -> 5
+            is Mod.Reference -> 6
         }
     }
 

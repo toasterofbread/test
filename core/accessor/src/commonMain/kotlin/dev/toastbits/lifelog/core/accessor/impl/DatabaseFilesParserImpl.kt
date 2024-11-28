@@ -57,7 +57,7 @@ class DatabaseFilesParserImpl(
             }
         }
 
-        return@withContext LogDatabase(configuration, days = scope.days, data = scope.data)
+        return@withContext LogDatabase(configuration, days = scope.days, data = scope.data, converter = converter)
     }
 
     private suspend fun FileStructure.preprocess(onAlert: (ParseAlertData) -> Unit): FileStructure {

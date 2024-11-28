@@ -67,6 +67,7 @@ class MarkdownUserContentGenerator: UserContentGenerator {
                 UserContent.Mod.CodeBlock -> "```\n"
                 UserContent.Mod.Italic -> "*"
                 UserContent.Mod.Strikethrough -> "~~"
+                is UserContent.Mod.Heading -> "#".repeat(level) + ' '
                 is UserContent.Mod.Reference -> "["
             }
 
@@ -80,6 +81,7 @@ class MarkdownUserContentGenerator: UserContentGenerator {
 
                     "]($referenceLink)"
                 }
+                is UserContent.Mod.Heading -> ""
                 else -> getStart()
             }
     }

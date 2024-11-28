@@ -18,14 +18,14 @@ import kotlinx.datetime.LocalDate
 private typealias TypePath = List<String>
 
 class LogFileConverterImpl(
-    private val referenceParser: LogEntityReferenceParser,
-    private val referenceGeneratorProvider: (LocalDate) -> LogEntityReferenceGenerator,
+    override val referenceParser: LogEntityReferenceParser,
+    override val referenceGeneratorProvider: (LocalDate) -> LogEntityReferenceGenerator,
     private val formats: LogFileConverterStrings = DEFAULT_FORMATS,
     private val extensionRegistry: ExtensionRegistry = ExtensionRegistryImpl(),
 //    eventTypes: List<LogEventType> = DEFAULT_EVENT_TYPES,
 //    referenceTypes: List<LogEntityReferenceType> = DEFAULT_REFERENCE_TYPES,
-    private val userContentParser: UserContentParser = MarkdownUserContentParser(),
-    private val userContentGenerator: UserContentGenerator = MarkdownUserContentGenerator()
+    override val userContentParser: UserContentParser = MarkdownUserContentParser(),
+    override val userContentGenerator: UserContentGenerator = MarkdownUserContentGenerator()
 ): LogFileConverter {
     override fun parseLogFile(lines: Sequence<String>, initialDate: LogDate?): LogFileConverter.ParseResult =
         LogFileParser(

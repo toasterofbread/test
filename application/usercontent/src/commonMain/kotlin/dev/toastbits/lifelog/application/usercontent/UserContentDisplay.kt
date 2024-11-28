@@ -2,6 +2,8 @@ package dev.toastbits.lifelog.application.usercontent
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
@@ -9,7 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ProvidableCompositionLocal
@@ -17,6 +21,8 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -27,7 +33,9 @@ import dev.toastbits.composekit.components.LocalContext
 import dev.toastbits.composekit.context.PlatformContext
 import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
+import dev.toastbits.composekit.theme.vibrantAccent
 import dev.toastbits.composekit.util.indexOfFirstOrNull
+import dev.toastbits.composekit.util.thenWith
 import dev.toastbits.lifelog.application.usercontent.model.ModsState
 import dev.toastbits.lifelog.application.usercontent.model.getState
 import dev.toastbits.lifelog.core.specification.model.UserContent
@@ -37,23 +45,27 @@ private val LocalReference: ProvidableCompositionLocal<LogEntityReference?> =
     compositionLocalOf { null }
 
 @Composable
-fun UserContentDisplay(content: UserContent, modifier: Modifier = Modifier) {
+fun UserContentDisplay(
+    content: UserContent,
+    modifier: Modifier = Modifier,
+    textStyle: TextStyle = LocalTextStyle.current
+) {
     SelectionContainer(modifier) {
         FlowRow {
             for (part in content.parts) {
-                UserContentPart(part)
+                UserContentPart(part, textStyle)
             }
         }
     }
 }
 
 @Composable
-fun UserContentPart(part: UserContent.Part) {
-    WithMods(part.mods) {
+fun UserContentPart(part: UserContent.Part, textStyle: TextStyle) {
+    WithMods(part.mods, textStyle) {
         when (part) {
             is UserContent.Part.Composite -> {
                 for (subpart in part.parts) {
-                    UserContentPart(subpart)
+                    UserContentPart(subpart, LocalTextStyle.current)
                 }
             }
             is UserContent.Part.Image -> {
@@ -94,30 +106,28 @@ private fun SinglePart(part: UserContent.Part.Single) {
             Text(
                 if (subpartIndex + 1 == subparts.size && textIndex + 1 != textParts.size) "$subpart "
                 else subpart,
-//                Modifier
-//                    .thenWith(reference) { ref ->
-//                        clickable(
-//                            remember { MutableInteractionSource() },
-//                            null
-//                        ) {
-//                            when (ref) {
-//                                is LogEntityReference.InLog -> TODO(ref.toString())
-//                                is LogEntityReference.InMetadata -> TODO(ref.toString())
-//                                is LogEntityReference.URL -> {
-//                                    if (context.canOpenUrl()) {
-//                                        context.openUrl(ref.url)
-//                                    }
-//                                    else if (context.canShare()) {
-//                                        context.shareText(ref.url)
-//                                    }
-//                                    else if (context.canCopyText()) {
-//                                        context.copyText(ref.url)
-//                                    }
-//                                }
-//                            }
-//                        }
-//                            .pointerHoverIcon(PointerIcon.Hand, true)
-//                    }
+                Modifier
+                    .thenWith(reference) { ref ->
+                        clickable(
+                            remember { MutableInteractionSource() },
+                            null
+                        ) {
+                            when (ref) {
+                                is LogEntityReference.InLog -> TODO(ref.toString())
+                                is LogEntityReference.InMetadata -> TODO(ref.toString())
+                                is LogEntityReference.URL -> {
+                                    if (context.canOpenUrl()) {
+                                        context.openUrl(ref.url)
+                                    } else if (context.canShare()) {
+                                        context.shareText(ref.url)
+                                    } else if (context.canCopyText()) {
+                                        context.copyText(ref.url)
+                                    }
+                                }
+                            }
+                        }
+                            .pointerHoverIcon(PointerIcon.Hand, true)
+                    }
             )
 
             if (subpartIndex + 1 != subparts.size) {
@@ -132,9 +142,13 @@ private fun SinglePart(part: UserContent.Part.Single) {
 }
 
 @Composable
-private fun WithMods(parts: Collection<UserContent.Mod>, content: @Composable () -> Unit) {
+private fun WithMods(
+    parts: Collection<UserContent.Mod>,
+    textStyle: TextStyle,
+    content: @Composable () -> Unit
+) {
     val state: ModsState = remember(parts.hashCode()) { parts.getState() }
-    val textStyle: TextStyle = LocalTextStyle.current
+    val typography: Typography = MaterialTheme.typography
 
     CompositionLocalProvider(
         LocalTextStyle providesComputed {
@@ -142,7 +156,18 @@ private fun WithMods(parts: Collection<UserContent.Mod>, content: @Composable ()
                 fontWeight = if (state.bold) FontWeight.Bold else textStyle.fontWeight,
                 fontStyle = if (state.italic) FontStyle.Italic else textStyle.fontStyle,
                 textDecoration = if (state.strikethrough) TextDecoration.LineThrough else textStyle.textDecoration,
-//                color = if (state.reference != null) LocalComposeKitTheme.currentValue.vibrantAccent else textStyle.color
+                fontSize = with (typography) {
+                    when (state.headingLevel) {
+                        1 -> displayLarge.fontSize
+                        2 -> displayMedium.fontSize
+                        3 -> displaySmall.fontSize
+                        4 -> headlineSmall.fontSize
+                        5 -> titleLarge.fontSize
+                        6 -> titleSmall.fontSize
+                        else -> textStyle.fontSize
+                    }
+                },
+                color = if (state.reference != null) LocalComposeKitTheme.currentValue.vibrantAccent else textStyle.color
             )
         },
         LocalReference provides state.reference
