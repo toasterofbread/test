@@ -39,7 +39,7 @@ internal val ICON_COLUMN_WIDTH: Dp = 40.dp
 internal const val START_COLUMN_FILL_RATIO: Float = 0.4f
 
 @Composable
-internal fun VerticalLogTimelineItemPreview(
+internal fun LogTimelineItemPreview(
     item: TimelineItem,
     modifier: Modifier = Modifier,
     onEventSelected: ((LogEventReference) -> Unit)? = null

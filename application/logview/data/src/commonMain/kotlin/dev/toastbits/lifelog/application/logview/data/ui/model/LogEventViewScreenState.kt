@@ -1,6 +1,8 @@
 package dev.toastbits.lifelog.application.logview.data.ui.model
 
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverter
+import dev.toastbits.lifelog.core.specification.converter.generateUserContent
+import dev.toastbits.lifelog.core.specification.converter.parseUserContent
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -33,19 +35,11 @@ internal suspend fun LogEventViewScreenState.getNext(
     when (this@getNext) {
         is LogEventViewScreenState.Editing ->
             LogEventViewScreenState.Previewing(
-                converter.userContentParser.parseUserContent(
-                    content,
-                    converter.referenceParser,
-                    onAlert = { _, _ -> }
-                )
+                converter.parseUserContent(content)
             )
         is LogEventViewScreenState.Previewing ->
             LogEventViewScreenState.Editing(
-                converter.userContentGenerator.generateUserContent(
-                    content,
-                    converter.referenceGeneratorProvider(eventReference.date.date),
-                    onAlert = { _, _ -> }
-                )
+                converter.generateUserContent(content, eventReference.date)
             )
     }
 }

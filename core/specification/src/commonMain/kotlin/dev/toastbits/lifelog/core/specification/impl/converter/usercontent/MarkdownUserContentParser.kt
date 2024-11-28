@@ -172,12 +172,14 @@ class MarkdownUserContentParser: UserContentParser {
                                         onAlert = { onAlert(it, currentLine) }
                                     )
 
+                                val referenceMod: UserContent.Mod? = linkDestination?.let { UserContent.Mod.Reference(it) }
+                                val ret: List<UserContent.Part> = listOf(UserContent.Part.Composite(linkLabel!!, setOfNotNull(referenceMod)))
+
                                 linkLabel = null
                                 linkOpeningBracket = false
                                 linkDestinationText = ""
 
-                                val referenceMod: UserContent.Mod? = linkDestination?.let { UserContent.Mod.Reference(it) }
-                                return listOf(UserContent.Part.Composite(linkLabel!!, setOfNotNull(referenceMod)))
+                                return ret
                             }
                         }
                         else if (node.type.name == "(") {

@@ -2,5 +2,4 @@
     <string name="app_name">LifeLog</string>
 
     <string name="button_open_settings">Open settings</string>
-    <string name="button_navigate_back">Go back</string>
 </resources>

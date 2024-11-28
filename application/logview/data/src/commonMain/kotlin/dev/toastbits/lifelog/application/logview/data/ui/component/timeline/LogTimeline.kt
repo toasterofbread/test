@@ -6,14 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
@@ -36,6 +32,7 @@ import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.item
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.item.EventTimelineItem
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.item.TimelineItem
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.item.rememberTimelineItems
+import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.model.LogTimelineState
 import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventReference
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.model.containsText
@@ -55,27 +52,17 @@ private val ITEM_SPACING: Dp = 25.dp
 private val SCROLLBAR_THICKNESS: Dp = 8.dp
 private val SCROLLBAR_SPACING: Dp = 5.dp
 
-internal class VerticalLogTimelineState(
-    from: VerticalLogTimelineState? = null
-) {
-    val columnState: LazyListState =
-        LazyListState(
-            from?.columnState?.firstVisibleItemIndex ?: 0,
-            from?.columnState?.firstVisibleItemScrollOffset ?: 0
-        )
-    var waveOffset: Float by mutableFloatStateOf(from?.waveOffset ?: 0f)
-    var filterText: String? by mutableStateOf(from?.filterText)
-}
-
 @Composable
-internal fun VerticalLogTimeline(
-    state: VerticalLogTimelineState,
+internal fun LogTimeline(
+    state: LogTimelineState,
     logDatabase: LogDatabase,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
     scrollTargetDateIndex: Int? = null,
     onCurrentDateIndexChanged: ((Int) -> Unit)? = null,
-    onEventSelected: ((LogEventReference) -> Unit)? = null
+    onEventSelected: ((LogEventReference) -> Unit)? = null,
+    filterEvents: ((LogEvent, LogEventReference) -> Boolean)? = null,
+    filterKey: Any? = Unit
 ) {
     val theme: ThemeValues = LocalComposeKitTheme.current
     val density: Density = LocalDensity.current
@@ -86,8 +73,17 @@ internal fun VerticalLogTimeline(
         logDatabase.rememberTimelineItems(
             key1 = state.filterText,
             key2 = locale,
-            filterEvents = { event ->
-                state.filterText?.let { event.containsText(it, locale) } ?: true
+            key3 = filterKey,
+            filterEvents = { event, reference ->
+                if (filterEvents?.invoke(event, reference) == false) {
+                    return@rememberTimelineItems false
+                }
+
+                if (state.filterText?.let { event.containsText(it, locale) } == false) {
+                    return@rememberTimelineItems false
+                }
+
+                return@rememberTimelineItems true
             }
         )
     val waveOffset: Float by animateFloatAsState(state.waveOffset)
@@ -155,14 +151,14 @@ internal fun VerticalLogTimeline(
                 when (item) {
                     is DateTimelineItem ->
                         stickyHeaderContentPaddingAware(state.columnState, key = item.index) {
-                            VerticalLogTimelineItemPreview(
+                            LogTimelineItemPreview(
                                 item,
                                 onEventSelected = onEventSelected
                             )
                         }
                     is EventTimelineItem ->
                         item(key = item.eventReference.hashCode().toString()) {
-                            VerticalLogTimelineItemPreview(
+                            LogTimelineItemPreview(
                                 item,
                                 Modifier.padding(bottom = ITEM_SPACING),
                                 onEventSelected = onEventSelected

@@ -12,7 +12,7 @@ kotlin = "2.1.0"
 compose = "1.8.0-dev1905"
 agp = "8.7.2"
 vanniktech-publish = "0.29.0"
-composekit = "2c2fab50"
+composekit = "6c0e9109"
 kogit = "0.0.1"
 ktor = "3.0.1"
 okio = "3.9.1"
@@ -20,6 +20,7 @@ sqldelight = "2.1.0-SNAPSHOT"
 sqldelight-wasm = "f363703160" # TEMP SqlDelight
 undercouch-download = "5.6.0"
 image-loader = "1.9.0"
+diff = "0.7.0"
 
 mokkery = "2.6.0-SNAPSHOT"
 assertk = "0.28.1"
@@ -44,6 +45,7 @@ kogit-core = { module = "dev.toastbits:kogit-core", version.ref = "kogit" }
 kogit-memory = { module = "dev.toastbits:kogit-memory", version.ref = "kogit" }
 kogit-system = { module = "dev.toastbits:kogit-system", version.ref = "kogit" }
 image-loader = { module = "io.github.qdsfdhvh:image-loader", version.ref = "image-loader" }
+diff = { module = "io.github.petertrr:kotlin-multiplatform-diff", version.ref = "diff" }
 
 kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }

@@ -32,11 +32,12 @@ internal sealed interface TimelineItem {
 internal fun LogDatabase.rememberTimelineItems(
     key1: Any? = Unit,
     key2: Any? = Unit,
-    filterEvents: suspend (LogEvent) -> Boolean = { true }
+    key3: Any? = Unit,
+    filterEvents: (suspend (LogEvent, LogEventReference) -> Boolean)? = null
 ): State<List<TimelineItem>> {
     val itemsState: MutableState<List<TimelineItem>> = remember { mutableStateOf(emptyList()) }
 
-    LaunchedEffect(key1, key2) {
+    LaunchedEffect(key1, key2, key3) {
         withContext(Dispatchers.Default) {
             val sortedDays: List<Map.Entry<LogDate, List<LogEvent>>> =
                 this@rememberTimelineItems.days.entries.sortedBy { it.key.date }
@@ -50,7 +51,8 @@ internal fun LogDatabase.rememberTimelineItems(
 
                     val includedEventIndices: List<Int> =
                         events.mapIndexedNotNull { index, event ->
-                            if (filterEvents(event)) index else null
+                            if (filterEvents?.invoke(event, LogEventReference(date, index)) != false) index
+                            else null
                         }
 
                     if (includedEventIndices.isNotEmpty()) {

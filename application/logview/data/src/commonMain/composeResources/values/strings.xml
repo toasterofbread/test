@@ -1,6 +1,14 @@
 <resources>
-    <plurals name="log_view_screen_changes_made_popup_$x">
+    <plurals name="log_view_screen_$x_changes_made_popup">
         <item quantity="one">$x change made</item>
         <item quantity="other">$x changes made</item>
     </plurals>
+    <plurals name="log_view_screen_$x_content_changes_made">
+        <item quantity="one">$x content change made</item>
+        <item quantity="other">$x content changes made</item>
+    </plurals>
+    <string name="log_view_screen_button_review_changes">Review changes</string>
+    <string name="log_view_screen_button_save">Save changes</string>
+    <string name="log_view_screen_button_discard_event_changes">Discard changes for this event</string>
+    <string name="log_view_screen_title_review_changes">Review changes</string>
 </resources>

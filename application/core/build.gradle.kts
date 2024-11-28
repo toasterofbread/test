@@ -12,7 +12,11 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                 implementation(libs.composekit.navigation)
+                implementation(projects.core.specification)
+
+                implementation(libs.composekit.util)
+                implementation(libs.composekit.navigation)
+                implementation(libs.composekit.components)
             }
         }
     }

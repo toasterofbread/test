@@ -1,5 +1,4 @@
 import util.configureAllComposeTargets
-import util.configureAllKmpTargets
 
 plugins {
     id("android-library-conventions")
@@ -21,6 +20,8 @@ kotlin {
                 implementation(libs.composekit.components)
                 implementation(libs.composekit.util)
                 implementation(libs.composekit.navigation)
+
+                implementation(libs.diff)
             }
         }
     }

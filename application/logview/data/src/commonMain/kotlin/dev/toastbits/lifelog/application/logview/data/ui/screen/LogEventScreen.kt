@@ -22,7 +22,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,10 +44,13 @@ import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventViewScree
 import dev.toastbits.lifelog.application.logview.data.ui.model.get
 import dev.toastbits.lifelog.application.logview.data.ui.model.getNext
 import dev.toastbits.lifelog.application.logview.data.ui.model.getNextType
+import dev.toastbits.lifelog.core.specification.converter.generateUserContent
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
@@ -56,42 +58,65 @@ import kotlin.time.Duration.Companion.milliseconds
 private val CHANGES_UPDATE_DELAY: Duration = 500.milliseconds
 
 class LogEventScreen(
-    private val eventReference: LogEventReference,
+    val eventReference: LogEventReference,
     private val logDatabase: LogDatabase,
-    initialChanges: LogEventChanges?,
+    private var changes: LogEventChanges,
     private val updateChanges: (LogEventChanges) -> Unit
 ): Screen {
+    private val coroutineScope: CoroutineScope = CoroutineScope(Job())
     private val event: LogEvent = logDatabase[eventReference]
 
     private var state: LogEventViewScreenState by mutableStateOf(
-        LogEventViewScreenState.Previewing(
-            initialChanges?.content ?: event.content ?: UserContent.EMPTY
-        )
+        LogEventViewScreenState.Previewing(getCurrentContent())
     )
     private var loadingNextStateType: LogEventViewScreenState.Type? by mutableStateOf(null)
-    private var changes: LogEventChanges by mutableStateOf(initialChanges ?: LogEventChanges.EMPTY)
+
+    override fun onClosed() {
+        super.onClosed()
+        coroutineScope.cancel()
+    }
+
+    fun setChanges(changes: LogEventChanges?) {
+        this.changes = changes ?: LogEventChanges.EMPTY
+
+        coroutineScope.launchSingle {
+            loadingNextStateType = state.type
+            state =
+                when (state) {
+                    is LogEventViewScreenState.Editing ->
+                        LogEventViewScreenState.Editing(
+                            logDatabase.converter.generateUserContent(getCurrentContent(), eventReference.date)
+                        )
+                    is LogEventViewScreenState.Previewing ->
+                        LogEventViewScreenState.Previewing(getCurrentContent())
+                }
+            loadingNextStateType = null
+        }
+    }
+
+    private fun getCurrentContent(): UserContent =
+        changes.content ?: event.content ?: UserContent.EMPTY
+
+    private fun openNextState() {
+        coroutineScope.launchSingle {
+            if (loadingNextStateType != null) {
+                loadingNextStateType = null
+                return@launchSingle
+            }
+            loadingNextStateType = state.getNextType()
+            state = state.getNext(eventReference, logDatabase.converter)
+            loadingNextStateType = null
+        }
+    }
 
     @Composable
     override fun Content(navigator: Navigator, modifier: Modifier, contentPadding: PaddingValues) {
         val scrollBarSpacing: Dp = 5.dp
         val scrollBarThickness: Dp = 8.dp
         val density: Density = LocalDensity.current
-        val coroutineScope: CoroutineScope = rememberCoroutineScope()
 
         val event: LogEvent = remember(eventReference) { logDatabase[eventReference] }
         var bottomContentHeight: Dp by remember { mutableStateOf(0.dp) }
-
-        fun openNextState() {
-            coroutineScope.launchSingle {
-                if (loadingNextStateType != null) {
-                    loadingNextStateType = null
-                    return@launchSingle
-                }
-                loadingNextStateType = state.getNextType()
-                state = state.getNext(eventReference, logDatabase.converter)
-                loadingNextStateType = null
-            }
-        }
 
         BackHandler((loadingNextStateType ?: state.type) == LogEventViewScreenState.Type.EDIT) {
             if (loadingNextStateType != null) {
@@ -120,7 +145,9 @@ class LogEventScreen(
                 }
 
             changes = changes.copy(
-                content = if (newContent == event.content) null else newContent
+                content =
+                    if (newContent == (event.content ?: UserContent.EMPTY)) null
+                    else newContent
             )
             updateChanges(changes)
         }
