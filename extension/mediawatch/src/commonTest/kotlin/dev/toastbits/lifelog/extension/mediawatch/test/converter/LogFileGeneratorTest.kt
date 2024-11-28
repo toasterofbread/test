@@ -3,15 +3,13 @@ package dev.toastbits.lifelog.extension.mediawatch.test.converter
 import assertk.assertThat
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
-import dev.mokkery.answering.returns
-import dev.mokkery.every
-import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverter
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverterStrings
 import dev.toastbits.lifelog.core.specification.impl.converter.LogFileConverterImpl
 import dev.toastbits.lifelog.core.specification.impl.converter.LogFileConverterImpl.Companion.DEFAULT_FORMATS
 import dev.toastbits.lifelog.core.specification.impl.converter.usercontent.MarkdownUserContentGenerator
+import dev.toastbits.lifelog.core.specification.impl.extension.ExtensionRegistryImpl
 import dev.toastbits.lifelog.core.specification.impl.model.entity.date.LogDateImpl
 import dev.toastbits.lifelog.core.specification.model.entity.date.LogDate
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
@@ -37,10 +35,14 @@ class LogFileGeneratorTest {
     @BeforeTest
     fun setUp() {
         referenceGenerator = mock {
-            every { generateReferencePath(any(), any(), any()) } returns mockResultReferencePath
+//            every { generateReferencePath(any(), any(), any()) } returns mockResultReferencePath
         }
-        converter = LogFileConverterImpl(mock {}, { referenceGenerator }, formats = formats)
-        converter.registerExtension(mediaWatchExtension)
+        converter = LogFileConverterImpl(
+            mock {},
+            { referenceGenerator },
+            formats = formats,
+            extensionRegistry = ExtensionRegistryImpl(listOf(mediaWatchExtension))
+        )
 
         markdownGenerator = MarkdownUserContentGenerator()
     }

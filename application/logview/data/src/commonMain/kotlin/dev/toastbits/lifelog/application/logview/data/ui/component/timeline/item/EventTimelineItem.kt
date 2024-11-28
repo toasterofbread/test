@@ -25,7 +25,7 @@ import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
 import dev.toastbits.composekit.util.rememberAsLocalisedValue
 import dev.toastbits.composekit.util.thenIf
-import dev.toastbits.lifelog.application.core.usercontent.UserContentDisplay
+import dev.toastbits.lifelog.application.usercontent.UserContentDisplay
 import dev.toastbits.lifelog.application.logview.data.ui.screen.LogEventReference
 import dev.toastbits.lifelog.application.logview.data.ui.screen.get
 import dev.toastbits.lifelog.application.logview.data.ui.toImageVector

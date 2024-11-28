@@ -1,5 +1,6 @@
 package dev.toastbits.lifelog.core.specification.model.reference
 
+import com.eygraber.uri.UriCodec
 import dev.toastbits.lifelog.core.specification.extension.ExtensionId
 import kotlinx.datetime.LocalDate
 
@@ -35,7 +36,10 @@ sealed interface LogEntityReference {
 }
 
 data class LogEntityPath(val segments: List<String>) {
-    override fun toString(): String = segments.joinToString("/")
+    override fun toString(): String =
+        segments.joinToString("/") {
+            UriCodec.encode(it)
+        }
 
     companion object {
         val ROOT: LogEntityPath get() = of("/")

@@ -3,18 +3,19 @@ package dev.toastbits.lifelog.extension.mediawatch.testutil.parser
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNull
-import dev.mokkery.answering.returns
+import dev.mokkery.answering.calls
 import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
-import dev.toastbits.lifelog.extension.mediawatch.MediaWatchExtension
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverter
 import dev.toastbits.lifelog.core.specification.impl.converter.LogFileConverterImpl
 import dev.toastbits.lifelog.core.specification.impl.converter.usercontent.MarkdownUserContentParser
+import dev.toastbits.lifelog.core.specification.impl.extension.ExtensionRegistryImpl
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReference
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceGenerator
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceParser
+import dev.toastbits.lifelog.extension.mediawatch.MediaWatchExtension
 import dev.toastbits.lifelog.extension.mediawatch.impl.model.reference.BookMediaReference
 import kotlinx.datetime.LocalDate
 import kotlin.test.BeforeTest
@@ -30,20 +31,21 @@ open class ParserTest {
         private set
 
     val mediaWatchExtension: MediaWatchExtension = MediaWatchExtension()
-    val mockResultReference: LogEntityReference get() = BookMediaReference("TEST", mediaWatchExtension.id, mediaWatchExtension.strings.mediaReferenceTypeId)
+
+    fun createTestReference(id: String): LogEntityReference =
+        BookMediaReference(id, mediaWatchExtension.id, mediaWatchExtension.strings.mediaReferenceTypeId)
 
     @BeforeTest
     fun setUp() {
         referenceParser = mock {
-            every { parseReference(any(), any()) } returns mockResultReference
+            every { parseReference(any(), any()) } calls { createTestReference(it.arg<String>(0)) }
         }
         referenceGenerator = mock {
 
         }
         markdownParser = MarkdownUserContentParser()
 
-        converter = LogFileConverterImpl(referenceParser, { referenceGenerator })
-        converter.registerExtension(mediaWatchExtension)
+        converter = LogFileConverterImpl(referenceParser, { referenceGenerator }, extensionRegistry = ExtensionRegistryImpl(listOf(mediaWatchExtension)))
     }
 
     val templateDate: LocalDate = LocalDate.parse("2024-07-02")

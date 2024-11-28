@@ -2,10 +2,10 @@ package dev.toastbits.lifelog.application.logview.data.ui.component.timeline.ite
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import dev.toastbits.lifelog.application.logview.data.ui.screen.LogEventReference
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
@@ -29,29 +29,40 @@ internal sealed interface TimelineItem {
 }
 
 @Composable
-internal fun LogDatabase.rememberTimelineItems(): List<TimelineItem> {
-    var items: List<TimelineItem> by remember { mutableStateOf(emptyList()) }
+internal fun LogDatabase.rememberTimelineItems(
+    key1: Any? = Unit,
+    key2: Any? = Unit,
+    filterEvents: suspend (LogEvent) -> Boolean = { true }
+): State<List<TimelineItem>> {
+    val itemsState: MutableState<List<TimelineItem>> = remember { mutableStateOf(emptyList()) }
 
-    LaunchedEffect(this) {
+    LaunchedEffect(key1, key2) {
         withContext(Dispatchers.Default) {
             val sortedDays: List<Map.Entry<LogDate, List<LogEvent>>> =
                 this@rememberTimelineItems.days.entries.sortedBy { it.key.date }
 
-            items = buildList {
+            itemsState.value = buildList {
                 var dateIndex: Int = 0
                 for ((date, events) in sortedDays) {
                     if (events.isEmpty()) {
                         continue
                     }
 
-                    add(DateTimelineItem(date, dateIndex++))
-                    for (index in events.indices) {
-                        add(EventTimelineItem(LogEventReference(date, index), this@rememberTimelineItems))
+                    val includedEventIndices: List<Int> =
+                        events.mapIndexedNotNull { index, event ->
+                            if (filterEvents(event)) index else null
+                        }
+
+                    if (includedEventIndices.isNotEmpty()) {
+                        add(DateTimelineItem(date, dateIndex++))
+                        for (index in includedEventIndices) {
+                            add(EventTimelineItem(LogEventReference(date, index), this@rememberTimelineItems))
+                        }
                     }
                 }
             }
         }
     }
 
-    return items
+    return itemsState
 }

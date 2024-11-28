@@ -1,4 +1,4 @@
-package dev.toastbits.lifelog.application.core.usercontent.model
+package dev.toastbits.lifelog.application.usercontent.model
 
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReference

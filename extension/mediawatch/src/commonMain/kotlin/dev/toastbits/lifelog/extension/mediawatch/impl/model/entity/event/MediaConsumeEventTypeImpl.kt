@@ -3,12 +3,15 @@ package dev.toastbits.lifelog.extension.mediawatch.impl.model.entity.event
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverterStrings
 import dev.toastbits.lifelog.core.specification.converter.alert.LogGenerateAlert
 import dev.toastbits.lifelog.core.specification.converter.alert.LogParseAlert
+import dev.toastbits.lifelog.core.specification.impl.converter.usercontent.UserContentParser
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEventType
+import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReference
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceGenerator
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceParser
 import dev.toastbits.lifelog.extension.mediawatch.MediaWatchExtensionStrings
+import dev.toastbits.lifelog.extension.mediawatch.alert.MediaWatchLogParseAlert
 import dev.toastbits.lifelog.extension.mediawatch.impl.model.mapper.createConsumeEvent
 import dev.toastbits.lifelog.extension.mediawatch.impl.model.mapper.createReference
 import dev.toastbits.lifelog.extension.mediawatch.model.entity.event.MediaConsumeEvent
@@ -35,11 +38,32 @@ class MediaConsumeEventTypeImpl(
         metadata: String?,
         content: UserContent?,
         referenceParser: LogEntityReferenceParser,
+        userContentParser: UserContentParser,
         logStrings: LogFileConverterStrings,
         onAlert: (LogParseAlert) -> Unit
     ): MediaConsumeEvent {
+        val referenceMods: List<UserContent.Mod.Reference> =
+            userContentParser.parseUserContent(body, referenceParser) { alert, _ -> onAlert(alert) }
+                .parts.flatMap { part ->
+                    part.mods.filterIsInstance<UserContent.Mod.Reference>()
+                }
+
+        val urlReferences: List<LogEntityReference.URL> =
+            referenceMods.mapNotNull {
+                it.reference as? LogEntityReference.URL
+            }
+
+        if (urlReferences.isNotEmpty()) {
+            onAlert(MediaWatchLogParseAlert.URLInMediaTitle(strings.extensionId, body))
+        }
+
+        val mediaId: String =
+            referenceMods.firstNotNullOfOrNull { mod ->
+                mod.reference.takeIf { it !is LogEntityReference.URL }
+            }?.path?.segments?.lastOrNull() ?: body.trim()
+
         val entityType: MediaEntityType = getPrefixIndexMediaEntityType(prefixIndex)
-        val mediaReference: MediaReference = entityType.createReference(body.trim(), this.strings.extensionId, this.strings.mediaReferenceTypeId)
+        val mediaReference: MediaReference = entityType.createReference(mediaId, this.strings.extensionId, this.strings.mediaReferenceTypeId)
 
         val event: MediaConsumeEvent = entityType.createConsumeEvent(mediaReference)
         event.content = content

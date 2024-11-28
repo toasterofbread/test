@@ -6,6 +6,11 @@ import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverter
+import dev.toastbits.lifelog.core.specification.impl.model.entity.date.LogDateImpl
+import dev.toastbits.lifelog.core.specification.impl.model.entity.event.LogCommentEventImpl
+import dev.toastbits.lifelog.core.specification.model.UserContent
+import dev.toastbits.lifelog.core.specification.model.entity.date.LogDate
+import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import dev.toastbits.lifelog.extension.mediawatch.impl.model.reference.BookMediaReference
 import dev.toastbits.lifelog.extension.mediawatch.impl.model.reference.GameMediaReference
 import dev.toastbits.lifelog.extension.mediawatch.impl.model.reference.MovieOrShowMediaReference
@@ -15,13 +20,8 @@ import dev.toastbits.lifelog.extension.mediawatch.model.entity.event.GameMediaCo
 import dev.toastbits.lifelog.extension.mediawatch.model.entity.event.MediaConsumeEvent
 import dev.toastbits.lifelog.extension.mediawatch.model.entity.event.MovieOrShowMediaConsumeEvent
 import dev.toastbits.lifelog.extension.mediawatch.model.entity.event.SongMediaConsumeEvent
-import dev.toastbits.lifelog.extension.mediawatch.util.MediaEntityType
-import dev.toastbits.lifelog.core.specification.impl.model.entity.date.LogDateImpl
-import dev.toastbits.lifelog.core.specification.impl.model.entity.event.LogCommentEventImpl
-import dev.toastbits.lifelog.core.specification.model.UserContent
-import dev.toastbits.lifelog.core.specification.model.entity.date.LogDate
-import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import dev.toastbits.lifelog.extension.mediawatch.testutil.parser.ParserTest
+import dev.toastbits.lifelog.extension.mediawatch.util.MediaEntityType
 import kotlinx.datetime.LocalDate.Formats.ISO
 import kotlinx.datetime.format
 import kotlin.test.Test
@@ -53,7 +53,7 @@ class LogFileParserTest: ParserTest() {
                         ${prefix.uppercase()} Test Test Test ($iterationText $suffix)
                         """.trimIndent()
 
-                        val result: LogFileConverter.ParseResult = converter.parseLogFile(text.split('\n'))
+                        val result: LogFileConverter.ParseResult = converter.parseLogFile(text.splitToSequence('\n'))
                         assertThat(result.alerts).isEmpty()
 
                         val event: LogEvent = result.days[LogDateImpl(templateDate, ambiguous = false)]!!.single()
@@ -97,7 +97,7 @@ Watched Test Test Test (first watch, eps 1-5) {
 // Standalone comment
         """
 
-        val result: LogFileConverter.ParseResult = converter.parseLogFile(text.split('\n'))
+        val result: LogFileConverter.ParseResult = converter.parseLogFile(text.splitToSequence('\n'))
         assertThat(result.alerts).isEmpty()
 
         val (date: LogDate, day: List<LogEvent>) = result.days.entries.single()
@@ -185,7 +185,7 @@ Listened to $eventReference (12th listen) {
                 )
             )
 
-        val result: LogFileConverter.ParseResult = converter.parseLogFile(text.split('\n'))
+        val result: LogFileConverter.ParseResult = converter.parseLogFile(text.splitToSequence('\n'))
         assertThat(result.alerts).isEmpty()
 
         assertThat(result.days).hasSize(1)

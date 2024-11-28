@@ -7,6 +7,7 @@ import dev.toastbits.lifelog.core.specification.impl.converter.usercontent.Markd
 import dev.toastbits.lifelog.core.specification.impl.converter.usercontent.MarkdownUserContentParser
 import dev.toastbits.lifelog.core.specification.impl.converter.usercontent.UserContentGenerator
 import dev.toastbits.lifelog.core.specification.impl.converter.usercontent.UserContentParser
+import dev.toastbits.lifelog.core.specification.impl.extension.ExtensionRegistryImpl
 import dev.toastbits.lifelog.core.specification.model.entity.date.LogDate
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEventType
@@ -20,7 +21,7 @@ class LogFileConverterImpl(
     private val referenceParser: LogEntityReferenceParser,
     private val referenceGeneratorProvider: (LocalDate) -> LogEntityReferenceGenerator,
     private val formats: LogFileConverterStrings = DEFAULT_FORMATS,
-    private val extensionRegistry: ExtensionRegistry,
+    private val extensionRegistry: ExtensionRegistry = ExtensionRegistryImpl(),
 //    eventTypes: List<LogEventType> = DEFAULT_EVENT_TYPES,
 //    referenceTypes: List<LogEntityReferenceType> = DEFAULT_REFERENCE_TYPES,
     private val userContentParser: UserContentParser = MarkdownUserContentParser(),

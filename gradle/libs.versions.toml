@@ -8,20 +8,20 @@ android-sdk-min = "24"
 sqlite-wasm-year = "2024"
 sqlite-wasm-version = "3460100"
 
-kotlin = "2.1.0-RC"
+kotlin = "2.1.0"
 compose = "1.8.0-dev1905"
 agp = "8.7.2"
 vanniktech-publish = "0.29.0"
-composekit = "1b386fa7"
+composekit = "2c2fab50"
 kogit = "0.0.1"
-ktor = "3.0.0"
+ktor = "3.0.1"
 okio = "3.9.1"
 sqldelight = "2.1.0-SNAPSHOT"
 sqldelight-wasm = "f363703160" # TEMP SqlDelight
 undercouch-download = "5.6.0"
-coil = "3.0.4"
+image-loader = "1.9.0"
 
-mokkery = "2.3.0"
+mokkery = "2.6.0-SNAPSHOT"
 assertk = "0.28.1"
 
 markdown = "0.7.3"
@@ -43,6 +43,7 @@ composekit-application = { module = "dev.toastbits:composekit-application", vers
 kogit-core = { module = "dev.toastbits:kogit-core", version.ref = "kogit" }
 kogit-memory = { module = "dev.toastbits:kogit-memory", version.ref = "kogit" }
 kogit-system = { module = "dev.toastbits:kogit-system", version.ref = "kogit" }
+image-loader = { module = "io.github.qdsfdhvh:image-loader", version.ref = "image-loader" }
 
 kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -63,8 +64,6 @@ sqldelight-extension-coroutines = { module = "com.github.toasterofbread.sqldelig
 sqldelight-driver-wasmjs = { module = "com.github.toasterofbread.sqldelight:web-worker-driver-wasm-js", version.ref = "sqldelight-wasm" }
 sqldelight-driver-jvm = { module = "com.github.toasterofbread.sqldelight:sqlite-driver", version.ref = "sqldelight-wasm" }
 sqldelight-driver-android = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
-coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
-coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
 
 mokkery-plugin = { module = "dev.mokkery:dev.mokkery.gradle.plugin", version.ref = "mokkery" }
 assertk = { module = "com.willowtreeapps.assertk:assertk", version.ref = "assertk" }

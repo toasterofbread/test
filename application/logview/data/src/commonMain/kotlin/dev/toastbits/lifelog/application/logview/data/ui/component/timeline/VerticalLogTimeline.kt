@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -30,12 +31,16 @@ import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyColu
 import dev.toastbits.composekit.components.utils.composable.stickyHeaderContentPaddingAware
 import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
+import dev.toastbits.composekit.util.LocalLocale
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.item.DateTimelineItem
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.item.EventTimelineItem
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.item.TimelineItem
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.item.rememberTimelineItems
 import dev.toastbits.lifelog.application.logview.data.ui.screen.LogEventReference
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
+import dev.toastbits.lifelog.core.specification.model.containsText
+import dev.toastbits.lifelog.core.specification.model.entity.LogDisplayText
+import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.PI
@@ -47,6 +52,8 @@ private val WAVE_THICKNESS: Dp = 1.5.dp
 private val WAVE_WAVELENGTH: Dp = 40.dp
 private const val WAVE_SCROLL_SPEED: Float = 0.75f
 private val ITEM_SPACING: Dp = 25.dp
+private val SCROLLBAR_THICKNESS: Dp = 8.dp
+private val SCROLLBAR_SPACING: Dp = 5.dp
 
 internal class VerticalLogTimelineState(
     from: VerticalLogTimelineState? = null
@@ -57,6 +64,7 @@ internal class VerticalLogTimelineState(
             from?.columnState?.firstVisibleItemScrollOffset ?: 0
         )
     var waveOffset: Float by mutableFloatStateOf(from?.waveOffset ?: 0f)
+    var filterText: String? by mutableStateOf(from?.filterText)
 }
 
 @Composable
@@ -71,9 +79,17 @@ internal fun VerticalLogTimeline(
 ) {
     val theme: ThemeValues = LocalComposeKitTheme.current
     val density: Density = LocalDensity.current
+    val locale: String = LocalLocale.current
     val coroutineScope: CoroutineScope = rememberCoroutineScope()
 
-    val timelineItems: List<TimelineItem> = logDatabase.rememberTimelineItems()
+    val timelineItems: List<TimelineItem> by
+        logDatabase.rememberTimelineItems(
+            key1 = state.filterText,
+            key2 = locale,
+            filterEvents = { event ->
+                state.filterText?.let { event.containsText(it, locale) } ?: true
+            }
+        )
     val waveOffset: Float by animateFloatAsState(state.waveOffset)
 
     if (onCurrentDateIndexChanged != null) {
@@ -125,9 +141,6 @@ internal fun VerticalLogTimeline(
     }
 
     Box(modifier) {
-        val scrollBarThickness: Dp = 8.dp
-        val scrollBarSpacing: Dp = 5.dp
-
         ScrollBarLazyColumn(
             Modifier.fillMaxSize(),
             state = state.columnState,
@@ -135,8 +148,8 @@ internal fun VerticalLogTimeline(
             onScrollDelta = { delta, _ ->
                 state.waveOffset -= delta * WAVE_SCROLL_SPEED
             },
-            scrollBarSpacing = scrollBarSpacing,
-            scrollBarThickness = scrollBarThickness
+            scrollBarSpacing = SCROLLBAR_SPACING,
+            scrollBarThickness = SCROLLBAR_THICKNESS
         ) {
             for (item in timelineItems) {
                 when (item) {
@@ -164,7 +177,7 @@ internal fun VerticalLogTimeline(
                 .matchParentSize()
                 .clipToBounds()
                 .padding(contentPadding)
-                .padding(end = scrollBarThickness + scrollBarSpacing)
+                .padding(end = SCROLLBAR_THICKNESS + SCROLLBAR_SPACING)
                 .zIndex(-1f)
         ) {
             val position: Float =
@@ -232,3 +245,23 @@ private fun DrawScope.wavePath(
 private fun Float.toRadians(): Float =
     (this * 180f) / PI.toFloat()
 
+private suspend fun LogEvent.containsText(text: String, locale: String): Boolean {
+    for (content in getAllUserContent()) {
+        if (content.containsText(text, ignoreCase = true)) {
+            return true
+        }
+    }
+
+    when (val title: LogDisplayText = getTitle(locale)) {
+        is LogDisplayText.OfString ->
+            if (title.string.contains(text, ignoreCase = true)) {
+                return true
+            }
+        is LogDisplayText.OfUserContent ->
+            if (title.userContent.containsText(text, ignoreCase = true)) {
+                return true
+            }
+    }
+
+    return false
+}

@@ -67,6 +67,28 @@ data class UserContent(
     }
 }
 
+fun UserContent.containsText(text: String, ignoreCase: Boolean = false): Boolean =
+    anyPart(
+        singlePredicate = { it.text.contains(text, ignoreCase = ignoreCase) },
+        imagePredicate = { false }
+    )
+
+fun UserContent.anyPart(
+    singlePredicate: (Part.Single) -> Boolean,
+    imagePredicate: (Part.Image) -> Boolean
+): Boolean =
+    parts.any { it.anyPart(singlePredicate, imagePredicate) }
+
+fun Part.anyPart(
+    singlePredicate: (Part.Single) -> Boolean,
+    imagePredicate: (Part.Image) -> Boolean
+): Boolean =
+    when (this) {
+        is Part.Composite -> parts.any { it.anyPart(singlePredicate, imagePredicate) }
+        is Part.Image -> imagePredicate(this)
+        is Part.Single -> singlePredicate(this)
+    }
+
 fun Iterable<Mod>.sorted(): List<Mod> =
     sortedBy {
         when (it) {

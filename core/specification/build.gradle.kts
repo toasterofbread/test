@@ -18,6 +18,7 @@ kotlin {
             dependencies {
                 implementation(libs.markdown)
                 api(libs.kotlinx.datetime)
+                implementation("com.eygraber:uri-kmp:0.0.18")
 //                implementation(libs.kotlinx.serialization.json)
             }
         }

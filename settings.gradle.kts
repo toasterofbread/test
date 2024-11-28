@@ -18,10 +18,15 @@ pluginManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
+
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/dev")
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 
         // TEMP
         maven("https://jitpack.io")
+
+        // Mokkery
+        maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
     }
 }
 
@@ -33,16 +38,19 @@ dependencyResolutionManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
-        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/dev")
         maven("https://jitpack.io")
+
+        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/dev")
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 
         // https://github.com/d1snin/catppuccin-kotlin (in ComposeKit)
         maven("https://maven.d1s.dev/snapshots")
 
-        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-
         // SqlDelight
         maven("https://oss.sonatype.org/content/repositories/snapshots/")
+
+        // Mokkery
+        maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
     }
 }
 

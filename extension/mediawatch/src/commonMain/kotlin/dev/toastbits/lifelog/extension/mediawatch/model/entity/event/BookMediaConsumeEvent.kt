@@ -1,11 +1,12 @@
 package dev.toastbits.lifelog.extension.mediawatch.model.entity.event
 
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverterStrings
-import dev.toastbits.lifelog.extension.mediawatch.model.reference.MediaReference
-import dev.toastbits.lifelog.extension.mediawatch.util.MediaEntityType
 import dev.toastbits.lifelog.core.specification.model.UserContent
+import dev.toastbits.lifelog.core.specification.model.entity.LogDisplayText
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import dev.toastbits.lifelog.extension.mediawatch.MediaWatchExtensionStrings
+import dev.toastbits.lifelog.extension.mediawatch.model.reference.MediaReference
+import dev.toastbits.lifelog.extension.mediawatch.util.MediaEntityType
 
 data class BookMediaConsumeEvent(
     override var mediaReference: MediaReference,

@@ -16,7 +16,7 @@ sealed class SpecificationLogParseAlert: LogParseAlert {
 
     data class InvalidReferenceFormat(val referenceText: String): SpecificationLogParseAlert(), LogParseAlert.Warning
     data class UnknownReferenceType(val referencePath: List<String>, val firstUnknownSegment: Int): SpecificationLogParseAlert(), LogParseAlert.Warning
-    data class InvalidReferenceSize(val referencePath: List<String>, val expectedSize: Int): SpecificationLogParseAlert(), LogParseAlert.Warning
+    data class InvalidReferenceSize(val referencePath: List<String>, val expectedSize: Int): SpecificationLogParseAlert(), LogParseAlert.Error
 
     data class RedefinedMetadataValue(val key: LogEntityReference): SpecificationLogParseAlert(), LogParseAlert.Warning
 

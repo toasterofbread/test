@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
 import dev.toastbits.composekit.navigation.navigator.Navigator
-import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
 import dev.toastbits.composekit.theme.ThemeValues
+import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
 import dev.toastbits.lifelog.application.dbsource.data.ui.component.DatabaseSourceConfigurationPreview
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step.LoadStep
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step.LoadStepCheckIfUpToDate
@@ -93,7 +93,7 @@ internal fun DatabaseSourceLoader(
 
         when (result) {
             is LoadStep.ExecuteResult.DatabaseLoaded -> {
-                if (result.parseResult.alerts.isEmpty() || autoProceed) {
+                if (result.parseResult.alerts.isEmpty() || (autoProceed && canProceedWith(result.parseResult))) {
                     onProceeded(result.parseResult.database)
                 }
                 else {
@@ -135,7 +135,7 @@ internal fun DatabaseSourceLoader(
             }
 
             val allowProceed: Boolean = remember(loadResult) {
-                loadResult?.first?.alerts?.none { it.alert.severity == LogConvertAlert.Severity.ERROR } == true
+                loadResult?.first?.let { canProceedWith(it) } ?: false
             }
 
             TooltipBox(
@@ -173,3 +173,6 @@ internal fun DatabaseSourceLoader(
         }
     }
 }
+
+private fun canProceedWith(result: LogDatabaseParseResult): Boolean =
+    result.alerts.none { it.alert.severity == LogConvertAlert.Severity.ERROR }

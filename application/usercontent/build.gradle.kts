@@ -16,8 +16,11 @@ kotlin {
 
                 implementation(libs.composekit.theme)
                 implementation(libs.composekit.util)
-                implementation(libs.coil.compose)
-                implementation(libs.coil.network.ktor)
+                implementation(libs.composekit.components)
+
+                implementation(libs.image.loader)
+//                implementation(libs.coil.compose)
+//                implementation(libs.coil.network.ktor)
             }
         }
     }

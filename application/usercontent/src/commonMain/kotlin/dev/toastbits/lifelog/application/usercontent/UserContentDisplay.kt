@@ -1,14 +1,11 @@
-package dev.toastbits.lifelog.application.core.usercontent
+package dev.toastbits.lifelog.application.usercontent
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.LocalTextStyle
@@ -18,22 +15,21 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
+import com.seiko.imageloader.rememberImagePainter
+import dev.toastbits.composekit.components.LocalContext
+import dev.toastbits.composekit.context.PlatformContext
 import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
-import dev.toastbits.composekit.theme.vibrantAccent
 import dev.toastbits.composekit.util.indexOfFirstOrNull
-import dev.toastbits.composekit.util.thenWith
-import dev.toastbits.lifelog.application.core.usercontent.model.ModsState
-import dev.toastbits.lifelog.application.core.usercontent.model.getState
+import dev.toastbits.lifelog.application.usercontent.model.ModsState
+import dev.toastbits.lifelog.application.usercontent.model.getState
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReference
 
@@ -61,7 +57,8 @@ fun UserContentPart(part: UserContent.Part) {
                 }
             }
             is UserContent.Part.Image -> {
-                AsyncImage(model = part.location, contentDescription = null)
+                val painter: Painter = rememberImagePainter(part.location)
+                Image(painter, contentDescription = null)
             }
             is UserContent.Part.Single -> {
                 SinglePart(part)
@@ -73,6 +70,7 @@ fun UserContentPart(part: UserContent.Part) {
 @Composable
 private fun SinglePart(part: UserContent.Part.Single) {
     val reference: LogEntityReference? = LocalReference.current
+    val context: PlatformContext = LocalContext.current
     val textParts: List<String> = part.text.split(' ')
 
     for ((textIndex, text) in textParts.withIndex()) {
@@ -96,15 +94,30 @@ private fun SinglePart(part: UserContent.Part.Single) {
             Text(
                 if (subpartIndex + 1 == subparts.size && textIndex + 1 != textParts.size) "$subpart "
                 else subpart,
-                Modifier
-                    .thenWith(reference) { ref ->
-                        clickable(
-                            remember { MutableInteractionSource() },
-                            null
-                        ) {
-                            TODO("Open reference $ref")
-                        }
-                    }
+//                Modifier
+//                    .thenWith(reference) { ref ->
+//                        clickable(
+//                            remember { MutableInteractionSource() },
+//                            null
+//                        ) {
+//                            when (ref) {
+//                                is LogEntityReference.InLog -> TODO(ref.toString())
+//                                is LogEntityReference.InMetadata -> TODO(ref.toString())
+//                                is LogEntityReference.URL -> {
+//                                    if (context.canOpenUrl()) {
+//                                        context.openUrl(ref.url)
+//                                    }
+//                                    else if (context.canShare()) {
+//                                        context.shareText(ref.url)
+//                                    }
+//                                    else if (context.canCopyText()) {
+//                                        context.copyText(ref.url)
+//                                    }
+//                                }
+//                            }
+//                        }
+//                            .pointerHoverIcon(PointerIcon.Hand, true)
+//                    }
             )
 
             if (subpartIndex + 1 != subparts.size) {
@@ -129,7 +142,7 @@ private fun WithMods(parts: Collection<UserContent.Mod>, content: @Composable ()
                 fontWeight = if (state.bold) FontWeight.Bold else textStyle.fontWeight,
                 fontStyle = if (state.italic) FontStyle.Italic else textStyle.fontStyle,
                 textDecoration = if (state.strikethrough) TextDecoration.LineThrough else textStyle.textDecoration,
-                color = if (state.reference != null) LocalComposeKitTheme.currentValue.vibrantAccent else textStyle.color
+//                color = if (state.reference != null) LocalComposeKitTheme.currentValue.vibrantAccent else textStyle.color
             )
         },
         LocalReference provides state.reference

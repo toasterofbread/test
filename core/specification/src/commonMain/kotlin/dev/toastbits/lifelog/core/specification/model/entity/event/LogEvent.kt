@@ -10,8 +10,11 @@ import dev.toastbits.lifelog.core.specification.util.LogStringId
 interface LogEvent: LogEntity {
     var content: UserContent?
 
+    fun getAllUserContent(): List<UserContent> =
+        listOfNotNull(content, aboveComment, inlineComment)
+
     fun getIcon(): Icon
-    suspend fun getTitle(locale: String): LogDisplayText = LogDisplayText.OfString("")
+    suspend fun getTitle(locale: String): LogDisplayText
 
     override fun getCompanion(): LogEntityCompanion<*> = Companion
 

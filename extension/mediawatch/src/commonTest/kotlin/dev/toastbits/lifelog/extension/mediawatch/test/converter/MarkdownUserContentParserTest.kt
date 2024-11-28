@@ -11,10 +11,11 @@ import kotlin.test.Test
 class MarkdownUserContentParserTest: ParserTest() {
     @Test
     fun testEntityReference() {
-        val text: String = "Hello [World!](ref)".inTemplate()
+        val reference: String = "ref"
+        val markdownText: String = "Hello [World!]($reference)".inTemplate()
         val renderedText: String = "Hello World!".inTemplate()
 
-        val parsed: UserContent = parseAndTest(text, renderedText)
+        val parsed: UserContent = parseAndTest(markdownText, renderedText)
 
         assertThat(parsed.parts).hasSize(3)
 
@@ -22,7 +23,7 @@ class MarkdownUserContentParserTest: ParserTest() {
         assertThat(parsed.parts[2].mods).isEmpty()
 
         assertThat(parsed.parts[1].mods).hasSize(1)
-        assertThat(parsed.parts[1].mods.single()).isEqualTo(UserContent.Mod.Reference(mockResultReference))
+        assertThat(parsed.parts[1].mods.single()).isEqualTo(UserContent.Mod.Reference(createTestReference(reference)))
     }
 
     @Test

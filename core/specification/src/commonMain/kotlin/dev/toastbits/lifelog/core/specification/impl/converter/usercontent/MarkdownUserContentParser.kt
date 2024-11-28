@@ -9,7 +9,17 @@ import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.ast.getTextInNode
 import org.intellij.markdown.flavours.MarkdownFlavourDescriptor
 import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor
+import org.intellij.markdown.flavours.gfm.StrikeThroughDelimiterParser
 import org.intellij.markdown.parser.MarkdownParser
+import org.intellij.markdown.parser.sequentialparsers.EmphasisLikeParser
+import org.intellij.markdown.parser.sequentialparsers.SequentialParser
+import org.intellij.markdown.parser.sequentialparsers.SequentialParserManager
+import org.intellij.markdown.parser.sequentialparsers.impl.BacktickParser
+import org.intellij.markdown.parser.sequentialparsers.impl.EmphStrongDelimiterParser
+import org.intellij.markdown.parser.sequentialparsers.impl.ImageParser
+import org.intellij.markdown.parser.sequentialparsers.impl.InlineLinkParser
+import org.intellij.markdown.parser.sequentialparsers.impl.MathParser
+import org.intellij.markdown.parser.sequentialparsers.impl.ReferenceLinkParser
 
 class MarkdownUserContentParser: UserContentParser {
     override fun parseUserContent(
@@ -25,9 +35,19 @@ class MarkdownUserContentParser: UserContentParser {
             )
 
         var currentLine: Int = 0
+        var linkLabel: List<UserContent.Part>? = null
+        var linkOpeningBracket: Boolean = false
+        var linkDestinationText: String = ""
 
         fun getNodeParts(node: ASTNode): List<UserContent.Part> {
             fun List<ASTNode>.getParts(): List<UserContent.Part> = flatMap { getNodeParts(it) }
+
+            if (linkOpeningBracket && node.type.name != ")") {
+                linkOpeningBracket = false
+                linkDestinationText += node.getTextInNode(text)
+                linkOpeningBracket = true
+                return emptyList()
+            }
 
             when (node.type.name) {
                 "PARAGRAPH",
@@ -92,7 +112,13 @@ class MarkdownUserContentParser: UserContentParser {
                 }
                 "GFM_AUTOLINK" -> {
                     val link: String = node.getTextInNode(text).toString()
-                    return listOf(UserContent.Part.Single(link, setOf(UserContent.Mod.Reference(LogEntityReference.URL(link)))))
+                    return listOf(UserContent.Part.Single(link))
+                }
+                "LINK_LABEL" -> {
+                    linkLabel = node.children.subList(1, node.children.size - 1).getParts()
+                    linkOpeningBracket = false
+                    linkDestinationText = ""
+                    return emptyList()
                 }
                 "INLINE_LINK" -> {
                     var linkTextParts: List<UserContent.Part>? = null
@@ -100,12 +126,16 @@ class MarkdownUserContentParser: UserContentParser {
 
                     for (linkChild in node.children) {
                         when (linkChild.type.name) {
-                            "LINK_TEXT" -> {
+                             "LINK_TEXT" -> {
                                 val linkTextNodes: List<ASTNode> = linkChild.children.drop(1).dropLast(1)
                                 linkTextParts = linkTextNodes.flatMap { getNodeParts(it) }
                             }
                             "LINK_DESTINATION" -> {
-                                linkReference = referenceParser.parseReference(linkChild.getTextInNode(text).toString(), onAlert = { onAlert(it, currentLine) })
+                                var linkText: String = linkChild.getTextInNode(text).toString()
+                                if (linkText.startsWith('<') && linkText.endsWith('>')) {
+                                    linkText = linkText.substring(1, linkText.length - 1)
+                                }
+                                linkReference = referenceParser.parseReference(linkText, onAlert = { onAlert(it, currentLine) })
                             }
                             "(", ")" -> {}
                             else -> onAlert(node.toUnhandledAlert("LINK", text), currentLine)
@@ -116,6 +146,29 @@ class MarkdownUserContentParser: UserContentParser {
                     return listOf(UserContent.Part.Composite(linkTextParts.orEmpty(), setOfNotNull(referenceMod)))
                 }
                 else -> {
+                    if (linkLabel != null) {
+                        if (linkOpeningBracket) {
+                            if (node.type.name == ")") {
+                                val linkDestination: LogEntityReference? =
+                                    referenceParser.parseReference(
+                                        linkDestinationText,
+                                        onAlert = { onAlert(it, currentLine) }
+                                    )
+
+                                linkLabel = null
+                                linkOpeningBracket = false
+                                linkDestinationText = ""
+
+                                val referenceMod: UserContent.Mod? = linkDestination?.let { UserContent.Mod.Reference(it) }
+                                return listOf(UserContent.Part.Composite(linkLabel!!, setOfNotNull(referenceMod)))
+                            }
+                        }
+                        else if (node.type.name == "(") {
+                            linkOpeningBracket = true
+                            return emptyList()
+                        }
+                    }
+
                     if (node.type.name.length == 1) {
                         val nodeText: String = node.getTextInNode(text).toString()
                         return listOf(UserContent.Part.Single(nodeText))
@@ -156,5 +209,19 @@ class MarkdownUserContentParser: UserContentParser {
         }
     }
 
-    private fun getFlavour(): MarkdownFlavourDescriptor = GFMFlavourDescriptor()
+    private fun getFlavour(): MarkdownFlavourDescriptor =
+        object : GFMFlavourDescriptor() {
+            override val sequentialParserManager = object : SequentialParserManager() {
+                override fun getParserSequence(): List<SequentialParser> =
+                    listOf(
+                        // AutolinkParser(listOf(MarkdownTokenTypes.AUTOLINK, GFMTokenTypes.GFM_AUTOLINK)),
+                        BacktickParser(),
+                        MathParser(),
+                        ImageParser(),
+                        InlineLinkParser(),
+                        ReferenceLinkParser(),
+                        EmphasisLikeParser(EmphStrongDelimiterParser(), StrikeThroughDelimiterParser())
+                    )
+            }
+        }
 }
