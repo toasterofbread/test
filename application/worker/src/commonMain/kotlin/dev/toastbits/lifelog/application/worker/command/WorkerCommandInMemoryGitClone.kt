@@ -5,6 +5,7 @@ import dev.toastbits.kogit.core.filestructure.countFiles
 import dev.toastbits.kogit.core.model.GitCredentials
 import dev.toastbits.kogit.memory.handler.stage.GitHandlerStage
 import dev.toastbits.kogit.memory.helper.GitHelper
+import dev.toastbits.kogit.memory.model.GitObject
 import dev.toastbits.lifelog.application.worker.cache.LocalGitObjectCache
 import dev.toastbits.lifelog.application.worker.mapper.WorkerExecutionContext
 import dev.toastbits.lifelog.application.worker.mapper.toTransferable
@@ -33,10 +34,18 @@ data class WorkerCommandInMemoryGitClone(
                 )
 
         val httpClient: HttpClient = HttpClient()
-        val gitHelper: GitHelper = GitHelper(httpClient, context.ioDispatcher, context.defaultDispatcher, gitCredentials)
+        val gitHelper: GitHelper = GitHelper(
+            repositoryUrl = repositoryUrl,
+            branchName = branchName,
+            objectRegistry = cache,
+            httpClient = httpClient,
+            ioDispatcher = context.ioDispatcher,
+            workDispatcher = context.defaultDispatcher,
+            credentials = gitCredentials
+        )
 
-        val fileStructure: FileStructure =
-            gitHelper.cloneToFileStructure(repositoryUrl, branchName, cache) { stage, part, total ->
+        val (headCommit: GitObject, fileStructure: FileStructure) =
+            gitHelper.cloneToFileStructure { stage, part, total ->
                 onProgress(Progress(stage, part, total))
             }.fold(
                 onSuccess = { it },
@@ -62,12 +71,12 @@ data class WorkerCommandInMemoryGitClone(
                 return RuntimeException("Serialising file structure from $repositoryUrl:$branchName with $gitCredentials failed", e).toResult()
             }
 
-        return WorkerCommandResult.Success(Response(transferableFileStructure))
+        return WorkerCommandResult.Success(Response(headCommit.hash, transferableFileStructure))
     }
 
     @Serializable
     data class Progress(val stage: GitHandlerStage, val part: Long?, val total: Long?): WorkerCommandProgress
 
     @Serializable
-    data class Response(val transferFileStructure: TransferableFileStructure): WorkerCommandResponse
+    data class Response(val headCommitRef: String, val transferFileStructure: TransferableFileStructure): WorkerCommandResponse
 }

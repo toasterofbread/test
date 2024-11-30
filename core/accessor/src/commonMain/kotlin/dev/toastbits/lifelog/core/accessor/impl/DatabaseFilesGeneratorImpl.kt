@@ -43,7 +43,7 @@ class DatabaseFilesGeneratorImpl(
                 converter.generateLogFile(group.associateWith { days[it]!! })
 
             for (alert in generateResult.alerts) {
-                onAlert(alert.copy(filePath = filePath.toString()))
+                onAlert(alert.copy(filePath = filePath))
             }
 
             createFile(filePath, generateResult.lines)

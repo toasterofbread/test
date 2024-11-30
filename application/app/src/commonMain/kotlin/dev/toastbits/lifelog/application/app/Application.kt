@@ -39,6 +39,7 @@ import dev.toastbits.composekit.util.thenIf
 import dev.toastbits.lifelog.application.app.ui.PersistentTopBar
 import dev.toastbits.lifelog.application.core.FullContentScreen
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourcelist.DatabaseSourceListScreen
+import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourcelist.LogSaveScreenProviderImpl
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.DatabaseSourceLoadScreen
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.logview.data.ui.screen.LogListScreen
@@ -124,7 +125,7 @@ class Application(
             DatabaseSourceLoadScreen(
                 autoOpenConfiguration,
                 onLoaded = {
-                    navigator.replaceScreen(LogListScreen(it))
+                    navigator.replaceScreen(LogListScreen(it, LogSaveScreenProviderImpl(autoOpenConfiguration)))
                 },
                 autoProceed = true
             )

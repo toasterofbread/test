@@ -67,7 +67,7 @@ class LogEventScreen(
     private val event: LogEvent = logDatabase[eventReference]
 
     private var state: LogEventViewScreenState by mutableStateOf(
-        LogEventViewScreenState.Previewing(getCurrentContent())
+        LogEventViewScreenState.Preview(getCurrentContent())
     )
     private var loadingNextStateType: LogEventViewScreenState.Type? by mutableStateOf(null)
 
@@ -83,12 +83,12 @@ class LogEventScreen(
             loadingNextStateType = state.type
             state =
                 when (state) {
-                    is LogEventViewScreenState.Editing ->
-                        LogEventViewScreenState.Editing(
+                    is LogEventViewScreenState.Edit ->
+                        LogEventViewScreenState.Edit(
                             logDatabase.converter.generateUserContent(getCurrentContent(), eventReference.date)
                         )
-                    is LogEventViewScreenState.Previewing ->
-                        LogEventViewScreenState.Previewing(getCurrentContent())
+                    is LogEventViewScreenState.Preview ->
+                        LogEventViewScreenState.Preview(getCurrentContent())
                 }
             loadingNextStateType = null
         }
@@ -129,19 +129,19 @@ class LogEventScreen(
 
         LaunchedEffect(state) {
             val state: LogEventViewScreenState = state
-            if (state is LogEventViewScreenState.Editing) {
+            if (state is LogEventViewScreenState.Edit) {
                 delay(CHANGES_UPDATE_DELAY)
             }
 
             val newContent: UserContent =
                 when (state) {
-                    is LogEventViewScreenState.Editing ->
+                    is LogEventViewScreenState.Edit ->
                         logDatabase.converter.userContentParser.parseUserContent(
                             state.content,
                             logDatabase.converter.referenceParser,
                             onAlert = { _, _ -> }
                         )
-                    is LogEventViewScreenState.Previewing -> state.content
+                    is LogEventViewScreenState.Preview -> state.content
                 }
 
             changes = changes.copy(

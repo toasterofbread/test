@@ -1,14 +1,13 @@
 package dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step
 
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
-import dev.toastbits.lifelog.application.dbsource.domain.model.LogDatabaseParseResult
 
-internal sealed interface LoadStep {
-    suspend fun execute(accessor: DatabaseAccessor, onProgress: (DatabaseAccessor.LoadProgress) -> Unit): ExecuteResult
+internal sealed interface LoadStep<R> {
+    suspend fun execute(accessor: DatabaseAccessor, onProgress: (DatabaseAccessor.LoadProgress) -> Unit): ExecuteResult<R>
 
-    sealed interface ExecuteResult {
-        data class ExceptionThrown(val exception: Throwable): ExecuteResult
-        data class DatabaseLoaded(val parseResult: LogDatabaseParseResult): ExecuteResult
-        data class NextStep(val nextStep: LoadStep): ExecuteResult
+    sealed interface ExecuteResult<R> {
+        data class Done<R>(val result: R): ExecuteResult<R>
+        data class NextStep<R>(val nextStep: LoadStep<R>): ExecuteResult<R>
+        data class ExceptionThrown<R>(val exception: Throwable): ExecuteResult<R>
     }
 }

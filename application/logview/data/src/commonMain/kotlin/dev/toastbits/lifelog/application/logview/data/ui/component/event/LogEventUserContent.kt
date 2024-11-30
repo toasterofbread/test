@@ -33,7 +33,7 @@ internal fun LogEventUserContent(
         }
         else {
             when (val currentState: LogEventViewScreenState = state) {
-                is LogEventViewScreenState.Editing -> {
+                is LogEventViewScreenState.Edit -> {
                     val textFieldState: TextFieldState = remember { TextFieldState(currentState.content) }
 
                     BasicTextField(
@@ -46,7 +46,7 @@ internal fun LogEventUserContent(
                         updateState(currentState.copy(textFieldState.text.toString()))
                     }
                 }
-                is LogEventViewScreenState.Previewing ->
+                is LogEventViewScreenState.Preview ->
                     UserContentDisplay(
                         currentState.content
                     )

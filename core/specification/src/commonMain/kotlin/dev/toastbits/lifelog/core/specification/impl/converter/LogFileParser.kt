@@ -15,8 +15,10 @@ import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEventType
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceParser
 import kotlinx.datetime.LocalDate
+import okio.Path
 
 internal class LogFileParser(
+    private val filePath: Path,
     private val strings: LogFileConverterStrings,
     private val eventTypes: List<LogEventType>,
     private val userContentParser: UserContentParser,
@@ -64,7 +66,7 @@ internal class LogFileParser(
     }
 
     private fun onAlert(error: LogParseAlert, line: Int = currentLineIndex) {
-        alerts.add(ParseAlertData(error, line.toUInt(), null))
+        alerts.add(ParseAlertData(error, line.toUInt(), filePath))
     }
 
     private fun String.extractComment(): Pair<String, UserContent?> {

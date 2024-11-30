@@ -1,0 +1,79 @@
+package dev.toastbits.lifelog.application.worker.command
+
+import dev.toastbits.kogit.core.filestructure.SerialisableFileStructure
+import dev.toastbits.kogit.core.model.GitCredentials
+import dev.toastbits.kogit.memory.handler.GitCommitGenerator.UserInfo
+import dev.toastbits.kogit.memory.handler.stage.GitHandlerStage
+import dev.toastbits.kogit.memory.helper.GitHelper
+import dev.toastbits.kogit.memory.model.GitObject
+import dev.toastbits.kogit.memory.model.MutableGitObjectRegistry
+import dev.toastbits.kogit.memory.model.readObject
+import dev.toastbits.lifelog.application.worker.cache.LocalGitObjectCache
+import dev.toastbits.lifelog.application.worker.mapper.WorkerExecutionContext
+import dev.toastbits.lifelog.application.worker.model.WorkerCommandResult
+import dev.toastbits.lifelog.application.worker.model.toResult
+import io.ktor.client.HttpClient
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class WorkerCommandInMemoryGitCommit(
+    val headCommitRef: String,
+    val message: String,
+    val author: UserInfo,
+    val committer: UserInfo,
+    val repositoryUrl: String,
+    val branchName: String,
+    val gitCredentials: GitCredentials?,
+    val fileStructure: SerialisableFileStructure
+): WorkerCommand {
+    override suspend fun execute(
+        context: WorkerExecutionContext,
+        onProgress: (WorkerCommandProgress) -> Unit
+    ): WorkerCommandResult {
+        val cache: MutableGitObjectRegistry =
+            LocalGitObjectCache.getInstance(repositoryUrl, context.platformContext)
+                .fold(
+                    onSuccess = { it },
+                    onFailure = { return it.toResult() }
+                )
+
+        val gitHelper: GitHelper =
+            GitHelper(
+                repositoryUrl = repositoryUrl,
+                branchName = branchName,
+                objectRegistry = cache,
+                httpClient = HttpClient(),
+                ioDispatcher = context.ioDispatcher,
+                workDispatcher = context.defaultDispatcher,
+                credentials = gitCredentials
+            )
+
+        val progressListener: GitHelper.ProgressListener =
+            GitHelper.ProgressListener { stage, part, total ->
+                onProgress(
+                    Progress(stage, part, total)
+                )
+            }
+
+        val headCommit: GitObject = cache.readObject(headCommitRef)
+        val newCommit: GitObject =
+            gitHelper.commitAndPushFileStructure(
+                headCommit,
+                fileStructure,
+                message,
+                author,
+                committer,
+                progressListener
+            ).getOrElse {
+                return it.toResult()
+            }
+
+        return WorkerCommandResult.Success(Response(newCommit.hash))
+    }
+
+    @Serializable
+    data class Progress(val stage: GitHandlerStage, val part: Long?, val total: Long?): WorkerCommandProgress
+
+    @Serializable
+    data class Response(val newCommitRef: String): WorkerCommandResponse
+}

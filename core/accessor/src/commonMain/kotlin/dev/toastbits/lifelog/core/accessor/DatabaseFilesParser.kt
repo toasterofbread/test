@@ -7,6 +7,7 @@ import dev.toastbits.lifelog.core.specification.database.LogDatabase
 interface DatabaseFilesParser {
     suspend fun parseDatabaseFileStructure(
         structure: FileStructure,
+        gitCommitRef: String?,
         onAlert: (ParseAlertData) -> Unit
     ): LogDatabase
 }

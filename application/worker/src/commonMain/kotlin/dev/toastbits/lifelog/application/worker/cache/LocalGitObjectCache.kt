@@ -9,6 +9,7 @@ import dev.toastbits.kogit.memory.model.MutableGitObjectRegistry
 import dev.toastbits.lifelog.application.worker.GitDatabase
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.collections.List
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -60,11 +61,39 @@ class LocalGitObjectCache private constructor(
         )
     }
 
+    override suspend fun hasObject(ref: String): Boolean =
+        objects.contains(ref)
+            || database.objectQueries.getType(repositoryIdentifier, ref).awaitAsOneOrNull() != null
+
     override suspend fun readObjectOrNull(ref: String): GitObject? = mutex.withLock {
         objects[ref]?.obj
         ?: database.objectQueries.get(repositoryIdentifier, ref).awaitAsOneOrNull()?.let { (dataBase64, type) ->
             GitObject(base64.decode(dataBase64), type.toGitObjectType(), ref)
         }
+    }
+
+    override suspend fun readObjects(refs: List<String>): List<GitObject> {
+        val ret: MutableList<GitObject> = mutableListOf()
+        val neededRefs: MutableList<String> = mutableListOf()
+        for (ref in refs) {
+            val obj: GitObject? = objects[ref]?.obj
+            if (obj != null) {
+                ret.add(obj)
+            }
+            else {
+                neededRefs.add(ref)
+            }
+        }
+
+        if (neededRefs.isNotEmpty()) {
+            ret.addAll(
+                database.objectQueries.getMultiple(repositoryIdentifier, neededRefs).awaitAsList().map { (ref, type, dataBase64) ->
+                    GitObject(base64.decode(dataBase64), type.toGitObjectType(), ref)
+                }
+            )
+        }
+
+        return ret
     }
 
     override suspend fun writeObject(obj: GitObject) = mutex.withLock {

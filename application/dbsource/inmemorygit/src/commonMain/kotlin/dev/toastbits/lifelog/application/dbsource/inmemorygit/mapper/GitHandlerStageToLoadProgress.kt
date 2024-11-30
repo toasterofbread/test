@@ -6,10 +6,12 @@ import dev.toastbits.lifelog.application.dbsource.domain.accessor.create
 import lifelog.application.dbsource.inmemorygit.generated.resources.Res
 import lifelog.application.dbsource.inmemorygit.generated.resources.accessor_progress_clone_pulling
 import lifelog.application.dbsource.inmemorygit.generated.resources.accessor_progress_clone_retrieving_ref
+import lifelog.application.dbsource.inmemorygit.generated.resources.accessor_progress_pack_file_generating
 import lifelog.application.dbsource.inmemorygit.generated.resources.accessor_progress_pack_file_parse_checksum
 import lifelog.application.dbsource.inmemorygit.generated.resources.accessor_progress_pack_file_parse_parsing_objects
 import lifelog.application.dbsource.inmemorygit.generated.resources.accessor_progress_pack_file_parse_preparing_pack_file
 import lifelog.application.dbsource.inmemorygit.generated.resources.accessor_progress_pack_file_parse_reading_header
+import lifelog.application.dbsource.inmemorygit.generated.resources.accessor_progress_push
 import lifelog.application.dbsource.inmemorygit.generated.resources.accessor_progress_rendering_commit_tree
 import lifelog.application.dbsource.inmemorygit.generated.resources.accessor_progress_serialising_file_structure
 import lifelog.application.dbsource.inmemorygit.generated.resources.accessor_progress_writing_objects_to_cache
@@ -27,6 +29,8 @@ internal fun GitHandlerStage.toLoadProgress(part: Long?, total: Long?): LoadProg
             GitHandlerStage.RenderCommitTree -> LoadProgress.Type.GENERIC
             GitHandlerStage.SerialisingFileStructure -> LoadProgress.Type.GENERIC
             GitHandlerStage.WritingObjectsToCache -> LoadProgress.Type.GENERIC
+            GitHandlerStage.PackFileGenerate -> LoadProgress.Type.GENERIC
+            GitHandlerStage.Push -> LoadProgress.Type.NETWORK
         }
 
     val messageResource: StringResource =
@@ -40,6 +44,8 @@ internal fun GitHandlerStage.toLoadProgress(part: Long?, total: Long?): LoadProg
             GitHandlerStage.RenderCommitTree -> Res.string.accessor_progress_rendering_commit_tree
             GitHandlerStage.SerialisingFileStructure -> Res.string.accessor_progress_serialising_file_structure
             GitHandlerStage.WritingObjectsToCache -> Res.string.accessor_progress_writing_objects_to_cache
+            GitHandlerStage.PackFileGenerate -> Res.string.accessor_progress_pack_file_generating
+            GitHandlerStage.Push -> Res.string.accessor_progress_push
         }
 
     return type.create(part, total, messageResource)

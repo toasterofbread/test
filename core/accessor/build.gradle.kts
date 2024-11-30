@@ -19,6 +19,7 @@ kotlin {
                 api(libs.kogit.core)
                 api(libs.kotlinx.coroutines.core)
                 api(libs.okio)
+                implementation(libs.uri.kmp)
             }
         }
 

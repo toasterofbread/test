@@ -9,6 +9,12 @@ interface LogEntity {
     var inlineComment: UserContent?
     var aboveComment: UserContent?
 
+    fun copy(
+        inlineComment: UserContent?,
+        aboveComment: UserContent?,
+        properties: Map<StringId, Property<*, *>>
+    ): LogEntity
+
     fun getCompanion(): LogEntityCompanion<*> = Companion
 
     data class Property<T: LogEntity, V>(

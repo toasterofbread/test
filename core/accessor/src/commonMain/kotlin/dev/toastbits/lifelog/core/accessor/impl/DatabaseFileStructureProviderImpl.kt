@@ -1,5 +1,6 @@
 package dev.toastbits.lifelog.core.accessor.impl
 
+import com.eygraber.uri.UriCodec
 import dev.toastbits.kogit.core.filestructure.toPath
 import dev.toastbits.lifelog.core.accessor.DatabaseFileStructureProvider
 import dev.toastbits.lifelog.core.specification.converter.alert.LogParseAlert
@@ -50,7 +51,7 @@ class DatabaseFileStructureProviderImpl(
                             configuration.strings.extensionContentDirectoryName,
                             extension.id,
                             referenceType.id
-                        ) + reference.path.segments
+                        ) + reference.path.segments.map { UriCodec.encode(it) }
                     ).toPath()
                 }
 
@@ -68,7 +69,8 @@ class DatabaseFileStructureProviderImpl(
             return LogEntityReference.URL(text)
         }
 
-        val normalisedPath: List<String> = text.toPath().normalized().segments
+        val normalisedPath: List<String> =
+            text.toPath().normalized().segments.map { UriCodec.decode(it) }
 
         if (normalisedPath.any { it == ".." }) {
             onAlert(SpecificationLogParseAlert.InvalidReferenceFormat(text))

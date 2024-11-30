@@ -1,5 +1,6 @@
 package dev.toastbits.lifelog.core.accessor.reference
 
+import com.eygraber.uri.UriCodec
 import dev.toastbits.lifelog.core.accessor.DatabaseFileStructureProvider
 import dev.toastbits.lifelog.core.specification.converter.alert.LogGenerateAlert
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityPath
@@ -16,6 +17,6 @@ class LogEntityReferenceGeneratorImpl(
         onAlert: (LogGenerateAlert) -> Unit
     ): LogEntityPath {
         val referencePath: Path = fileStructureProvider.getEntityReferenceFilePath(reference)
-        return LogEntityPath(referencePath.segments)
+        return LogEntityPath(referencePath.segments.map { UriCodec.decode(it) })
     }
 }

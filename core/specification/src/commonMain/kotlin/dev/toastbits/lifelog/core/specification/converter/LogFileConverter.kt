@@ -11,6 +11,7 @@ import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceGenerator
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceParser
 import kotlinx.datetime.LocalDate
+import okio.Path
 
 interface LogFileConverter {
     val referenceParser: LogEntityReferenceParser
@@ -18,7 +19,11 @@ interface LogFileConverter {
     val userContentParser: UserContentParser
     val userContentGenerator: UserContentGenerator
 
-    fun parseLogFile(lines: Sequence<String>, initialDate: LogDate? = null): ParseResult
+    fun parseLogFile(
+        fileLines: Sequence<String>,
+        filePath: Path,
+        initialDate: LogDate? = null
+    ): ParseResult
     fun generateLogFile(days: Map<LogDate, List<LogEvent>>): GenerateResult
 
     data class ParseResult(
@@ -34,7 +39,7 @@ interface LogFileConverter {
     data class AlertOnLine<T: LogConvertAlert>(
         val alert: T,
         val lineIndex: UInt?,
-        val filePath: String?
+        val filePath: Path?
     )
 }
 

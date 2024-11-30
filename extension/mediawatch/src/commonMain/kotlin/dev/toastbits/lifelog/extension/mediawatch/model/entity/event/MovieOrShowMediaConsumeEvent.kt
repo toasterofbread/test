@@ -1,13 +1,15 @@
 package dev.toastbits.lifelog.extension.mediawatch.model.entity.event
 
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverterStrings
-import dev.toastbits.lifelog.extension.mediawatch.model.reference.MediaReference
-import dev.toastbits.lifelog.extension.mediawatch.util.MediaEntityType
 import dev.toastbits.lifelog.core.specification.model.UserContent
+import dev.toastbits.lifelog.core.specification.model.entity.LogEntity
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
+import dev.toastbits.lifelog.core.specification.util.StringId
 import dev.toastbits.lifelog.extension.mediawatch.MediaWatchExtensionStrings
 import dev.toastbits.lifelog.extension.mediawatch.impl.mediaRangeToText
 import dev.toastbits.lifelog.extension.mediawatch.impl.model.entity.event.MediaRangeValue
+import dev.toastbits.lifelog.extension.mediawatch.model.reference.MediaReference
+import dev.toastbits.lifelog.extension.mediawatch.util.MediaEntityType
 import kotlin.time.Duration
 
 data class MovieOrShowMediaConsumeEvent(
@@ -72,6 +74,23 @@ data class MovieOrShowMediaConsumeEvent(
             }
         }
     }
+
+    override fun copy(
+        content: UserContent?,
+        inlineComment: UserContent?,
+        aboveComment: UserContent?,
+        properties: Map<StringId, LogEntity.Property<*, *>>?
+    ): LogEvent =
+        copy(
+            mediaReference = mediaReference,
+            inlineComment = inlineComment,
+            aboveComment = aboveComment,
+            content = content,
+            iteration = iteration,
+            iterationsUnsure = iterationsUnsure,
+            watchedRange = watchedRange,
+            watchedRangeUnsure = watchedRangeUnsure
+        )
 
     sealed interface WatchedRange {
         data class Episodes(

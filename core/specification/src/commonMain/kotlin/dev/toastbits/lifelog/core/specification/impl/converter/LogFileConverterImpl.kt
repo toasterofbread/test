@@ -14,6 +14,7 @@ import dev.toastbits.lifelog.core.specification.model.entity.event.LogEventType
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceGenerator
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceParser
 import kotlinx.datetime.LocalDate
+import okio.Path
 
 private typealias TypePath = List<String>
 
@@ -27,14 +28,19 @@ class LogFileConverterImpl(
     override val userContentParser: UserContentParser = MarkdownUserContentParser(),
     override val userContentGenerator: UserContentGenerator = MarkdownUserContentGenerator()
 ): LogFileConverter {
-    override fun parseLogFile(lines: Sequence<String>, initialDate: LogDate?): LogFileConverter.ParseResult =
+    override fun parseLogFile(
+        fileLines: Sequence<String>,
+        filePath: Path,
+        initialDate: LogDate?
+    ): LogFileConverter.ParseResult =
         LogFileParser(
+            filePath,
             formats,
             extensionRegistry.getAllExtensions().flatMap { it.extraEventTypes },
             userContentParser,
             referenceParser,
             initialDate
-        ).parse(lines)
+        ).parse(fileLines)
 
     override fun generateLogFile(days: Map<LogDate, List<LogEvent>>): LogFileConverter.GenerateResult =
         LogFileGenerator(

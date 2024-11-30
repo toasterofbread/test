@@ -50,12 +50,12 @@ class GDocsDatabaseFileStructurePreprocessor(
             if (path.segments.size == fileStructureProvider.getLogFilePathSize() && path.name == strings.logFileName && path.segments.firstOrNull() == strings.logsDirectoryName) {
                 val ref: LogEntityReference.InLog? =
                     fileStructureProvider.getPathLogFile(path.segments.drop(1)) {
-                        onAlert(ParseAlertData(it, null, path.toString()))
+                        onAlert(ParseAlertData(it, null, path))
                     }
 
                 val newFileLength: Int =
                     preprocessLogFile(file.readLines(), newStructure, fileStructureProvider, mediaReferenceType, strings, ref) { alert, line ->
-                        onAlert(ParseAlertData(alert, line?.toUInt(), path.toString()))
+                        onAlert(ParseAlertData(alert, line?.toUInt(), path))
                     }
 
                 newFile = object : FileStructure.Node.File.FileLines {
@@ -67,7 +67,7 @@ class GDocsDatabaseFileStructurePreprocessor(
                             strings,
                             ref
                         ) { alert, line ->
-                            onAlert(ParseAlertData(alert, line.toUInt(), path.toString()))
+                            onAlert(ParseAlertData(alert, line.toUInt(), path))
                         }
                 }
             }

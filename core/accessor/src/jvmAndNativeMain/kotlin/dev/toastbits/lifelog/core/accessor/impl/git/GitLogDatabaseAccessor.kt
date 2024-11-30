@@ -1,5 +1,7 @@
 package dev.toastbits.lifelog.core.accessor.impl.git
 
+import dev.toastbits.kogit.core.filestructure.FileStructure
+import dev.toastbits.kogit.core.filestructure.walkFiles
 import dev.toastbits.kogit.system.GitWrapper
 import dev.toastbits.lifelog.core.accessor.DatabaseFilesGenerator
 import dev.toastbits.lifelog.core.accessor.DatabaseFilesParser
@@ -7,8 +9,6 @@ import dev.toastbits.lifelog.core.accessor.LocalLogDatabaseAccessor
 import dev.toastbits.lifelog.core.accessor.RemoteLogDatabaseAccessor
 import dev.toastbits.lifelog.core.accessor.impl.getDatabaseFileStructure
 import dev.toastbits.lifelog.core.accessor.model.GitRemoteBranch
-import dev.toastbits.kogit.core.filestructure.FileStructure
-import dev.toastbits.kogit.core.filestructure.walkFiles
 import dev.toastbits.lifelog.core.specification.converter.GenerateAlertData
 import dev.toastbits.lifelog.core.specification.converter.ParseAlertData
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
@@ -49,7 +49,7 @@ class GitLogDatabaseAccessor(
 
     override suspend fun loadDatabaseLocally(onAlert: (ParseAlertData) -> Unit): LogDatabase {
         val fileStructure: FileStructure = fileSystem.getDatabaseFileStructure(repository.directory)
-        return filesParser.parseDatabaseFileStructure(fileStructure, onAlert)
+        return filesParser.parseDatabaseFileStructure(fileStructure, null, onAlert)
     }
 
     override fun canSaveDatabaseRemotely(database: LogDatabase): Boolean =

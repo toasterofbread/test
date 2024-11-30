@@ -30,6 +30,7 @@ class DatabaseFilesParserImpl(
 ): DatabaseFilesParser {
     override suspend fun parseDatabaseFileStructure(
         structure: FileStructure,
+        gitCommitRef: String?,
         onAlert: (ParseAlertData) -> Unit
     ): LogDatabase = withContext(ioDispatcher) {
         val days: MutableMap<LogDate, List<LogEvent>> = mutableMapOf()
@@ -43,12 +44,12 @@ class DatabaseFilesParserImpl(
                     if (it is SpecificationLogParseAlert.UnknownReferenceType && it.firstUnknownSegment == 0) {
                         return@parseReference
                     }
-                    onAlert(ParseAlertData(it, null, path.toString()))
+                    onAlert(ParseAlertData(it, null, path))
                 } ?: return@walkFiles
 
             when (reference) {
                 is LogEntityReference.InLog -> {
-                    scope.onInLogEntityReference(reference, file)
+                    scope.onInLogEntityReference(reference, file, path)
                 }
                 is LogEntityReference.InMetadata -> {
                     scope.onInMetadataEntityReference(reference, file, path)
@@ -57,7 +58,13 @@ class DatabaseFilesParserImpl(
             }
         }
 
-        return@withContext LogDatabase(configuration, days = scope.days, data = scope.data, converter = converter)
+        return@withContext LogDatabase(
+            configuration,
+            days = scope.days,
+            data = scope.data,
+            converter = converter,
+            gitCommitRef = gitCommitRef
+        )
     }
 
     private suspend fun FileStructure.preprocess(onAlert: (ParseAlertData) -> Unit): FileStructure {
@@ -74,7 +81,11 @@ class DatabaseFilesParserImpl(
         return structure
     }
 
-    private suspend fun Scope.onInLogEntityReference(reference: LogEntityReference.InLog, file: FileStructure.Node.File) {
+    private suspend fun Scope.onInLogEntityReference(
+        reference: LogEntityReference.InLog,
+        file: FileStructure.Node.File,
+        filePath: Path
+    ) {
         if (reference.extensionId != null) {
             val dataFile: LogDataFile =
                 when (file) {
@@ -90,7 +101,7 @@ class DatabaseFilesParserImpl(
             configuration.strings.logFileName -> {
                 val lines: Sequence<String> = file.readLines()
 
-                val log: LogFileConverter.ParseResult = converter.parseLogFile(lines, initialDate = LogDateImpl(reference.logDate, ambiguous = true))
+                val log: LogFileConverter.ParseResult = converter.parseLogFile(lines, filePath, initialDate = LogDateImpl(reference.logDate, ambiguous = true))
                 log.alerts.forEach(onAlert)
 
                 for ((day, events) in log.days) {
@@ -104,12 +115,12 @@ class DatabaseFilesParserImpl(
 
     private suspend fun Scope.onInMetadataEntityReference(reference: LogEntityReference.InMetadata, file: FileStructure.Node.File, path: Path) {
         if (data.containsKey(reference)) {
-            onAlert(ParseAlertData(SpecificationLogParseAlert.RedefinedMetadataValue(reference), null, path.toString()))
+            onAlert(ParseAlertData(SpecificationLogParseAlert.RedefinedMetadataValue(reference), null, path))
         }
 
         val extension: SpecificationExtension? = configuration.extensionRegistry.findRegisteredExtension(reference.extensionId!!)
         if (extension == null) {
-            onAlert(ParseAlertData(SpecificationLogParseAlert.UnregisteredExtension(reference.extensionId!!), null, path.toString()))
+            onAlert(ParseAlertData(SpecificationLogParseAlert.UnregisteredExtension(reference.extensionId!!), null, path))
             return
         }
 
@@ -119,13 +130,13 @@ class DatabaseFilesParserImpl(
                 SpecificationLogParseAlert.UnregisteredReferenceType(
                     reference.referenceTypeId,
                     reference.extensionId
-                ), null, path.toString()))
+                ), null, path))
             return
         }
 
         val lines: Sequence<String> = file.readLines()
         val parsedMetadata: LogDataFile =
-            referenceType.parseReferenceMetadata(reference.path.segments, lines) { onAlert(it.copy(filePath = path.toString())) }
+            referenceType.parseReferenceMetadata(reference.path.segments, lines) { onAlert(it.copy(filePath = path)) }
             ?: return
 
         data[reference] = parsedMetadata

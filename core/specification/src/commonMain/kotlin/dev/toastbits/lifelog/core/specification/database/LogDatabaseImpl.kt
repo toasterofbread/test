@@ -9,7 +9,8 @@ data class LogDatabase(
     val configuration: LogDatabaseConfiguration,
     val days: Map<LogDate, List<LogEvent>> = emptyMap(),
     val data: Map<LogEntityReference, LogDataFile> = emptyMap(),
-    val converter: LogFileConverter
+    val converter: LogFileConverter,
+    val gitCommitRef: String?
 )
 
 sealed interface LogDataFile {

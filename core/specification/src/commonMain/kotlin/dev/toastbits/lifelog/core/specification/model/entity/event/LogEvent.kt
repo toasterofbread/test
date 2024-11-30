@@ -6,6 +6,7 @@ import dev.toastbits.lifelog.core.specification.model.entity.LogEntity
 import dev.toastbits.lifelog.core.specification.model.entity.LogEntity.Property
 import dev.toastbits.lifelog.core.specification.model.entity.LogEntityCompanion
 import dev.toastbits.lifelog.core.specification.util.LogStringId
+import dev.toastbits.lifelog.core.specification.util.StringId
 
 interface LogEvent: LogEntity {
     var content: UserContent?
@@ -15,6 +16,20 @@ interface LogEvent: LogEntity {
 
     fun getIcon(): Icon
     suspend fun getTitle(locale: String): LogDisplayText
+
+    fun copy(
+        content: UserContent?,
+        inlineComment: UserContent?,
+        aboveComment: UserContent?,
+        properties: Map<StringId, Property<*, *>>?
+    ): LogEvent
+
+    override fun copy(
+        inlineComment: UserContent?,
+        aboveComment: UserContent?,
+        properties: Map<StringId, Property<*, *>>
+    ): LogEntity =
+        copy(content, inlineComment, aboveComment, properties)
 
     override fun getCompanion(): LogEntityCompanion<*> = Companion
 

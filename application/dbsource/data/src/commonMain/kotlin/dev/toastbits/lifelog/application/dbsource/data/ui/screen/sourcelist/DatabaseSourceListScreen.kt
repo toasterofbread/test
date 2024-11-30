@@ -8,22 +8,51 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.Screen
+import dev.toastbits.kogit.memory.handler.GitCommitGenerator.UserInfo
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceconfiguration.DatabaseSourceConfigurationScreen
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.DatabaseSourceLoadScreen
+import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.DatabaseSourceSaveScreen
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
 import dev.toastbits.lifelog.application.logview.data.ui.screen.LogListScreen
+import dev.toastbits.lifelog.application.logview.data.ui.screen.LogSaveScreenProvider
 import dev.toastbits.lifelog.application.settings.data.compositionlocal.LocalSettings
 import dev.toastbits.lifelog.application.settings.domain.appsettings.AppSettings
 import dev.toastbits.lifelog.application.settings.domain.model.SerialisedDatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.settings.domain.model.deserialiseConfiguration
 import dev.toastbits.lifelog.application.settings.domain.model.serialiseConfiguration
+import dev.toastbits.lifelog.core.specification.database.LogDatabase
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
 import lifelog.application.dbsource.data.generated.resources.Res
 import lifelog.application.dbsource.data.generated.resources.button_configure_database_source_cancel
 import lifelog.application.dbsource.data.generated.resources.button_configure_database_source_save
 import lifelog.application.dbsource.data.generated.resources.button_new_database_source_add
 import lifelog.application.dbsource.data.generated.resources.button_new_database_source_cancel
 import org.jetbrains.compose.resources.stringResource
+
+class LogSaveScreenProviderImpl(
+    private val sourceConfiguration: DatabaseSourceConfiguration
+): LogSaveScreenProvider {
+    override fun invoke(
+        database: LogDatabase,
+        autoProceed: Boolean,
+        onFinished: () -> Unit
+    ): Screen {
+        val user: UserInfo =
+            UserInfo("Talo Halton", "talohalton@gmail.com", Clock.System.now(), TimeZone.currentSystemDefault())
+
+        return DatabaseSourceSaveScreen(
+            database = database,
+            message = "Hello",
+            author = user,
+            committer = user,
+            sourceConfiguration = sourceConfiguration,
+            onFinished = onFinished,
+            autoProceed = autoProceed
+        )
+    }
+}
 
 class DatabaseSourceListScreen: Screen {
     @Composable
@@ -47,12 +76,12 @@ class DatabaseSourceListScreen: Screen {
             contentPadding = contentPadding,
             autoOpenConfigurationIndex = autoOpenIndex,
             onSelected = { index ->
-                val source: DatabaseSourceConfiguration = sourceConfigurations[index]
+                val sourceConfiguration: DatabaseSourceConfiguration = sourceConfigurations[index]
                 navigator.pushScreen(
                     DatabaseSourceLoadScreen(
-                        source,
+                        sourceConfiguration,
                         onLoaded = { database ->
-                            navigator.replaceScreen(LogListScreen(database))
+                            navigator.replaceScreen(LogListScreen(database, LogSaveScreenProviderImpl(sourceConfiguration)))
                         }
                     )
                 )

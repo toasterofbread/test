@@ -16,9 +16,10 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(libs.markdown)
                 api(libs.kotlinx.datetime)
-                implementation("com.eygraber:uri-kmp:0.0.18")
+                api(libs.okio)
+                implementation(libs.markdown)
+                implementation(libs.uri.kmp)
 //                implementation(libs.kotlinx.serialization.json)
             }
         }

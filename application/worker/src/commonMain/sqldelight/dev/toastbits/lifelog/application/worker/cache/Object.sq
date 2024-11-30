@@ -13,6 +13,12 @@ INSERT OR REPLACE INTO Object(repository, hash, type, data_base64) VALUES (?, ?,
 get:
 SELECT data_base64, type FROM Object WHERE repository = ? AND hash = ?;
 
+getType:
+SELECT type FROM Object WHERE repository = ? AND hash = ?;
+
+getMultiple:
+SELECT hash, type, data_base64 FROM Object WHERE repository = ? AND hash IN ?;
+
 list:
 SELECT hash, type FROM Object WHERE repository = ? AND (:type IS NULL OR :type = type);
 

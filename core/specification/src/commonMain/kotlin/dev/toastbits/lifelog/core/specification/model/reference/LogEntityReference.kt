@@ -37,7 +37,7 @@ sealed interface LogEntityReference {
 
 data class LogEntityPath(val segments: List<String>) {
     override fun toString(): String =
-        segments.joinToString("/") {
+        "/" + segments.joinToString("/") {
             UriCodec.encode(it)
         }
 

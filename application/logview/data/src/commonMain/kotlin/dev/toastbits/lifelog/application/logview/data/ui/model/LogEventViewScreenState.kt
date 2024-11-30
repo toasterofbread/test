@@ -10,10 +10,10 @@ import kotlinx.coroutines.withContext
 internal sealed interface LogEventViewScreenState {
     val type: Type
 
-    data class Previewing(val content: UserContent): LogEventViewScreenState {
+    data class Preview(val content: UserContent): LogEventViewScreenState {
         override val type: Type = Type.PREVIEW
     }
-    data class Editing(val content: String): LogEventViewScreenState {
+    data class Edit(val content: String): LogEventViewScreenState {
         override val type: Type = Type.EDIT
     }
 
@@ -24,8 +24,8 @@ internal sealed interface LogEventViewScreenState {
 
 internal fun LogEventViewScreenState.getNextType(): LogEventViewScreenState.Type =
     when (this) {
-        is LogEventViewScreenState.Editing -> LogEventViewScreenState.Type.PREVIEW
-        is LogEventViewScreenState.Previewing -> LogEventViewScreenState.Type.EDIT
+        is LogEventViewScreenState.Edit -> LogEventViewScreenState.Type.PREVIEW
+        is LogEventViewScreenState.Preview -> LogEventViewScreenState.Type.EDIT
     }
 
 internal suspend fun LogEventViewScreenState.getNext(
@@ -33,12 +33,12 @@ internal suspend fun LogEventViewScreenState.getNext(
     converter: LogFileConverter
 ): LogEventViewScreenState = withContext(Dispatchers.Default) {
     when (this@getNext) {
-        is LogEventViewScreenState.Editing ->
-            LogEventViewScreenState.Previewing(
+        is LogEventViewScreenState.Edit ->
+            LogEventViewScreenState.Preview(
                 converter.parseUserContent(content)
             )
-        is LogEventViewScreenState.Previewing ->
-            LogEventViewScreenState.Editing(
+        is LogEventViewScreenState.Preview ->
+            LogEventViewScreenState.Edit(
                 converter.generateUserContent(content, eventReference.date)
             )
     }

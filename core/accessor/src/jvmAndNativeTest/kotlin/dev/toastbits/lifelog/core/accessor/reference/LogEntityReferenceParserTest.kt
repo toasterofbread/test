@@ -4,12 +4,15 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNull
 import dev.toastbits.lifelog.core.accessor.DatabaseFileStructureProvider
-import dev.toastbits.lifelog.core.accessor.LogFileSplitStrategy
 import dev.toastbits.lifelog.core.accessor.impl.DatabaseFileStructureProviderImpl
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverterStrings
 import dev.toastbits.lifelog.core.specification.converter.alert.LogParseAlert
 import dev.toastbits.lifelog.core.specification.converter.alert.SpecificationLogParseAlert
+import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguration
+import dev.toastbits.lifelog.core.specification.database.LogFileSplitStrategy
+import dev.toastbits.lifelog.core.specification.extension.ExtensionRegistry
 import dev.toastbits.lifelog.core.specification.impl.converter.LogFileConverterStringsImpl
+import dev.toastbits.lifelog.core.specification.impl.extension.ExtensionRegistryImpl
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityPath
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReference
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceParser
@@ -26,10 +29,16 @@ class LogEntityReferenceParserTest {
     @BeforeTest
     fun setUp() {
         fileStructureProvider = DatabaseFileStructureProviderImpl(
-            strings,
-            LogFileSplitStrategy.Month
+            object : LogDatabaseConfiguration {
+                override val extensionRegistry: ExtensionRegistry =
+                    ExtensionRegistryImpl(listOf(TestExtension))
+                override val splitStrategy: LogFileSplitStrategy =
+                    LogFileSplitStrategy.Month
+                override val strings: LogFileConverterStrings =
+                    this@LogEntityReferenceParserTest.strings
+
+            }
         )
-        fileStructureProvider.registerExtension(TestExtension)
         referenceParser = fileStructureProvider
     }
 

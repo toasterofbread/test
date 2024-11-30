@@ -27,14 +27,9 @@ import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
 import dev.toastbits.lifelog.application.dbsource.data.ui.component.DatabaseSourceConfigurationPreview
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step.LoadStep
-import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step.LoadStepCheckIfUpToDate
-import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step.LoadStepLoadOnline
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
-import dev.toastbits.lifelog.application.dbsource.domain.accessor.OfflineDatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
-import dev.toastbits.lifelog.application.dbsource.domain.model.LogDatabaseParseResult
-import dev.toastbits.lifelog.core.specification.converter.alert.LogConvertAlert
-import dev.toastbits.lifelog.core.specification.database.LogDatabase
+import dev.toastbits.lifelog.core.specification.converter.LogFileConverter
 import lifelog.application.dbsource.data.generated.resources.Res
 import lifelog.application.dbsource.data.generated.resources.button_database_loader_cancel
 import lifelog.application.dbsource.data.generated.resources.button_database_loader_proceed
@@ -46,33 +41,30 @@ import kotlin.time.TimeMark
 import kotlin.time.TimeSource
 
 @Composable
-internal fun DatabaseSourceLoader(
+internal fun <R> DatabaseSourceLoader(
     sourceConfiguration: DatabaseSourceConfiguration,
     databaseAccessor: DatabaseAccessor,
+    initialStep: LoadStep<R>,
+    getAlerts: (R) -> List<LogFileConverter.AlertOnLine<*>>,
     modifier: Modifier = Modifier,
-    onProceeded: (LogDatabase) -> Unit,
-    autoProceed: Boolean = false
+    onProceeded: (R) -> Unit,
+    autoProceed: Boolean = false,
+    canProceedWith: (R) -> Boolean = { true },
 ) {
     val navigator: Navigator = LocalNavigator.current
     val theme: ThemeValues = LocalComposeKitTheme.current
 
     var loadException: Throwable? by remember { mutableStateOf(null) }
-    var currentStep: LoadStep =
-        remember(databaseAccessor) {
-            if (databaseAccessor is OfflineDatabaseAccessor) LoadStepCheckIfUpToDate(
-                databaseAccessor
-            )
-            else LoadStepLoadOnline
-        }
+    var currentStep: LoadStep<R> by remember { mutableStateOf(initialStep) }
 
     val finishedStepsProgress: MutableList<DatabaseAccessor.LoadProgress> = remember { mutableStateListOf() }
     var currentProgress: DatabaseAccessor.LoadProgress? by remember { mutableStateOf(null) }
 
     val loadStartTime: TimeMark = remember { TimeSource.Monotonic.markNow() }
-    var loadResult: Pair<LogDatabaseParseResult, Duration>? by remember { mutableStateOf(null) }
+    var loadResult: Pair<R, Duration>? by remember { mutableStateOf(null) }
 
     LaunchedEffect(currentStep) {
-        val result: LoadStep.ExecuteResult =
+        val result: LoadStep.ExecuteResult<R> =
             currentStep.execute(databaseAccessor) { progress ->
                 if (progress.isError) {
                     finishedStepsProgress.add(progress)
@@ -92,12 +84,11 @@ internal fun DatabaseSourceLoader(
         }
 
         when (result) {
-            is LoadStep.ExecuteResult.DatabaseLoaded -> {
-                if (result.parseResult.alerts.isEmpty() || (autoProceed && canProceedWith(result.parseResult))) {
-                    onProceeded(result.parseResult.database)
-                }
-                else {
-                    loadResult = result.parseResult to loadStartTime.elapsedNow()
+            is LoadStep.ExecuteResult.Done -> {
+                loadResult = result.result to loadStartTime.elapsedNow()
+
+                if (autoProceed && canProceedWith(result.result)) {
+                    onProceeded(result.result)
                 }
             }
             is LoadStep.ExecuteResult.ExceptionThrown -> {
@@ -113,7 +104,8 @@ internal fun DatabaseSourceLoader(
         DatabaseSourceConfigurationPreview(sourceConfiguration)
 
         DatabaseSourceLoadScreenProgressLog(
-            result = loadResult,
+            result = loadResult?.let { (result, duration) -> getAlerts(result) to duration },
+            databaseAccessor = databaseAccessor,
             finishedStepsProgress = finishedStepsProgress,
             currentProgress = currentProgress,
             loadException = loadException,
@@ -134,9 +126,10 @@ internal fun DatabaseSourceLoader(
                 return@Row
             }
 
-            val allowProceed: Boolean = remember(loadResult) {
-                loadResult?.first?.let { canProceedWith(it) } ?: false
-            }
+            val allowProceed: Boolean =
+                remember(loadResult) {
+                    loadResult?.first?.let { canProceedWith(it) } ?: false
+                }
 
             TooltipBox(
                 TooltipDefaults.rememberPlainTooltipPositionProvider(),
@@ -161,7 +154,7 @@ internal fun DatabaseSourceLoader(
                             return@Button
                         }
 
-                        loadResult?.first?.database?.also {
+                        loadResult?.first?.also {
                             onProceeded(it)
                         }
                     },
@@ -173,6 +166,3 @@ internal fun DatabaseSourceLoader(
         }
     }
 }
-
-private fun canProceedWith(result: LogDatabaseParseResult): Boolean =
-    result.alerts.none { it.alert.severity == LogConvertAlert.Severity.ERROR }

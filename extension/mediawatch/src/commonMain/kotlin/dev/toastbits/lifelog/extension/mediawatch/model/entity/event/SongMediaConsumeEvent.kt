@@ -1,11 +1,13 @@
 package dev.toastbits.lifelog.extension.mediawatch.model.entity.event
 
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverterStrings
+import dev.toastbits.lifelog.core.specification.model.UserContent
+import dev.toastbits.lifelog.core.specification.model.entity.LogEntity
+import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
+import dev.toastbits.lifelog.core.specification.util.StringId
+import dev.toastbits.lifelog.extension.mediawatch.MediaWatchExtensionStrings
 import dev.toastbits.lifelog.extension.mediawatch.model.reference.MediaReference
 import dev.toastbits.lifelog.extension.mediawatch.util.MediaEntityType
-import dev.toastbits.lifelog.core.specification.model.UserContent
-import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
-import dev.toastbits.lifelog.extension.mediawatch.MediaWatchExtensionStrings
 
 data class SongMediaConsumeEvent(
     override var mediaReference: MediaReference,
@@ -23,4 +25,19 @@ data class SongMediaConsumeEvent(
         strings: MediaWatchExtensionStrings,
         logStrings: LogFileConverterStrings
     ): String? = null
+
+    override fun copy(
+        content: UserContent?,
+        inlineComment: UserContent?,
+        aboveComment: UserContent?,
+        properties: Map<StringId, LogEntity.Property<*, *>>?
+    ): LogEvent =
+        copy(
+            mediaReference = mediaReference,
+            inlineComment = inlineComment,
+            aboveComment = aboveComment,
+            content = content,
+            iteration = iteration,
+            iterationsUnsure = iterationsUnsure
+        )
 }

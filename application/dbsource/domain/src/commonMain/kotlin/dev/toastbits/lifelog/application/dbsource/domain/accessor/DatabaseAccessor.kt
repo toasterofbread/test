@@ -1,11 +1,23 @@
 package dev.toastbits.lifelog.application.dbsource.domain.accessor
 
 import androidx.compose.runtime.Composable
+import dev.toastbits.kogit.memory.handler.GitCommitGenerator.UserInfo
 import dev.toastbits.lifelog.application.dbsource.domain.model.LogDatabaseParseResult
+import dev.toastbits.lifelog.core.specification.database.LogDatabase
+import okio.Path
 import org.jetbrains.compose.resources.StringResource
 
 interface DatabaseAccessor {
     suspend fun loadOnlineDatabase(onProgress: (LoadProgress) -> Unit): Result<LogDatabaseParseResult>
+    suspend fun saveOnlineDatabase(
+        database: LogDatabase,
+        message: String,
+        author: UserInfo,
+        committer: UserInfo,
+        onProgress: (LoadProgress) -> Unit
+    ): Result<Unit>
+
+    fun getFileLineUri(filePath: Path, lineIndex: UInt?): String?
 
     interface LoadProgress {
         val isError: Boolean get() = false

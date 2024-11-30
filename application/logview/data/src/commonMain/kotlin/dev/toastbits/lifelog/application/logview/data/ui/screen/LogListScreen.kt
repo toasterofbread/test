@@ -44,6 +44,7 @@ import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.mode
 import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventChanges
 import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventReference
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
+import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import lifelog.application.logview.data.generated.resources.Res
 import lifelog.application.logview.data.generated.resources.`log_view_screen_$x_changes_made_popup`
 import lifelog.application.logview.data.generated.resources.log_view_screen_button_review_changes
@@ -52,7 +53,8 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 class LogListScreen(
-    private val logDatabase: LogDatabase
+    private val logDatabase: LogDatabase,
+    private val logSaveScreenProvider: LogSaveScreenProvider
 ): ResponsiveTwoPaneScreen<LogEventScreen>(
     initialStartPaneRatioSource =
         InitialPaneRatioSource.Remembered(
@@ -66,6 +68,21 @@ class LogListScreen(
     private var showSearchBar: Boolean by mutableStateOf(false)
 
     private val eventChanges: MutableMap<LogEventReference, LogEventChanges> = mutableStateMapOf()
+
+    private fun applyChangesToDatabase(): LogDatabase? {
+        if (eventChanges.isEmpty()) {
+            return null
+        }
+
+        return logDatabase.copy(
+            days = logDatabase.days.toMutableMap().also { days ->
+                for ((ref, changes) in eventChanges) {
+                    val events: List<LogEvent> = days[ref.date]!!
+                    days[ref.date] = events.toMutableList().apply { set(ref.logIndex, changes.applyTo(get(ref.logIndex))) }
+                }
+            }
+        )
+    }
 
     @Composable
     override fun getCurrentData(): LogEventScreen? = viewingEventScreen
@@ -171,7 +188,19 @@ class LogListScreen(
                     }
 
                     IconButton({
-                        // TODO
+                        val database: LogDatabase =
+                            applyChangesToDatabase()
+                                ?: return@IconButton
+
+                        navigator.pushScreen(
+                            logSaveScreenProvider(
+                                database = database,
+                                autoProceed = false,
+                                onFinished = {
+                                    navigator.navigateBackward()
+                                }
+                            )
+                        )
                     }) {
                         Icon(Icons.Default.Save, stringResource(Res.string.log_view_screen_button_save))
                     }
