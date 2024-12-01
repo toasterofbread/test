@@ -1,14 +1,13 @@
 package dev.toastbits.lifelog.application.worker
 
-import dev.toastbits.lifelog.application.worker.model.TypedWorkerCommandResult
 import dev.toastbits.lifelog.application.worker.command.WorkerCommand
 import dev.toastbits.lifelog.application.worker.command.WorkerCommandCancelCurrent
 import dev.toastbits.lifelog.application.worker.command.WorkerCommandProgress
 import dev.toastbits.lifelog.application.worker.command.WorkerCommandResponse
+import dev.toastbits.lifelog.application.worker.model.TypedWorkerCommandResult
 import dev.toastbits.lifelog.application.worker.model.WorkerCommandResult
 import dev.toastbits.lifelog.application.worker.model.cast
 import dev.toastbits.lifelog.application.worker.model.toPotentialError
-import kotlinx.browser.window
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ChannelResult
@@ -23,6 +22,7 @@ import org.w3c.dom.Worker
 actual class WorkerClient {
     private val worker: Worker = createWorker()
     private val mutex: Mutex = Mutex()
+    private val workerEncoder: WorkerEncoder = WorkerEncoder()
     private val resultChannel: Channel<WorkerCommandResult> = Channel()
     private var pendingErrorEvents: MutableList<ErrorEvent> = mutableListOf()
 
@@ -74,7 +74,7 @@ actual class WorkerClient {
                         return Result.failure(RuntimeException(msg("Serialising command '$command' failed"), e))
                     }
 
-                worker.postMessage(serialisedCommand.toJsString())
+                workerEncoder.post(worker, serialisedCommand)
 
                 while (true) {
                     popPendingMessages().forEach(onProgress)
@@ -100,7 +100,7 @@ actual class WorkerClient {
         }
         catch (e: CancellationException) {
             log("Command cancelled, sending WorkerCommandCancelCurrent")
-            worker.postMessage(workerJson.encodeToString<WorkerCommand>(WorkerCommandCancelCurrent).toJsString())
+            workerEncoder.post(worker, workerJson.encodeToString<WorkerCommand>(WorkerCommandCancelCurrent))
             throw e
         }
     }
@@ -114,7 +114,7 @@ actual class WorkerClient {
 
         val response: WorkerCommandResult =
             try {
-                workerJson.decodeFromString(message.data.toString())
+                workerEncoder.decode(message)
             }
             catch (e: Throwable) {
                 RuntimeException(msg("Message '${message.data}' could not be deserialised"), e).printStackTrace()

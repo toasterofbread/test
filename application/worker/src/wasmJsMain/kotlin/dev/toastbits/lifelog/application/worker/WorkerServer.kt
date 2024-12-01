@@ -2,8 +2,8 @@ package dev.toastbits.lifelog.application.worker
 
 import dev.toastbits.lifelog.application.worker.command.WorkerCommand
 import dev.toastbits.lifelog.application.worker.command.WorkerCommandCancelCurrent
-import dev.toastbits.lifelog.application.worker.model.WorkerCommandResult
 import dev.toastbits.lifelog.application.worker.mapper.WorkerExecutionContext
+import dev.toastbits.lifelog.application.worker.model.WorkerCommandResult
 import dev.toastbits.lifelog.application.worker.model.toResult
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -22,6 +22,7 @@ internal class WorkerServer(private val context: WorkerExecutionContext) {
         CoroutineScope(SupervisorJob())
 
     private val mutex: Mutex = Mutex()
+    private val workerEncoder: WorkerEncoder = WorkerEncoder()
 
     private fun msg(message: String): String = "Worker (server): $message"
     private fun log(message: String) = println(msg(message))
@@ -29,10 +30,10 @@ internal class WorkerServer(private val context: WorkerExecutionContext) {
     fun handleMessage(message: MessageEvent) {
         val command: WorkerCommand =
             try {
-                workerJson.decodeFromString(message.data.toString())
+                workerEncoder.decode(message)
             }
             catch (e: Throwable) {
-                val exception: Throwable = RuntimeException(msg("Deserialising command from '${message.data}' failed"))
+                val exception: Throwable = RuntimeException(msg("Deserialising command from '${message.data}' failed"), e)
                 exception.printStackTrace()
                 exception.toResult().post()
                 return
@@ -93,7 +94,6 @@ internal class WorkerServer(private val context: WorkerExecutionContext) {
                 workerJson.encodeToString(RuntimeException(message, e).toResult())
             }
 
-        self.postMessage(serialisedResult.toJsString())
+        workerEncoder.post(self, serialisedResult)
     }
 }
-
