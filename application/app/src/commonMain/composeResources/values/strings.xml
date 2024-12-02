@@ -1,5 +1,10 @@
 <resources>
     <string name="app_name">LifeLog</string>
+    <string name="author_name">toasterofbread</string>
+    <string name="author_url">https://toastbits.dev</string>
+    <string name="app_footer_author_prefix">Built with 愛 by </string>
+    <string name="app_footer_author_suffix">.</string>
+    <string name="app_footer_body">This project is in early development and is largely non-functional.</string>
 
     <string name="button_open_settings">Open settings</string>
 </resources>

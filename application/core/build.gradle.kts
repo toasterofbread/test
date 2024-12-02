@@ -17,6 +17,7 @@ kotlin {
                 implementation(libs.composekit.util)
                 implementation(libs.composekit.navigation)
                 implementation(libs.composekit.components)
+                implementation(libs.composekit.theme)
             }
         }
     }

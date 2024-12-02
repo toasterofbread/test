@@ -22,7 +22,7 @@ import lifelog.application.app.generated.resources.button_open_settings
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-internal fun PersistentTopBar(modifier: Modifier) {
+internal fun PersistentTopBar(modifier: Modifier = Modifier) {
     val navigator: Navigator = LocalNavigator.current
     val settings: AppSettings = LocalSettings.current
 

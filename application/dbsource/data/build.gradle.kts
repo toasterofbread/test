@@ -1,5 +1,4 @@
 import util.configureAllComposeTargets
-import util.configureAllKmpTargets
 
 plugins {
     id("android-library-conventions")
@@ -14,6 +13,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(projects.application.dbsource.domain)
+                implementation(projects.application.core)
                 implementation(projects.application.settings.domain)
                 implementation(projects.application.settings.data)
                 implementation(projects.application.logview.data)

@@ -1,6 +1,5 @@
 package dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,21 +19,12 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import dev.toastbits.composekit.components.LocalContext
 import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyColumn
 import dev.toastbits.composekit.components.utils.composable.wave.WaveLineArea
-import dev.toastbits.composekit.context.PlatformContext
 import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
-import dev.toastbits.composekit.theme.vibrantAccent
+import dev.toastbits.lifelog.application.core.ui.LinkText
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverter
 import dev.toastbits.lifelog.core.specification.converter.alert.LogConvertAlert
@@ -127,7 +117,6 @@ private fun AlertLine(
     alert: LogFileConverter.AlertOnLine<*>,
     databaseAccessor: DatabaseAccessor
 ) {
-    val context: PlatformContext = LocalContext.current
     val theme: ThemeValues = LocalComposeKitTheme.current
 
     CompositionLocalProvider(
@@ -147,30 +136,10 @@ private fun AlertLine(
                 } + " at "
             )
 
-            val buttonDatabaseLoaderGoToFile: String =
-                stringResource(Res.string.button_database_loader_go_to_file)
-            val url: String? =
-                remember(alert) {
-                    alert.getUri(databaseAccessor)?.takeIf { context.canOpenUrl() }
-                }
-
-            Text(
-                alert.filePath.toString() + alert.lineIndex?.let { ":$it" }.orEmpty(),
-                color =
-                    if (url != null) theme.vibrantAccent
-                    else Color.Unspecified,
-                modifier =
-                    if (url != null)
-                        Modifier
-                            .clickable {
-                                context.openUrl(url)
-                            }
-                            .semantics {
-                                contentDescription = buttonDatabaseLoaderGoToFile
-                                role = Role.Button
-                            }
-                            .pointerHoverIcon(PointerIcon.Hand, true)
-                    else Modifier
+            LinkText(
+                text = alert.filePath.toString() + alert.lineIndex?.let { ":$it" }.orEmpty(),
+                url = remember(alert) { alert.getUri(databaseAccessor) },
+                linkContentDescription = stringResource(Res.string.button_database_loader_go_to_file)
             )
 
             Text(" | $alert")

@@ -36,6 +36,7 @@ import dev.toastbits.composekit.theme.model.ThemeValuesData
 import dev.toastbits.composekit.util.copy
 import dev.toastbits.composekit.util.plus
 import dev.toastbits.composekit.util.thenIf
+import dev.toastbits.lifelog.application.app.ui.PersistentBottomBar
 import dev.toastbits.lifelog.application.app.ui.PersistentTopBar
 import dev.toastbits.lifelog.application.core.FullContentScreen
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourcelist.DatabaseSourceListScreen
@@ -156,6 +157,10 @@ class Application(
                             copy(top = 0.dp)
                         }
                     )
+
+                    if (!fullContentScreen) {
+                        PersistentBottomBar(Modifier.fillMaxWidth().padding(paddingValues.copy(top = 0.dp)))
+                    }
                 }
             }
         }
