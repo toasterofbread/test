@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.toastbits.composekit.components.platform.composable.BackHandler
 import dev.toastbits.composekit.components.utils.modifier.horizontal
 import dev.toastbits.composekit.util.copy
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.model.LogTimelineState
@@ -48,6 +49,10 @@ internal fun DefaultLogTimelineColumn(
     var currentDateIndex: Int? by remember { mutableStateOf(null) }
     var scrollTargetDateIndex: Int? by remember { mutableStateOf(null) }
     var shouldFocusSearchBar: Boolean by remember { mutableStateOf(false) }
+
+    BackHandler(showSearchBar) {
+        setShowSearchBar(false)
+    }
 
     Column(
         modifier,
