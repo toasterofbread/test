@@ -6,6 +6,7 @@ import dev.toastbits.kogit.memory.handler.GitCommitGenerator.UserInfo
 import dev.toastbits.kogit.memory.handler.stage.GitHandlerStage
 import dev.toastbits.kogit.memory.helper.GitHelper
 import dev.toastbits.kogit.memory.model.GitObject
+import dev.toastbits.kogit.memory.model.GitRef
 import dev.toastbits.kogit.memory.model.MutableGitObjectRegistry
 import dev.toastbits.kogit.memory.model.readObject
 import dev.toastbits.lifelog.application.worker.cache.LocalGitObjectCache
@@ -22,7 +23,7 @@ data class WorkerCommandInMemoryGitCommit(
     val author: UserInfo,
     val committer: UserInfo,
     val repositoryUrl: String,
-    val branchName: String,
+    val branch: GitRef.Branch,
     val gitCredentials: GitCredentials?,
     val fileStructure: SerialisableFileStructure
 ): WorkerCommand {
@@ -40,7 +41,8 @@ data class WorkerCommandInMemoryGitCommit(
         val gitHelper: GitHelper =
             GitHelper(
                 repositoryUrl = repositoryUrl,
-                branchName = branchName,
+                readRef = branch,
+                writeBranch = branch,
                 objectRegistry = cache,
                 httpClient = HttpClient(),
                 ioDispatcher = context.ioDispatcher,

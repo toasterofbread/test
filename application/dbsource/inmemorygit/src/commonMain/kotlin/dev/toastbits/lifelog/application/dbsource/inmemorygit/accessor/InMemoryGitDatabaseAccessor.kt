@@ -4,6 +4,7 @@ import dev.toastbits.kogit.core.filestructure.FileStructure
 import dev.toastbits.kogit.core.filestructure.toSerialisable
 import dev.toastbits.kogit.core.model.GitCredentials
 import dev.toastbits.kogit.memory.handler.GitCommitGenerator.UserInfo
+import dev.toastbits.kogit.memory.model.GitRef
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor.LoadProgress
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.create
@@ -38,7 +39,12 @@ class InMemoryGitDatabaseAccessor(
         val databaseConfiguration: LogDatabaseConfiguration = databaseConfigurationProvider()
         val gitCredentials: GitCredentials? = gitCredentialsProvider()
 
-        val command: WorkerCommandInMemoryGitClone = WorkerCommandInMemoryGitClone(configuration.repositoryUrl, configuration.branchName, gitCredentials)
+        val command: WorkerCommandInMemoryGitClone =
+            WorkerCommandInMemoryGitClone(
+                repositoryUrl = configuration.repositoryUrl,
+                branch = GitRef.Branch(configuration.branchName),
+                gitCredentials = gitCredentials
+            )
 
         val fileStructureResult: WorkerCommandInMemoryGitClone.Response =
             workerClient.executeCommand<WorkerCommandInMemoryGitClone.Response>(
@@ -74,18 +80,19 @@ class InMemoryGitDatabaseAccessor(
         val generator: LogDatabaseGenerateHelper = LogDatabaseGenerateHelper(databaseConfiguration)
         val fileStructure: FileStructure = generator.generateFileStructure(database, alerts::add)
 
-        val command: WorkerCommandInMemoryGitCommit = WorkerCommandInMemoryGitCommit(
-            database.gitCommitRef!!,
-            message,
-            author,
-            committer,
-            configuration.repositoryUrl,
-            configuration.branchName,
-            gitCredentials,
-            fileStructure.toSerialisable {
-                onProgress(LoadProgress.Type.GENERIC.create(it.toLong(), null, Res.string.accessor_progress_serialising_file_structure))
-            }
-        )
+        val command: WorkerCommandInMemoryGitCommit =
+            WorkerCommandInMemoryGitCommit(
+                headCommitRef = database.gitCommitRef!!,
+                message = message,
+                author = author,
+                committer = committer,
+                repositoryUrl = configuration.repositoryUrl,
+                branch = GitRef.Branch(configuration.branchName),
+                gitCredentials = gitCredentials,
+                fileStructure = fileStructure.toSerialisable {
+                    onProgress(LoadProgress.Type.GENERIC.create(it.toLong(), null, Res.string.accessor_progress_serialising_file_structure))
+                }
+            )
 
         workerClient.executeCommand<WorkerCommandInMemoryGitCommit.Response>(
             command,

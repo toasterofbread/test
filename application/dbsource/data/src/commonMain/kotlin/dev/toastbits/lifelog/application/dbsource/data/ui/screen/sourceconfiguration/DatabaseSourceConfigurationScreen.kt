@@ -4,9 +4,8 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -92,37 +91,46 @@ internal class DatabaseSourceConfigurationScreen<T: DatabaseSourceConfiguration>
                 }
             }
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
+            FlowRow(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                itemVerticalAlignment = Alignment.CenterVertically
             ) {
-                val switchContentDescription: String = stringResource(Res.string.button_database_source_auto_open_toggle)
-                Switch(
-                    autoOpen,
-                    { autoOpen = it },
-                    Modifier.semantics { contentDescription = switchContentDescription }
-                )
-
-                Text(stringResource(Res.string.button_database_source_auto_open))
-
-                Spacer(Modifier.fillMaxWidth().weight(1f))
-
-                Button(onCancelled) {
-                    Text(getCancelText())
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    itemVerticalAlignment = Alignment.CenterVertically
+                ) {
+                    val switchContentDescription: String = stringResource(Res.string.button_database_source_auto_open_toggle)
+                    Switch(
+                        autoOpen,
+                        { autoOpen = it },
+                        Modifier.semantics { contentDescription = switchContentDescription }
+                    )
+                    Text(stringResource(Res.string.button_database_source_auto_open))
                 }
 
-                Button(
-                    {
-                        if (saved || invalidReasonMessages.isNotEmpty()) {
-                            return@Button
-                        }
-                        saved = true
-
-                        onSaved(currentConfiguration, autoOpen)
-                    },
-                    enabled = invalidReasonMessages.isEmpty()
+                FlowRow(
+                    Modifier.fillMaxWidth().weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End),
+                    itemVerticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(getSaveText())
+                    Button(onCancelled) {
+                        Text(getCancelText())
+                    }
+
+                    Button(
+                        {
+                            if (saved || invalidReasonMessages.isNotEmpty()) {
+                                return@Button
+                            }
+                            saved = true
+
+                            onSaved(currentConfiguration, autoOpen)
+                        },
+                        enabled = invalidReasonMessages.isEmpty()
+                    ) {
+                        Text(getSaveText())
+                    }
                 }
             }
         }

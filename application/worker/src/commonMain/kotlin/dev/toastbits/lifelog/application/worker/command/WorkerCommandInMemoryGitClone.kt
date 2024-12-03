@@ -6,6 +6,7 @@ import dev.toastbits.kogit.core.model.GitCredentials
 import dev.toastbits.kogit.memory.handler.stage.GitHandlerStage
 import dev.toastbits.kogit.memory.helper.GitHelper
 import dev.toastbits.kogit.memory.model.GitObject
+import dev.toastbits.kogit.memory.model.GitRef
 import dev.toastbits.lifelog.application.worker.cache.LocalGitObjectCache
 import dev.toastbits.lifelog.application.worker.mapper.WorkerExecutionContext
 import dev.toastbits.lifelog.application.worker.mapper.toTransferable
@@ -19,7 +20,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class WorkerCommandInMemoryGitClone(
     val repositoryUrl: String,
-    val branchName: String,
+    val branch: GitRef.Branch,
     val gitCredentials: GitCredentials?
 ): WorkerCommand {
     override suspend fun execute(
@@ -36,7 +37,8 @@ data class WorkerCommandInMemoryGitClone(
         val httpClient: HttpClient = HttpClient()
         val gitHelper: GitHelper = GitHelper(
             repositoryUrl = repositoryUrl,
-            branchName = branchName,
+            readRef = branch,
+            writeBranch = branch,
             objectRegistry = cache,
             httpClient = httpClient,
             ioDispatcher = context.ioDispatcher,
@@ -49,7 +51,7 @@ data class WorkerCommandInMemoryGitClone(
                 onProgress(Progress(stage, part, total))
             }.fold(
                 onSuccess = { it },
-                onFailure = { return RuntimeException("Cloning $repositoryUrl:$branchName with $gitCredentials failed", it).toResult() }
+                onFailure = { return RuntimeException("Cloning $repositoryUrl:$branch with $gitCredentials failed", it).toResult() }
             )
 
         val toCommit: Int = cache.countObjectsToCommit()
@@ -68,7 +70,7 @@ data class WorkerCommandInMemoryGitClone(
                 }
             }
             catch (e: Throwable) {
-                return RuntimeException("Serialising file structure from $repositoryUrl:$branchName with $gitCredentials failed", e).toResult()
+                return RuntimeException("Serialising file structure from $repositoryUrl:$branch with $gitCredentials failed", e).toResult()
             }
 
         return WorkerCommandResult.Success(Response(headCommit.hash, transferableFileStructure))

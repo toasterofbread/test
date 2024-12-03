@@ -20,6 +20,12 @@ import kotlinx.serialization.json.Json
 import lifelog.application.dbsource.inmemorygit.generated.resources.Res
 import lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_git_description
 import lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_git_name
+import lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_option_branch_description
+import lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_option_branch_title
+import lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_option_name_description
+import lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_option_name_title
+import lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_option_repository_url_description
+import lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_option_repository_url_title
 import org.jetbrains.compose.resources.stringResource
 
 object InMemoryGitDatabaseSourceType: DatabaseSourceType<InMemoryGitDatabaseSourceConfiguration> {
@@ -66,20 +72,20 @@ object InMemoryGitDatabaseSourceType: DatabaseSourceType<InMemoryGitDatabaseSour
             MutableStateTextFieldSettingsItem(
                 value = configuration.name,
                 onSet = { onChange(configuration.copy(name = it)) },
-                getPropertyName = { "name" },
-                getPropertyDescription = { null }
+                getPropertyName = { stringResource(Res.string.source_type_in_memory_option_name_title) },
+                getPropertyDescription = { stringResource(Res.string.source_type_in_memory_option_name_description) }
             ),
             MutableStateTextFieldSettingsItem(
                 value = configuration.repositoryUrl,
                 onSet = { onChange(configuration.copy(repositoryUrl = it)) },
-                getPropertyName = { "repositoryUrl" },
-                getPropertyDescription = { null }
+                getPropertyName = { stringResource(Res.string.source_type_in_memory_option_repository_url_title) },
+                getPropertyDescription = { stringResource(Res.string.source_type_in_memory_option_repository_url_description) }
             ),
             MutableStateTextFieldSettingsItem(
                 value = configuration.branchName,
                 onSet = { onChange(configuration.copy(branchName = it)) },
-                getPropertyName = { "branchName" },
-                getPropertyDescription = { null }
+                getPropertyName = { stringResource(Res.string.source_type_in_memory_option_branch_title) },
+                getPropertyDescription = { stringResource(Res.string.source_type_in_memory_option_branch_description) }
             )
         )
     }
