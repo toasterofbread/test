@@ -149,7 +149,15 @@ class MediaWatchExtensionStringsImpl(
 
         var upTo: Boolean = false
         var unsure: Boolean = false
+        var from: Boolean = false
         var text: String = text
+
+        for (prefix in mediaDurationRangeFromPrefixes) {
+            if (text.startsWith(prefix)) {
+                from = true
+                text = text.drop(prefix.length).trimStart()
+            }
+        }
 
         for (prefix in unsurePrefixes) {
             if (text.startsWith(prefix)) {
@@ -186,25 +194,49 @@ class MediaWatchExtensionStringsImpl(
             rhs = text.substring(splitterIndex + splitter.length)
         }
 
-        val start: BookMediaConsumeEvent.ReadPoint? = parseBookReadPointString(lhs, onAlert)
-        val end: BookMediaConsumeEvent.ReadPoint? = rhs?.let { parseBookReadPointString(it, onAlert) }
+        val start: BookMediaConsumeEvent.ReadPoint? = parseBookReadPointString(lhs, null, onAlert)
+        val end: BookMediaConsumeEvent.ReadPoint? = rhs?.let { parseBookReadPointString(it, start, onAlert) }
 
-        if (upTo) {
-            if (end != null) {
-                return null
-            }
-
+        if (upTo && end == null) {
             return BookMediaConsumeEvent.ReadRange(start = null, end = start, unsure = unsure)
+        }
+        else if (from && end == null) {
+            return BookMediaConsumeEvent.ReadRange(start = start, end = null, unsure = unsure)
         }
 
         return BookMediaConsumeEvent.ReadRange(start = start, end = end, unsure = unsure)
     }
 
-    private fun parseBookReadPointString(_text: String, onAlert: (LogParseAlert) -> Unit): BookMediaConsumeEvent.ReadPoint? {
+    private fun parseBookReadPointString(
+        _text: String,
+        previousPoint: BookMediaConsumeEvent.ReadPoint?,
+        onAlert: (LogParseAlert) -> Unit
+    ): BookMediaConsumeEvent.ReadPoint? {
+        if (mediaRangeStart.contains(_text)) {
+            return BookMediaConsumeEvent.ReadPoint.Start
+        }
+        if (mediaRangeEnd.contains(_text)) {
+            return BookMediaConsumeEvent.ReadPoint.End
+        }
+
         var text: String = _text
 
         var volume: UInt? = null
         var subpoint: BookMediaConsumeEvent.ReadPoint.Position.Subpoint? = null
+
+        if (previousPoint is BookMediaConsumeEvent.ReadPoint.Position) {
+            val value: Pair<UInt?, String>? = text.trimStart().extractBookValue()
+            if (value != null) {
+                if (previousPoint.volume != null && previousPoint.subpoint == null) {
+                    volume = value.first
+                    text = value.second
+                }
+                else if (previousPoint.volume == null && previousPoint.subpoint != null) {
+                    subpoint = value.first?.let { BookMediaConsumeEvent.ReadPoint.Position.Subpoint.Chapter(it) }
+                    text = value.second
+                }
+            }
+        }
 
         for (prefix in bookReadVolumePrefixes) {
             if (text.startsWith(prefix)) {

@@ -20,8 +20,8 @@ import org.jetbrains.compose.resources.StringResource
 internal fun GitHandlerStage.toLoadProgress(part: Long?, total: Long?): LoadProgress {
     val type: LoadProgress.Type =
         when (this) {
-            GitHandlerStage.Clone.RETRIEVE_REF -> LoadProgress.Type.NETWORK
             GitHandlerStage.Clone.PULL -> LoadProgress.Type.NETWORK
+            GitHandlerStage.ResolveRef -> LoadProgress.Type.NETWORK
             GitHandlerStage.PackFileParse.PREPARE_PACK -> LoadProgress.Type.GENERIC
             GitHandlerStage.PackFileParse.READ_HEADER -> LoadProgress.Type.GENERIC
             GitHandlerStage.PackFileParse.PARSE_OBJECTS -> LoadProgress.Type.GENERIC
@@ -35,8 +35,8 @@ internal fun GitHandlerStage.toLoadProgress(part: Long?, total: Long?): LoadProg
 
     val messageResource: StringResource =
         when (this) {
-            GitHandlerStage.Clone.RETRIEVE_REF -> Res.string.accessor_progress_clone_retrieving_ref
             GitHandlerStage.Clone.PULL -> Res.string.accessor_progress_clone_pulling
+            GitHandlerStage.ResolveRef -> Res.string.accessor_progress_clone_retrieving_ref
             GitHandlerStage.PackFileParse.PREPARE_PACK -> Res.string.accessor_progress_pack_file_parse_preparing_pack_file
             GitHandlerStage.PackFileParse.READ_HEADER -> Res.string.accessor_progress_pack_file_parse_reading_header
             GitHandlerStage.PackFileParse.PARSE_OBJECTS -> Res.string.accessor_progress_pack_file_parse_parsing_objects

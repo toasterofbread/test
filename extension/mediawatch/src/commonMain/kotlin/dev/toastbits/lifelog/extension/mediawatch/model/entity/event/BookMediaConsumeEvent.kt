@@ -28,10 +28,7 @@ data class BookMediaConsumeEvent(
     ): String? = buildString {
         val range: ReadRange = readRange ?: return null
         return buildString {
-            if (range.unsure) {
-                append(strings.unsurePrefixes.first())
-            }
-            append(strings.readRangeToText(range.start, range.end))
+            append(strings.readRangeToText(range.start, range.end, range.unsure))
         }
     }
 
@@ -102,12 +99,20 @@ data class BookMediaConsumeEvent(
             ReadPoint.End -> mediaRangeEnd.first()
         }
 
-    private fun MediaWatchExtensionStrings.readRangeToText(start: ReadPoint?, end: ReadPoint?): String? = buildString {
+    private fun MediaWatchExtensionStrings.readRangeToText(
+        start: ReadPoint?,
+        end: ReadPoint?,
+        unsure: Boolean
+    ): String? = buildString {
         if (end == ReadPoint.Position(volume = null, subpoint = ReadPoint.Position.Subpoint.Page(1U)) && start == null) {
             return mediaRangeFirstPrefixes.first() + bookReadPagePrefixes.first().trimEnd()
         }
 
         if (start != null && end != null) {
+            if (unsure) {
+                append(unsurePrefixes.first())
+            }
+
             val sharedPrefix: Boolean = start.canUseSharedPrefix(end)
             if (sharedPrefix) {
                 append(this@readRangeToText.bookReadPagePrefixes.first())
@@ -119,10 +124,16 @@ data class BookMediaConsumeEvent(
         }
         else if (start != null) {
             append(mediaDurationRangeFromPrefixes.first())
+            if (unsure) {
+                append(unsurePrefixes.first())
+            }
             append(readPointToText(start))
         }
         else if (end != null) {
             append(mediaDurationRangeToPrefixes.first())
+            if (unsure) {
+                append(unsurePrefixes.first())
+            }
             append(readPointToText(end))
         }
         else {

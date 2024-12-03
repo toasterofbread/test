@@ -8,8 +8,8 @@ import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccess
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor.LoadProgress.Type.NETWORK
 import lifelog.application.dbsource.domain.generated.resources.Res
 import lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_generic_$part`
-import lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_generic_$total`
 import lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_generic_$part_of_$total`
+import lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_generic_$total`
 import lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_network_$bytes`
 import lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_network_$bytes_of_$total_$percent`
 import org.jetbrains.compose.resources.StringResource
@@ -62,5 +62,9 @@ private fun LoadProgress.Type.getProgressMessage(part: Long, total: Long): Strin
             stringResource(Res.string.`database_accessor_load_progress_network_$bytes_of_$total_$percent`)
                 .replace("\$bytes", part.toString())
                 .replace("\$total", total.toString())
-                .replace("\$percent", ((part.toFloat() / total) * 100).roundTo(2).toString())
+                .replace(
+                    "\$percent",
+                    if (total <= 0) "0"
+                    else ((part.toFloat() / total) * 100).roundTo(2).toString()
+                )
     }
