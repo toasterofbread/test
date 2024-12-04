@@ -36,6 +36,7 @@ import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.Screen
 import dev.toastbits.composekit.util.launchSingle
 import dev.toastbits.composekit.util.plus
+import dev.toastbits.lifelog.application.core.model.LogEventData
 import dev.toastbits.lifelog.application.logview.data.ui.component.event.LogEventMetadata
 import dev.toastbits.lifelog.application.logview.data.ui.component.event.LogEventUserContent
 import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventChanges
@@ -115,7 +116,7 @@ class LogEventScreen(
         val scrollBarThickness: Dp = 8.dp
         val density: Density = LocalDensity.current
 
-        val event: LogEvent = remember(eventReference) { logDatabase[eventReference] }
+        val event: LogEventData = remember(eventReference) { logDatabase[eventReference] }
         var bottomContentHeight: Dp by remember { mutableStateOf(0.dp) }
 
         BackHandler((loadingNextStateType ?: state.type) == LogEventViewScreenState.Type.EDIT) {

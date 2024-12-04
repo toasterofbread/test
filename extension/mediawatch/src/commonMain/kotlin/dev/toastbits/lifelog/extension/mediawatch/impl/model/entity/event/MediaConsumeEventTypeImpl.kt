@@ -10,21 +10,22 @@ import dev.toastbits.lifelog.core.specification.model.entity.event.LogEventType
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReference
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceGenerator
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceParser
+import dev.toastbits.lifelog.core.specification.model.string.StringId
 import dev.toastbits.lifelog.extension.mediawatch.MediaWatchExtensionStrings
 import dev.toastbits.lifelog.extension.mediawatch.alert.MediaWatchLogParseAlert
 import dev.toastbits.lifelog.extension.mediawatch.impl.model.mapper.createConsumeEvent
 import dev.toastbits.lifelog.extension.mediawatch.impl.model.mapper.createReference
+import dev.toastbits.lifelog.extension.mediawatch.localisation.MediaStringId
 import dev.toastbits.lifelog.extension.mediawatch.model.entity.event.MediaConsumeEvent
 import dev.toastbits.lifelog.extension.mediawatch.model.entity.event.MediaConsumeEventType
 import dev.toastbits.lifelog.extension.mediawatch.model.reference.MediaReference
 import dev.toastbits.lifelog.extension.mediawatch.util.MediaEntityType
-import dev.toastbits.lifelog.extension.mediawatch.util.MediaStringId
 import kotlin.reflect.KClass
 
 class MediaConsumeEventTypeImpl(
     private val strings: MediaWatchExtensionStrings
 ): MediaConsumeEventType {
-    override val name: MediaStringId = MediaStringId.MediaExtension.NAME
+    override val name: StringId = MediaStringId.MediaExtension.NAME
     override val eventClass: KClass<*> = MediaConsumeEvent::class
 
     override val prefixes: List<String> =
@@ -65,7 +66,7 @@ class MediaConsumeEventTypeImpl(
         val entityType: MediaEntityType = getPrefixIndexMediaEntityType(prefixIndex)
         val mediaReference: MediaReference = entityType.createReference(mediaId, this.strings.extensionId, this.strings.mediaReferenceTypeId)
 
-        val event: MediaConsumeEvent = entityType.createConsumeEvent(mediaReference)
+        val event: MediaConsumeEvent = entityType.createConsumeEvent(mediaReference, this.strings.extensionId)
         event.content = content
 
         if (metadata != null) {

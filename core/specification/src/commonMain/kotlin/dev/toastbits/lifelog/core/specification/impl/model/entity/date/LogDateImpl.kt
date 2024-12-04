@@ -3,7 +3,7 @@ package dev.toastbits.lifelog.core.specification.impl.model.entity.date
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import dev.toastbits.lifelog.core.specification.model.entity.LogEntity
 import dev.toastbits.lifelog.core.specification.model.entity.date.LogDate
-import dev.toastbits.lifelog.core.specification.util.StringId
+import dev.toastbits.lifelog.core.specification.model.string.StringId
 import kotlinx.datetime.LocalDate
 
 data class LogDateImpl(

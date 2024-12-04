@@ -4,15 +4,16 @@ import dev.toastbits.lifelog.core.specification.converter.LogFileConverterString
 import dev.toastbits.lifelog.core.specification.converter.alert.LogGenerateAlert
 import dev.toastbits.lifelog.core.specification.converter.alert.LogParseAlert
 import dev.toastbits.lifelog.core.specification.impl.converter.usercontent.UserContentParser
+import dev.toastbits.lifelog.core.specification.localisation.LogStringId
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceGenerator
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceParser
-import dev.toastbits.lifelog.core.specification.util.LogStringId
-import dev.toastbits.lifelog.core.specification.util.StringId
+import dev.toastbits.lifelog.core.specification.model.string.StringId
 import kotlin.reflect.KClass
 
 object LogCommentEventType: LogEventType {
-    override val name: StringId = LogStringId.EventType.COMMENT
+    override val name: StringId = LogStringId.LogCommentEvent
+
     override val prefixes: List<String> = emptyList()
     override val eventClass: KClass<*> = LogCommentEvent::class
 

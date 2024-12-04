@@ -51,8 +51,8 @@ import dev.toastbits.lifelog.application.settings.domain.model.SerialisedDatabas
 import dev.toastbits.lifelog.application.settings.domain.model.deserialiseConfiguration
 import dev.toastbits.lifelog.application.worker.WorkerClient
 import dev.toastbits.lifelog.application.worker.compositionlocal.LocalWorkerClient
-import dev.toastbits.lifelog.extension.media.GDocsExtension
-import dev.toastbits.lifelog.extension.media.MediaExtension
+import dev.toastbits.lifelog.extension.gdocs.GDocsExtension
+import dev.toastbits.lifelog.extension.gdocs.MediaExtension
 import dev.toastbits.lifelog.extension.mediawatch.MediaWatchExtension
 
 class Application(

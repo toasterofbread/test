@@ -25,7 +25,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
-import dev.toastbits.composekit.util.rememberAsLocalisedValue
+import dev.toastbits.composekit.util.locale.rememberLocalisedValue
 import dev.toastbits.composekit.util.thenIf
 import dev.toastbits.lifelog.application.logview.data.ui.mapper.toImageVector
 import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventReference
@@ -38,7 +38,7 @@ import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 
 @Composable
 fun (suspend (String) -> LogDisplayText).rememberAsLogDisplayText(getDefault: () -> String = { "" }): State<LogDisplayText> =
-    this.rememberAsLocalisedValue { LogDisplayText.OfString(getDefault()) }
+    rememberLocalisedValue(this) { LogDisplayText.OfString(getDefault()) }
 
 @Composable
 fun LogDisplayText.Display(
@@ -60,7 +60,7 @@ data class EventTimelineItem(
 
     @Composable
     override fun MainContent(modifier: Modifier) {
-        val title: LogDisplayText by event::getTitle.rememberAsLogDisplayText()
+        val title: LogDisplayText by event::getPreview.rememberAsLogDisplayText()
         title.Display(modifier)
     }
 

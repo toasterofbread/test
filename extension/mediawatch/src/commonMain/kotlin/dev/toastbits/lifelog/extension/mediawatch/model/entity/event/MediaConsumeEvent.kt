@@ -5,10 +5,11 @@ import dev.toastbits.lifelog.core.specification.model.entity.LogDisplayText
 import dev.toastbits.lifelog.core.specification.model.entity.LogEntity
 import dev.toastbits.lifelog.core.specification.model.entity.LogEntityCompanion
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
+import dev.toastbits.lifelog.core.specification.model.string.StringId
 import dev.toastbits.lifelog.extension.mediawatch.MediaWatchExtensionStrings
+import dev.toastbits.lifelog.extension.mediawatch.localisation.MediaStringId
 import dev.toastbits.lifelog.extension.mediawatch.model.reference.MediaReference
 import dev.toastbits.lifelog.extension.mediawatch.util.MediaEntityType
-import dev.toastbits.lifelog.extension.mediawatch.util.MediaStringId
 
 sealed interface MediaConsumeEvent: LogEvent {
     var mediaReference: MediaReference
@@ -21,7 +22,13 @@ sealed interface MediaConsumeEvent: LogEvent {
         logStrings: LogFileConverterStrings
     ): String?
 
-    override suspend fun getTitle(locale: String): LogDisplayText =
+    override val typeName: StringId
+        get() = MediaStringId.MediaEntityType(mediaEntityType)
+
+    override val typeVerb: StringId
+        get() = MediaStringId.MediaEntityTypeVerb(mediaEntityType)
+
+    override suspend fun getPreview(locale: String): LogDisplayText =
         LogDisplayText.OfString(mediaReference.path.segments.lastOrNull().orEmpty())
 
     companion object: LogEntityCompanion<MediaConsumeEvent>(LogEvent) {

@@ -1,6 +1,6 @@
 package dev.toastbits.lifelog.core.specification.model.entity
 
-import dev.toastbits.lifelog.core.specification.util.StringId
+import dev.toastbits.lifelog.core.specification.model.string.StringId
 
 interface LogEntityProperty<T> {
     var value: T

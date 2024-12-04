@@ -1,11 +1,14 @@
 package dev.toastbits.lifelog.core.specification.model.entity
 
+import dev.toastbits.lifelog.core.specification.extension.ExtensionId
+import dev.toastbits.lifelog.core.specification.localisation.LogStringId
 import dev.toastbits.lifelog.core.specification.model.UserContent
-import dev.toastbits.lifelog.core.specification.util.LogStringId
-import dev.toastbits.lifelog.core.specification.util.StringId
+import dev.toastbits.lifelog.core.specification.model.string.StringId
 
 // An entity is anything that can be referenced in user content
 interface LogEntity {
+    val extensionId: ExtensionId?
+
     var inlineComment: UserContent?
     var aboveComment: UserContent?
 

@@ -12,6 +12,13 @@ interface SpecificationExtension {
     val extraEventTypes: List<LogEventType> get() = emptyList()
     val extraInLogReferenceTypes: List<LogEntityReferenceType.InLog> get() = emptyList()
     val extraInMetadataReferenceTypes: List<LogEntityReferenceType.InMetadata> get() = emptyList()
+
+    companion object {
+        val EMPTY: SpecificationExtension =
+            object : SpecificationExtension {
+                override val id: ExtensionId get() = throw IllegalStateException()
+            }
+    }
 }
 
 fun SpecificationExtension.validate() {

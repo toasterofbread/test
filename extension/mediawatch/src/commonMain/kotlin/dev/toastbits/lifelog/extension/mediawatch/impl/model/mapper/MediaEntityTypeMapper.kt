@@ -21,10 +21,10 @@ fun MediaEntityType.createReference(mediaId: String, extensionId: ExtensionId, r
         MediaEntityType.SONG -> SongMediaReference(mediaId, extensionId, referenceTypeId)
     }
 
-fun MediaEntityType.createConsumeEvent(mediaReference: MediaReference): MediaConsumeEvent =
+fun MediaEntityType.createConsumeEvent(mediaReference: MediaReference, extensionId: ExtensionId?): MediaConsumeEvent =
     when (this) {
-        MediaEntityType.MOVIE_OR_SHOW -> MovieOrShowMediaConsumeEvent(mediaReference)
-        MediaEntityType.BOOK -> BookMediaConsumeEvent(mediaReference)
-        MediaEntityType.GAME -> GameMediaConsumeEvent(mediaReference)
-        MediaEntityType.SONG -> SongMediaConsumeEvent(mediaReference)
+        MediaEntityType.MOVIE_OR_SHOW -> MovieOrShowMediaConsumeEvent(extensionId, mediaReference)
+        MediaEntityType.BOOK -> BookMediaConsumeEvent(extensionId, mediaReference)
+        MediaEntityType.GAME -> GameMediaConsumeEvent(extensionId, mediaReference)
+        MediaEntityType.SONG -> SongMediaConsumeEvent(extensionId, mediaReference)
     }

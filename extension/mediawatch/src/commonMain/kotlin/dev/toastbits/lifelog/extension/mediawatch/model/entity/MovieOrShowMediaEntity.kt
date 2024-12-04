@@ -1,8 +1,8 @@
 package dev.toastbits.lifelog.extension.mediawatch.model.entity
 
-import dev.toastbits.lifelog.extension.mediawatch.util.MediaStringId
 import dev.toastbits.lifelog.core.specification.model.entity.LogEntity
 import dev.toastbits.lifelog.core.specification.model.entity.LogEntityCompanion
+import dev.toastbits.lifelog.extension.mediawatch.localisation.MediaStringId
 import kotlin.time.Duration
 
 interface MovieOrShowMediaEntity: MediaEntity {

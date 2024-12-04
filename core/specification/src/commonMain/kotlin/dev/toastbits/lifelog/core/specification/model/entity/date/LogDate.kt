@@ -1,11 +1,14 @@
 package dev.toastbits.lifelog.core.specification.model.entity.date
 
+import dev.toastbits.lifelog.core.specification.extension.ExtensionId
+import dev.toastbits.lifelog.core.specification.localisation.LogStringId
 import dev.toastbits.lifelog.core.specification.model.entity.LogEntity
 import dev.toastbits.lifelog.core.specification.model.entity.LogEntityCompanion
-import dev.toastbits.lifelog.core.specification.util.LogStringId
 import kotlinx.datetime.LocalDate
 
 interface LogDate: LogEntity {
+    override val extensionId: ExtensionId? get() = null
+
     var date: LocalDate
     var ambiguous: Boolean
 

@@ -27,7 +27,7 @@ import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyColu
 import dev.toastbits.composekit.components.utils.composable.stickyHeaderContentPaddingAware
 import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
-import dev.toastbits.composekit.util.LocalLocale
+import dev.toastbits.composekit.util.locale.LocalLocale
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.item.DateTimelineItem
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.item.EventTimelineItem
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.item.TimelineItem
@@ -248,7 +248,8 @@ private suspend fun LogEvent.containsText(text: String, locale: String): Boolean
         }
     }
 
-    when (val title: LogDisplayText = getTitle(locale)) {
+    when (val title: LogDisplayText? = getTitle(locale)) {
+        null -> {}
         is LogDisplayText.OfString ->
             if (title.string.contains(text, ignoreCase = true)) {
                 return true

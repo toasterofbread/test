@@ -7,7 +7,7 @@ import dev.toastbits.lifelog.core.specification.impl.converter.usercontent.UserC
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceGenerator
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceParser
-import dev.toastbits.lifelog.core.specification.util.StringId
+import dev.toastbits.lifelog.core.specification.model.string.StringId
 import kotlin.reflect.KClass
 
 interface LogEventType {
