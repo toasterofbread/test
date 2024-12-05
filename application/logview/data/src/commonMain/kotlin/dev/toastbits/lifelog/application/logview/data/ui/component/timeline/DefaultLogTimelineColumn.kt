@@ -116,9 +116,14 @@ internal fun DefaultLogTimelineColumn(
             canScrollUp = timelineState.columnState.canScrollBackward,
             canScrollDown = timelineState.columnState.canScrollForward,
             searching = showSearchBar,
-            currentDateIndex = currentDateIndex,
-            setScrollTargetDateIndex = {
-                scrollTargetDateIndex = it
+            scrollDateBy = { by ->
+                val current: Int = currentDateIndex ?: return@LogTimelineNavigationBar
+                if (by == Int.MAX_VALUE || by == Int.MIN_VALUE) {
+                    scrollTargetDateIndex = by
+                }
+                else {
+                    scrollTargetDateIndex = current + by
+                }
             },
             showSearchBar = {
                 setShowSearchBar(true)

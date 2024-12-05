@@ -38,8 +38,7 @@ internal fun LogTimelineNavigationBar(
     canScrollUp: Boolean,
     canScrollDown: Boolean,
     searching: Boolean,
-    currentDateIndex: Int?,
-    setScrollTargetDateIndex: (Int) -> Unit,
+    scrollDateBy: (Int) -> Unit,
     showSearchBar: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -62,26 +61,16 @@ internal fun LogTimelineNavigationBar(
         }
 
         StyledButton(
-            onClick = {
-                val current: Int = currentDateIndex ?: return@StyledButton
-                setScrollTargetDateIndex(current - 1)
-            },
-            onAltClick = {
-                setScrollTargetDateIndex(Int.MIN_VALUE)
-            },
+            onClick = { scrollDateBy(-1) },
+            onAltClick = { scrollDateBy(Int.MIN_VALUE) },
             enabled = canScrollUp
         ) {
             Icon(Icons.Default.KeyboardArrowUp, null) // TODO
         }
 
         StyledButton(
-            onClick = {
-                val current: Int = currentDateIndex ?: return@StyledButton
-                setScrollTargetDateIndex(current + 1)
-            },
-            onAltClick = {
-                setScrollTargetDateIndex(Int.MAX_VALUE)
-            },
+            onClick = { scrollDateBy(1) },
+            onAltClick = { scrollDateBy(Int.MAX_VALUE) },
             enabled = canScrollDown
         ) {
             Icon(Icons.Default.KeyboardArrowDown, null) // TODO
