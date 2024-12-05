@@ -87,12 +87,12 @@ class LogEventChangesScreen(
                         onDiscardChanges,
                         Modifier
                             .align(Alignment.BottomStart)
-                            .padding(bottom = contentPadding.bottom)
                             .onSizeChanged {
                                 with (density) {
                                     discardButtonHeight = it.height.toDp()
                                 }
-                            },
+                            }
+                            .padding(bottom = contentPadding.bottom),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = theme.error,
                             contentColor = theme.error.getContrasted()
