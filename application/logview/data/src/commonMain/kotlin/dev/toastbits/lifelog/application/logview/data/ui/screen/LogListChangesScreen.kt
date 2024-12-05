@@ -41,7 +41,7 @@ class LogListChangesScreen(
     alwaysShowEndPane = true
 ), FullContentScreen {
     private var eventChanges: Map<LogEventReference, LogEventChanges> by mutableStateOf(eventChanges)
-    private var timelineState: LogTimelineState = LogTimelineState()
+    private var timelineState: LogTimelineState? = null
     private var viewingEventScreen: LogEventChangesScreen? by mutableStateOf(
         eventChanges.entries.firstOrNull()?.let { (eventReference, eventChanges) ->
             LogEventChangesScreen(
@@ -69,7 +69,7 @@ class LogListChangesScreen(
         val navigator: Navigator = LocalNavigator.current
         val currentTimelineState: LogTimelineState =
             remember {
-                LogTimelineState(timelineState).also { timelineState = it }
+                LogTimelineState(from = timelineState).also { timelineState = it }
             }
 
         Column(

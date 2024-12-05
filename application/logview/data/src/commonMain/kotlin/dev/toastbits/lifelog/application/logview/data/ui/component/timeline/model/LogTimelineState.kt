@@ -7,11 +7,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
 internal class LogTimelineState(
+    firstVisibleItemIndex: Int = 0,
     from: LogTimelineState? = null
 ) {
     val columnState: LazyListState =
         LazyListState(
-            from?.columnState?.firstVisibleItemIndex ?: 0,
+            from?.columnState?.firstVisibleItemIndex ?: firstVisibleItemIndex,
             from?.columnState?.firstVisibleItemScrollOffset ?: 0
         )
     var waveOffset: Float by mutableFloatStateOf(from?.waveOffset ?: 0f)

@@ -63,7 +63,7 @@ class LogListScreen(
         ),
     alwaysShowEndPane = true
 ), FullContentScreen {
-    private var timelineState: LogTimelineState = LogTimelineState()
+    private var timelineState: LogTimelineState? = null
     private var viewingEventScreen: LogEventScreen? by mutableStateOf(null)
     private var showSearchBar: Boolean by mutableStateOf(false)
 
@@ -91,7 +91,10 @@ class LogListScreen(
     override fun PrimaryPane(data: LogEventScreen?, contentPadding: PaddingValues, modifier: Modifier) {
         val currentTimelineState: LogTimelineState =
             remember {
-                LogTimelineState(timelineState).also { timelineState = it }
+                LogTimelineState(
+                    firstVisibleItemIndex = Int.MAX_VALUE,
+                    from = timelineState
+                ).also { timelineState = it }
             }
 
         DefaultLogTimelineColumn(
