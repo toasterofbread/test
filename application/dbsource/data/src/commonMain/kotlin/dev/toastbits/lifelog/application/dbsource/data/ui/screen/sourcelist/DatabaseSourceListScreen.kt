@@ -14,8 +14,8 @@ import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.Data
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.DatabaseSourceSaveScreen
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
-import dev.toastbits.lifelog.application.logview.data.ui.screen.LogListScreen
-import dev.toastbits.lifelog.application.logview.data.ui.screen.LogSaveScreenProvider
+import dev.toastbits.lifelog.application.logview.screen.LogListScreen
+import dev.toastbits.lifelog.application.logview.screen.LogSaveScreenProvider
 import dev.toastbits.lifelog.application.settings.data.compositionlocal.LocalSettings
 import dev.toastbits.lifelog.application.settings.domain.appsettings.AppSettings
 import dev.toastbits.lifelog.application.settings.domain.model.SerialisedDatabaseSourceConfiguration

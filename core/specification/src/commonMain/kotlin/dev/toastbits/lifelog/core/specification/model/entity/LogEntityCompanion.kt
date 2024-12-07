@@ -16,6 +16,7 @@ import kotlin.time.Duration
 abstract class LogEntityCompanion<T: LogEntity>(private vararg val parents: LogEntityCompanion<*>?) {
     protected abstract fun getProperties(): List<LogEntityProperty<T, *>>
 
+    @Suppress("UNCHECKED_CAST")
     private fun getChain(): List<LogEntityCompanion<T>> =
         listOf(this) + (parents.flatMap { it?.getChain().orEmpty() } as List<LogEntityCompanion<T>>)
 

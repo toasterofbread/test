@@ -16,7 +16,7 @@ kotlin {
                 implementation(projects.application.core)
                 implementation(projects.application.settings.domain)
                 implementation(projects.application.settings.data)
-                implementation(projects.application.logview.data)
+                implementation(projects.application.logview)
                 implementation(projects.core.specification)
 
                 implementation(libs.kogit.core)

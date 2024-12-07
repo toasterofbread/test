@@ -64,7 +64,7 @@ include(":application:settings:data")
 include(":application:dbsource:domain")
 include(":application:dbsource:data")
 include(":application:dbsource:inmemorygit")
-include(":application:logview:data")
+include(":application:logview")
 include(":application:usercontent")
 include(":application:cache")
 
