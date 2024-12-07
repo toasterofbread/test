@@ -4,8 +4,12 @@
         <item quantity="other">$x changes made</item>
     </plurals>
     <plurals name="log_view_screen_$x_content_changes_made">
-        <item quantity="one">$x content change made</item>
-        <item quantity="other">$x content changes made</item>
+        <item quantity="one">$x content change</item>
+        <item quantity="other">$x content changes</item>
+    </plurals>
+    <plurals name="log_view_screen_$x_property_changes_made">
+        <item quantity="one">$x property changed</item>
+        <item quantity="other">$x properties changed</item>
     </plurals>
     <string name="log_view_screen_button_review_changes">Review changes</string>
     <string name="log_view_screen_button_save">Save changes</string>

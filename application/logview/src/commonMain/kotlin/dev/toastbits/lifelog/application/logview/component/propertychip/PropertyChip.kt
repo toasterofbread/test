@@ -2,6 +2,7 @@ package dev.toastbits.lifelog.application.logview.component.propertychip
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
@@ -53,7 +54,8 @@ fun <T: LogEntity, V> LogEntityProperty<T, V>.PropertyChip(
                 theme.accent,
                 MaterialTheme.shapes.small
             )
-            .padding(horizontal = 10.dp),
+            .padding(horizontal = 10.dp)
+            .heightIn(min = 40.dp),
         contentAlignment = Alignment.Center
     ) {
         CompositionLocalProvider(

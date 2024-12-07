@@ -72,14 +72,16 @@ class LogEventChangesScreen(
                     eventChanges,
                     logDatabase,
                     Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        bottom =
-                            if (onDiscardChanges != null) discardButtonHeight
-                            else contentPadding.bottom
-                    ),
-                    scrollBarContentPadding = PaddingValues(
-                        bottom = contentPadding.bottom
-                    )
+                    contentPadding =
+                        PaddingValues(
+                            bottom =
+                                if (onDiscardChanges != null) discardButtonHeight
+                                else contentPadding.bottom
+                        ),
+                    scrollBarContentPadding =
+                        PaddingValues(
+                            bottom = contentPadding.bottom
+                        )
                 )
 
                 if (onDiscardChanges != null) {

@@ -4,16 +4,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import dev.toastbits.lifelog.application.logview.model.LogEntityChanges
 import dev.toastbits.lifelog.core.specification.model.entity.LogEntity
+import dev.toastbits.lifelog.core.specification.model.entity.property.LogEntityProperty
 
 interface LogEntityPropertiesScope<T: LogEntity> {
-    val propertyCount: Int
-
-    fun shouldPropertyShow(propertyIndex: Int): Boolean
+    val properties: List<LogEntityProperty<T, *>>
 
     @Composable
-    fun PropertyChip(
-        propertyIndex: Int,
-        onEdit: ((LogEntityChanges.Change<T, *>) -> Unit)?,
+    fun <V> PropertyChip(
+        property: LogEntityProperty<T, V>,
+        onEdit: ((LogEntityChanges.Change<T, V>) -> Unit)?,
         modifier: Modifier = Modifier
     )
 }

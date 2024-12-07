@@ -1,146 +1,226 @@
 package dev.toastbits.lifelog.application.logview.component
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyColumn
+import dev.toastbits.composekit.components.utils.composable.pane.ResizableSyncedSplitColumn
+import dev.toastbits.composekit.components.utils.composable.pane.model.InitialPaneRatioSource
 import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
 import dev.toastbits.composekit.theme.vibrantAccent
+import dev.toastbits.lifelog.application.logview.component.propertychip.PropertyChip
 import dev.toastbits.lifelog.application.logview.model.LogEntityChanges
 import dev.toastbits.lifelog.application.logview.model.LogEventReference
 import dev.toastbits.lifelog.core.specification.converter.generateUserContent
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
+import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguration
 import dev.toastbits.lifelog.core.specification.model.UserContent
+import dev.toastbits.lifelog.core.specification.model.entity.LogEntity
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import io.github.petertrr.diffutils.diff
-import io.github.petertrr.diffutils.patch.Patch
 import io.github.petertrr.diffutils.text.DiffRow
 import io.github.petertrr.diffutils.text.DiffRowGenerator
 import lifelog.application.logview.generated.resources.Res
 import lifelog.application.logview.generated.resources.`log_view_screen_$x_content_changes_made`
+import lifelog.application.logview.generated.resources.`log_view_screen_$x_property_changes_made`
+import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.pluralStringResource
 
 @Composable
-fun LogEventChangesDiff(
-    event: LogEvent,
+fun <T: LogEvent> LogEventChangesDiff(
+    event: T,
     eventReference: LogEventReference,
-    changes: LogEntityChanges<LogEvent>,
+    changes: LogEntityChanges<T>,
     logDatabase: LogDatabase,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
     scrollBarContentPadding: PaddingValues = contentPadding
 ) {
-    val contentChanges: Pair<Patch<String>, List<DiffRow>>? =
+    val stages: List<DiffStage<T>> =
         remember(event, changes) {
-            val newContent: UserContent =
-                changes.firstWithPropertyOrNull(LogEvent.PROPERTY_CONTENT)?.newValue
-                ?: return@remember null
-
-            val a: String = logDatabase.converter.generateUserContent(event.content ?: UserContent.EMPTY, eventReference.date)
-            val b: String = logDatabase.converter.generateUserContent(newContent, eventReference.date)
-
-            return@remember (
-                diff(a, b) to DiffRowGenerator(
-                    inlineDiffByWord = true
-                ).generateDiffRows(
-                    a.split('\n'),
-                    b.split('\n')
-                )
-            )
+            buildDiffStages(changes, logDatabase, event, eventReference)
         }
 
-    Column(modifier) {
-        if (contentChanges != null) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                val (patch: Patch<String>, diff: List<DiffRow>) = contentChanges
-                Text(
-                    pluralStringResource(Res.plurals.`log_view_screen_$x_content_changes_made`, patch.deltas.size)
-                        .replace("\$x", patch.deltas.size.toString()),
-                    style = MaterialTheme.typography.titleSmall
-                )
+    SelectionContainer(modifier) {
+        ResizableSyncedSplitColumn(
+            items = stages,
+            initialStartPaneRatioSource =
+                InitialPaneRatioSource.Remembered(
+                    "logview.component.LogEventChangesDiff",
+                    InitialPaneRatioSource.Ratio(0.5f)
+                ),
+            contentPadding = contentPadding,
+            scrollBarContentPadding = scrollBarContentPadding,
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            getItemContentAlignment = {
+                if (it is DiffStage.Heading<T>) Alignment.CenterStart
+                else Alignment.TopStart
+            }
+        ) { isStart: Boolean, stage: DiffStage<T> ->
+            when (stage) {
+                is DiffStage.Heading -> {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        if (isStart) {
+                            val headingStringResource: PluralStringResource =
+                                when (stage) {
+                                    is DiffStage.Heading.Content -> Res.plurals.`log_view_screen_$x_content_changes_made`
+                                    is DiffStage.Heading.Properties -> Res.plurals.`log_view_screen_$x_property_changes_made`
+                                }
 
-                Diff(
-                    diff,
-                    contentPadding = contentPadding,
-                    scrollBarContentPadding = scrollBarContentPadding
-                )
+                            Text(
+                                pluralStringResource(headingStringResource, stage.changeCount)
+                                    .replace("\$x", stage.changeCount.toString()),
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        }
+
+                        HorizontalDivider()
+                    }
+                }
+                is DiffStage.Spacer ->
+                    Spacer(Modifier.heightIn(20.dp))
+                is DiffStage.Change.Content ->
+                    ContentChangeText(
+                        stage.diffRow,
+                        isOld = isStart
+                    )
+                is DiffStage.Change.Property ->
+                    PropertyChangeText(
+                        stage.change,
+                        isOld = isStart,
+                        entity = event,
+                        configuration = logDatabase.configuration,
+                        modifier = Modifier.fillMaxWidth()
+                    )
             }
         }
     }
 }
 
 @Composable
-private fun Diff(
-    diff: List<DiffRow>,
-    modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(),
-    scrollBarContentPadding: PaddingValues = contentPadding
+private fun <T: LogEntity, V> PropertyChangeText(
+    change: LogEntityChanges.Change<T, V>,
+    isOld: Boolean,
+    entity: T,
+    configuration: LogDatabaseConfiguration,
+    modifier: Modifier = Modifier
+) {
+    val modifiedEntity: T =
+        if (isOld) entity
+        else change.applyTo(entity)
+
+    change.property.PropertyChip(
+        entity = modifiedEntity,
+        configuration = configuration,
+        onEdit = null,
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun ContentChangeText(
+    diffRow: DiffRow,
+    isOld: Boolean,
+    modifier: Modifier = Modifier
 ) {
     val theme: ThemeValues = LocalComposeKitTheme.current
-    val inactiveTextColour = theme.onBackground.copy(alpha = 0.5f)
 
-    ScrollBarLazyColumn(
-        modifier,
-        contentPadding = contentPadding,
-        scrollBarContentPadding = scrollBarContentPadding
-    ) {
-        item {
-            Column {
-                for (row in diff) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        val oldColour: Color
-                        val newColour: Color
+    val text: String =
+        remember(diffRow, isOld) {
+            (
+                if (isOld) diffRow.oldLine
+                else diffRow.newLine
+            ).replace("<br/>", "\n")
+        }
 
-                        when (row.tag) {
-                            DiffRow.Tag.DELETE -> {
-                                oldColour = theme.error
-                                newColour = theme.onBackground
-                            }
-                            DiffRow.Tag.INSERT,
-                            DiffRow.Tag.CHANGE -> {
-                                oldColour = theme.onBackground
-                                newColour = theme.vibrantAccent
-                            }
-                            DiffRow.Tag.EQUAL -> {
-                                oldColour = inactiveTextColour
-                                newColour = inactiveTextColour
-                            }
-                        }
+    val textColour: Color =
+        when (diffRow.tag) {
+            DiffRow.Tag.DELETE ->
+                if (isOld) theme.error
+                else theme.onBackground
 
-                        SelectionContainer(
-                            Modifier.fillMaxWidth(0.5f)
-                        ) {
-                            Text(
-                                row.oldLine.replace("<br/>", "\n"),
-                                color = oldColour
-                            )
-                        }
-                        SelectionContainer(
-                            Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                row.newLine.replace("<br/>", "\n"),
-                                color = newColour
-                            )
-                        }
-                    }
-                }
+            DiffRow.Tag.INSERT,
+            DiffRow.Tag.CHANGE ->
+                if (isOld) theme.onBackground
+                else theme.vibrantAccent
+
+            DiffRow.Tag.EQUAL ->
+                theme.onBackground.copy(alpha = 0.5f)
+        }
+
+    Text(text, modifier, color = textColour)
+}
+
+private sealed interface DiffStage<T: LogEntity> {
+    sealed interface Heading<T: LogEntity>: DiffStage<T> {
+        val changeCount: Int
+        data class Properties<T: LogEntity>(override val changeCount: Int): Heading<T>
+        data class Content<T: LogEntity>(override val changeCount: Int): Heading<T>
+    }
+    sealed interface Change<T: LogEntity>: DiffStage<T> {
+        data class Property<T: LogEntity>(val change: LogEntityChanges.Change<T, *>): Change<T>
+        data class Content<T: LogEntity>(val diffRow: DiffRow): Change<T>
+    }
+    class Spacer<T: LogEntity>: DiffStage<T>
+}
+
+private fun <T : LogEvent> buildDiffStages(
+    changes: LogEntityChanges<T>,
+    logDatabase: LogDatabase,
+    event: T,
+    eventReference: LogEventReference,
+): List<DiffStage<T>> =
+    buildList {
+        val propertyChanges: List<LogEntityChanges.Change<T, *>> =
+            changes.changesList.filter { it.property != LogEvent.PROPERTY_CONTENT }
+
+        add(DiffStage.Heading.Properties(propertyChanges.size))
+        for (change in propertyChanges) {
+            add(DiffStage.Change.Property(change))
+        }
+
+        add(DiffStage.Spacer())
+
+        val newContent: UserContent =
+            changes.firstWithPropertyOrNull(LogEvent.PROPERTY_CONTENT)?.newValue
+                ?: return@buildList
+
+        val a: String =
+            logDatabase.converter.generateUserContent(event.content ?: UserContent.EMPTY, eventReference.date)
+        val b: String =
+            logDatabase.converter.generateUserContent(newContent, eventReference.date)
+
+        val changeCount: Int = diff(a, b).deltas.size
+        add(DiffStage.Heading.Content(changeCount))
+
+        if (changeCount > 0) {
+            val diffRowGenerator: DiffRowGenerator =
+                DiffRowGenerator(inlineDiffByWord = true)
+
+            val rows: List<DiffRow> =
+                diffRowGenerator.generateDiffRows(
+                    a.split('\n'),
+                    b.split('\n')
+                )
+
+            for (row in rows) {
+                add(DiffStage.Change.Content(row))
             }
         }
     }
-}

@@ -54,6 +54,7 @@ import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import dev.toastbits.lifelog.core.specification.model.entity.date.LogDate
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
+import dev.toastbits.lifelog.core.specification.model.entity.property.LogEntityProperty
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -178,27 +179,11 @@ class LogEventScreen<T: LogEvent>(
 
                             LogEventMetadata(modifiedEvent, date, logDatabase.configuration)
 
-                            modifiedEvent.withProperties(logDatabase.configuration) {
-                                ScrollBarLazyRow(
-                                    Modifier.height(58.dp)
-                                ) {
-                                    item {
-                                        Row(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
-                                            for (propertyIndex in 0 until propertyCount) {
-                                                if (shouldPropertyShow(propertyIndex)) {
-                                                    PropertyChip(
-                                                        propertyIndex,
-                                                        onEdit =
-                                                            if (state.type == LogEventViewScreenState.Type.EDIT) ::onChange
-                                                            else null,
-                                                        Modifier.fillMaxHeight()
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            PropertiesRow(
+                                modifiedEvent,
+                                Modifier.height(58.dp),
+                                listOf(LogEvent.PROPERTY_CONTENT)
+                            )
 
                             val content: UserContent? = event.content
                             if (content != null) {
@@ -241,6 +226,35 @@ class LogEventScreen<T: LogEvent>(
                 }
 
                 StateCycleButton({ openNextState() })
+            }
+        }
+    }
+
+    @Composable
+    private fun PropertiesRow(
+        event: T,
+        modifier: Modifier = Modifier,
+        excludedProperties: List<LogEntityProperty<in T, *>> = emptyList()
+    ) {
+        event.withProperties(logDatabase.configuration) {
+            ScrollBarLazyRow(modifier) {
+                item {
+                    Row(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
+                        for (property in properties) {
+                            if (!property.shouldShow(event) || excludedProperties.contains(property)) {
+                                continue
+                            }
+
+                            PropertyChip(
+                                property,
+                                onEdit =
+                                    if (state.type == LogEventViewScreenState.Type.EDIT) ::onChange
+                                    else null,
+                                Modifier.fillMaxHeight()
+                            )
+                        }
+                    }
+                }
             }
         }
     }

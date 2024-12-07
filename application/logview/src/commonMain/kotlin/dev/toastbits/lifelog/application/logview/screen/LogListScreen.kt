@@ -127,7 +127,7 @@ class LogListScreen(
                             initialChanges =
                                 eventChanges[eventReference]
                                 ?: LogEntityChanges.createEmpty(),
-                            onChangesChanged = { newChanges ->
+                            onChangesChanged = { newChanges: LogEntityChanges<LogEvent> ->
                                 if (newChanges.hasChanges(event)) {
                                     eventChanges[eventReference] = newChanges
                                 }

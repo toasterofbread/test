@@ -13,35 +13,18 @@ fun <T: LogEntity> T.withProperties(
     configuration: LogDatabaseConfiguration,
     content: @Composable LogEntityPropertiesScope<T>.() -> Unit
 ) {
-    val properties: List<LogEntityProperty<T, *>> =
-        remember(this) {
-            getCompanion().getAllProperties() as List<LogEntityProperty<T, *>>
-        }
-
     val scope: LogEntityPropertiesScope<T> =
-        remember(properties) {
+        remember(this) {
             object : LogEntityPropertiesScope<T> {
-                override val propertyCount: Int
-                    get() = properties.size
-
-                override fun shouldPropertyShow(propertyIndex: Int): Boolean =
-                    properties[propertyIndex].shouldShow(this@withProperties)
+                @Suppress("UNCHECKED_CAST")
+                override val properties: List<LogEntityProperty<T, *>> =
+                    getCompanion().getAllProperties() as List<LogEntityProperty<T, *>>
 
                 @Composable
-                override fun PropertyChip(
-                    propertyIndex: Int,
-                    onEdit: ((LogEntityChanges.Change<T, *>) -> Unit)?,
-                    modifier: Modifier
-                ) {
-                    val property: LogEntityProperty<T, *> = properties[propertyIndex]
-                    PropertyChip(property, onEdit, modifier)
-                }
-
-                @Composable
-                private fun <V> PropertyChip(
+                override fun <V> PropertyChip(
                     property: LogEntityProperty<T, V>,
-                    onEdit: ((LogEntityChanges.Change<T, *>) -> Unit)?,
-                    modifier: Modifier = Modifier
+                    onEdit: ((LogEntityChanges.Change<T, V>) -> Unit)?,
+                    modifier: Modifier
                 ) {
                     property.PropertyChip(
                         entity = this@withProperties,

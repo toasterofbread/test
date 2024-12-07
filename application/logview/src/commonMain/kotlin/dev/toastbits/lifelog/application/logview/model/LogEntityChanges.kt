@@ -4,14 +4,14 @@ import dev.toastbits.lifelog.core.specification.model.entity.LogEntity
 import dev.toastbits.lifelog.core.specification.model.entity.property.LogEntityProperty
 
 class LogEntityChanges<T: LogEntity> private constructor(
-    private val changes: List<Change<T, *>> = emptyList()
+    val changesList: List<Change<T, *>> = emptyList()
 ) {
     fun hasChanges(entity: T): Boolean =
-        changes.any { it.changesEntity(entity) }
+        changesList.any { it.changesEntity(entity) }
 
     fun applyTo(entity: T): T {
         var currentEntity: T = entity
-        for (change in changes) {
+        for (change in changesList) {
             currentEntity = change.applyTo(currentEntity)
         }
         return currentEntity
@@ -22,12 +22,12 @@ class LogEntityChanges<T: LogEntity> private constructor(
 
     fun <V> copyWithChange(change: Change<T, V>): LogEntityChanges<T> =
         LogEntityChanges(
-            changes = changes.filterNot { it.property == change.property } + change
+            changesList = changesList.filterNot { it.property == change.property } + change
         )
 
     @Suppress("UNCHECKED_CAST")
     fun <V> firstWithPropertyOrNull(property: LogEntityProperty<in T, V>): Change<T, V>? =
-        changes.firstOrNull { it.property == property } as Change<T, V>?
+        changesList.firstOrNull { it.property == property } as Change<T, V>?
 
     data class Change<T: LogEntity, V>(
         val property: LogEntityProperty<T, V>,
@@ -41,7 +41,7 @@ class LogEntityChanges<T: LogEntity> private constructor(
     }
 
     override fun toString(): String =
-        "LogEntityChanges($changes)"
+        "LogEntityChanges($changesList)"
 
     companion object {
         fun <T: LogEntity> createEmpty(): LogEntityChanges<T> = LogEntityChanges()
