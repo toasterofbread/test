@@ -64,8 +64,13 @@ class LogListScreen(
         ),
     alwaysShowEndPane = true
 ), FullContentScreen {
+    data class EventScreen(
+        val eventReference: LogEventReference,
+        val screen: LogEventScreen<LogEvent>
+    )
+
     private var timelineState: LogTimelineState? = null
-    private var viewingEventScreen: LogEventScreen<LogEvent>? by mutableStateOf(null)
+    private var viewingEventScreen: EventScreen? by mutableStateOf(null)
     private var showSearchBar: Boolean by mutableStateOf(false)
 
     private val eventChanges: MutableMap<LogEventReference, LogEntityChanges<LogEvent>> = mutableStateMapOf()
@@ -88,7 +93,7 @@ class LogListScreen(
     }
 
     @Composable
-    override fun getCurrentData(): LogEventScreen<LogEvent>? = viewingEventScreen
+    override fun getCurrentData(): LogEventScreen<LogEvent>? = viewingEventScreen?.screen
 
     @Composable
     override fun PrimaryPane(data: LogEventScreen<LogEvent>?, contentPadding: PaddingValues, modifier: Modifier) {
@@ -104,27 +109,33 @@ class LogListScreen(
             contentPadding = contentPadding,
             timelineState = currentTimelineState,
             logDatabase = logDatabase,
+            isEventSelected = {
+                viewingEventScreen?.eventReference == it
+            },
             showSearchBar = showSearchBar,
             setShowSearchBar = { showSearchBar = it },
             modifier = modifier,
             onEventSelected = { eventReference ->
                 val event: LogEvent = logDatabase[eventReference]
                 viewingEventScreen =
-                    LogEventScreen(
-                        event,
-                        eventReference.date,
-                        logDatabase,
-                        initialChanges =
-                            eventChanges[eventReference]
-                            ?: LogEntityChanges.createEmpty(),
-                        onChangesChanged = { newChanges ->
-                            if (newChanges.hasChanges(event)) {
-                                eventChanges[eventReference] = newChanges
+                    EventScreen(
+                        eventReference,
+                        LogEventScreen(
+                            event,
+                            eventReference.date,
+                            logDatabase,
+                            initialChanges =
+                                eventChanges[eventReference]
+                                ?: LogEntityChanges.createEmpty(),
+                            onChangesChanged = { newChanges ->
+                                if (newChanges.hasChanges(event)) {
+                                    eventChanges[eventReference] = newChanges
+                                }
+                                else {
+                                    eventChanges.remove(eventReference)
+                                }
                             }
-                            else {
-                                eventChanges.remove(eventReference)
-                            }
-                        }
+                        )
                     )
             },
             extraFloatingContent = {

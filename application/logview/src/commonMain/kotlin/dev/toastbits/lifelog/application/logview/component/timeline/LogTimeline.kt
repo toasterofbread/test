@@ -14,10 +14,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -66,6 +70,7 @@ private val SCROLLBAR_SPACING: Dp = 5.dp
 internal fun LogTimeline(
     state: LogTimelineState,
     logDatabase: LogDatabase,
+    isEventSelected: (LogEventReference) -> Boolean,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
     scrollTargetDateIndex: Int? = null,
@@ -158,23 +163,7 @@ internal fun LogTimeline(
             scrollBarThickness = SCROLLBAR_THICKNESS
         ) {
             for (item in timelineItems) {
-                when (item) {
-                    is DateTimelineItem ->
-                        stickyHeaderContentPaddingAware(state.columnState, key = item.index) {
-                            LogTimelineItemPreview(
-                                item,
-                                onEventSelected = onEventSelected
-                            )
-                        }
-                    is EventTimelineItem ->
-                        item(key = item.eventReference.hashCode().toString()) {
-                            LogTimelineItemPreview(
-                                item,
-                                Modifier.padding(bottom = ITEM_SPACING),
-                                onEventSelected = onEventSelected
-                            )
-                        }
-                }
+                timelineItem(item, state, onEventSelected, isEventSelected)
             }
         }
 
@@ -201,6 +190,40 @@ internal fun LogTimeline(
                 }
             }
         }
+    }
+}
+
+private fun LazyListScope.timelineItem(
+    item: TimelineItem,
+    state: LogTimelineState,
+    onEventSelected: ((LogEventReference) -> Unit)?,
+    isEventSelected: (LogEventReference) -> Boolean,
+) {
+    when (item) {
+        is DateTimelineItem ->
+            stickyHeaderContentPaddingAware(state.columnState, key = item.index) {
+                LogTimelineItemPreview(
+                    item = item,
+                    onEventSelected = onEventSelected
+                )
+            }
+
+        is EventTimelineItem ->
+            item(key = item.eventReference.hashCode().toString()) {
+                val isSelected: State<Boolean> =
+                    remember(item.eventReference) {
+                        derivedStateOf {
+                            isEventSelected(item.eventReference)
+                        }
+                    }
+
+                LogTimelineItemPreview(
+                    item = item,
+                    selectedState = isSelected,
+                    modifier = Modifier.padding(bottom = ITEM_SPACING),
+                    onEventSelected = onEventSelected
+                )
+            }
     }
 }
 

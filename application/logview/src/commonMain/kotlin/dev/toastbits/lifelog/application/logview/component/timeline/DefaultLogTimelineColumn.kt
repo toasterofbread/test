@@ -36,6 +36,7 @@ internal fun DefaultLogTimelineColumn(
     contentPadding: PaddingValues,
     timelineState: LogTimelineState,
     logDatabase: LogDatabase,
+    isEventSelected: (LogEventReference) -> Boolean,
     showSearchBar: Boolean,
     setShowSearchBar: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
@@ -66,9 +67,10 @@ internal fun DefaultLogTimelineColumn(
             var bottomContentHeight: Dp by remember { mutableStateOf(0.dp) }
 
             LogTimeline(
-                timelineState,
-                logDatabase,
-                Modifier.matchParentSize(),
+                state = timelineState,
+                logDatabase = logDatabase,
+                isEventSelected = isEventSelected,
+                modifier = Modifier.matchParentSize(),
                 contentPadding = contentPadding.copy(bottom = bottomContentHeight),
                 scrollTargetDateIndex = scrollTargetDateIndex,
                 onCurrentDateIndexChanged = {

@@ -96,6 +96,9 @@ class LogListChangesScreen(
                     ),
                 timelineState = currentTimelineState,
                 logDatabase = logDatabase,
+                isEventSelected = {
+                    viewingEventScreen?.eventReference == it
+                },
                 showSearchBar = showSearchBar,
                 setShowSearchBar = { showSearchBar = it },
                 onEventSelected = { eventReference ->
