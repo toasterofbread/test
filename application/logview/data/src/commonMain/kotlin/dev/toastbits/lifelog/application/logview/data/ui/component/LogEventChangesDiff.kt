@@ -17,7 +17,7 @@ import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyColu
 import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
 import dev.toastbits.composekit.theme.vibrantAccent
-import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventChanges
+import dev.toastbits.lifelog.application.logview.data.ui.model.LogEntityChanges
 import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventReference
 import dev.toastbits.lifelog.core.specification.converter.generateUserContent
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
@@ -35,7 +35,7 @@ import org.jetbrains.compose.resources.pluralStringResource
 fun LogEventChangesDiff(
     event: LogEvent,
     eventReference: LogEventReference,
-    changes: LogEventChanges,
+    changes: LogEntityChanges<LogEvent>,
     logDatabase: LogDatabase,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
@@ -43,12 +43,12 @@ fun LogEventChangesDiff(
 ) {
     val contentChanges: Pair<Patch<String>, List<DiffRow>>? =
         remember(event, changes) {
-            if (changes.content == null) {
-                return@remember null
-            }
+            val newContent: UserContent =
+                changes.firstWithPropertyOrNull(LogEvent.PROPERTY_CONTENT)?.newValue
+                ?: return@remember null
 
             val a: String = logDatabase.converter.generateUserContent(event.content ?: UserContent.EMPTY, eventReference.date)
-            val b: String = logDatabase.converter.generateUserContent(changes.content, eventReference.date)
+            val b: String = logDatabase.converter.generateUserContent(newContent, eventReference.date)
 
             return@remember (
                 diff(a, b) to DiffRowGenerator(

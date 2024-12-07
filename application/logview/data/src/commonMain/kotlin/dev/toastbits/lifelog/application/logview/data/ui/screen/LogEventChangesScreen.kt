@@ -30,7 +30,7 @@ import dev.toastbits.composekit.util.copy
 import dev.toastbits.composekit.util.getContrasted
 import dev.toastbits.lifelog.application.core.ui.GenericTopBar
 import dev.toastbits.lifelog.application.logview.data.ui.component.LogEventChangesDiff
-import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventChanges
+import dev.toastbits.lifelog.application.logview.data.ui.model.LogEntityChanges
 import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventReference
 import dev.toastbits.lifelog.application.logview.data.ui.model.get
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
@@ -42,7 +42,7 @@ import org.jetbrains.compose.resources.stringResource
 
 class LogEventChangesScreen(
     val eventReference: LogEventReference,
-    private val eventChanges: LogEventChanges,
+    private val eventChanges: LogEntityChanges<LogEvent>,
     private val logDatabase: LogDatabase,
     private val onDiscardChanges: (() -> Unit)?
 ): Screen {

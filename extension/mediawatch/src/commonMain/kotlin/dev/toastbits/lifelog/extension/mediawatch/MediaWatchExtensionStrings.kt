@@ -2,7 +2,6 @@ package dev.toastbits.lifelog.extension.mediawatch
 
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverterStrings
 import dev.toastbits.lifelog.core.specification.converter.alert.LogParseAlert
-import dev.toastbits.lifelog.core.specification.extension.ExtensionId
 import dev.toastbits.lifelog.extension.mediawatch.impl.model.MediaDurationFormat
 import dev.toastbits.lifelog.extension.mediawatch.impl.model.entity.event.MediaRangeValue
 import dev.toastbits.lifelog.extension.mediawatch.model.entity.event.BookMediaConsumeEvent
@@ -11,9 +10,7 @@ import dev.toastbits.lifelog.extension.mediawatch.model.entity.event.MovieOrShow
 import dev.toastbits.lifelog.extension.mediawatch.util.MediaEntityType
 
 interface MediaWatchExtensionStrings {
-    val extensionId: String
-
-    val mediaReferenceTypeId: ExtensionId
+    val mediaReferenceTypeId: String
     val mediaPreferredDurationFormat: MediaDurationFormat
     val mediaDurationRangeFromPrefixes: List<String>
     val mediaDurationRangeToPrefixes: List<String>

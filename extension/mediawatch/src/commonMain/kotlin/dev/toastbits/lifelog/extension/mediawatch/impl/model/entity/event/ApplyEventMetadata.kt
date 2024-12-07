@@ -16,8 +16,9 @@ internal fun applyEventMetadata(
     strings: MediaWatchExtensionStrings,
     logStrings: LogFileConverterStrings,
     onAlert: (LogParseAlert) -> Unit
-) {
-    val iterationSuffixes: List<String> = strings.getMediaEntityTypeIterationSuffixes(event.mediaEntityType).map { it.lowercase() }
+): MediaConsumeEvent {
+    var currentEvent: MediaConsumeEvent = event
+    val iterationSuffixes: List<String> = strings.getMediaEntityTypeIterationSuffixes(currentEvent.mediaEntityType).map { it.lowercase() }
 
     val parts: List<String> = text.split(',').filter { it.isNotBlank() }
     for (part in parts) {
@@ -29,7 +30,7 @@ internal fun applyEventMetadata(
             }
 
             val iterationText: String = lowerPart.dropLast(suffix.length).trimEnd()
-            applyEventIterationString(iterationText, event, strings, onAlert)
+            currentEvent = applyEventIterationString(iterationText, currentEvent, strings, onAlert)
             lowerPart = null
             break
         }
@@ -38,13 +39,16 @@ internal fun applyEventMetadata(
             break
         }
 
-        when (event) {
-            is MovieOrShowMediaConsumeEvent -> applyMovieOrShowEventMetadata(lowerPart, event, strings, logStrings, onAlert)
-            is BookMediaConsumeEvent -> applyBookEventMetadata(lowerPart, event, strings, logStrings, onAlert)
-            is GameMediaConsumeEvent -> applyGameEventMetadata(lowerPart, event, strings, logStrings, onAlert)
-            is SongMediaConsumeEvent -> TODO(lowerPart)
-        }
+        currentEvent =
+            when (currentEvent) {
+                is MovieOrShowMediaConsumeEvent -> applyMovieOrShowEventMetadata(lowerPart, currentEvent, strings, logStrings, onAlert)
+                is BookMediaConsumeEvent -> applyBookEventMetadata(lowerPart, currentEvent, strings, logStrings, onAlert)
+                is GameMediaConsumeEvent -> applyGameEventMetadata(lowerPart, currentEvent, strings, logStrings, onAlert)
+                is SongMediaConsumeEvent -> TODO(lowerPart)
+            }
     }
+
+    return currentEvent
 }
 
 private fun applyEventIterationString(
@@ -52,7 +56,7 @@ private fun applyEventIterationString(
     event: MediaConsumeEvent,
     strings: MediaWatchExtensionStrings,
     onAlert: (LogParseAlert) -> Unit
-) {
+): MediaConsumeEvent {
     var iterationText: String = text
     var unsure: Boolean = false
 
@@ -86,10 +90,13 @@ private fun applyEventIterationString(
     }
 
     if (number == null) {
-        onAlert(MediaWatchLogParseAlert.UnknownIterationSpecifier(strings.extensionId, text))
-        return
+        onAlert(MediaWatchLogParseAlert.UnknownIterationSpecifier(text))
+        return event
     }
 
-    event.iteration = number
-    event.iterationsUnsure = unsure
+    return event.copy(
+        mediaReference = event.mediaReference,
+        iteration = number,
+        iterationsUnsure = unsure
+    )
 }

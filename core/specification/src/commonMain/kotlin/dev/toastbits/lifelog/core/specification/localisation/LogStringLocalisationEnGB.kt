@@ -8,7 +8,8 @@ internal object LogStringLocalisationEnGB: StringLocalisation<SpecificationExten
     override suspend fun getStringImpl(id: LogStringId, extension: SpecificationExtension): String =
         when (id) {
             LogStringId.Property.LogDate.DATE -> "Date"
-            LogStringId.Property.LogEntity.COMMENT -> "Comment"
+            LogStringId.Property.LogEntity.INLINE_COMMENT -> "Inline comment"
+            LogStringId.Property.LogEntity.ABOVE_COMMENT -> "Above comment"
             LogStringId.Property.LogEvent.CONTENT -> "Content"
             LogStringId.LogCommentEvent -> "Comment"
             LogStringId.LogCommentEventVerb -> "Commented"

@@ -3,7 +3,6 @@ package dev.toastbits.lifelog.extension.mediawatch.impl
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverterStrings
 import dev.toastbits.lifelog.core.specification.converter.alert.LogParseAlert
 import dev.toastbits.lifelog.core.specification.converter.parseOrNull
-import dev.toastbits.lifelog.core.specification.extension.ExtensionId
 import dev.toastbits.lifelog.extension.mediawatch.MediaWatchExtensionStrings
 import dev.toastbits.lifelog.extension.mediawatch.alert.MediaWatchLogParseAlert
 import dev.toastbits.lifelog.extension.mediawatch.impl.model.MediaDurationFormat
@@ -25,8 +24,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 
 class MediaWatchExtensionStringsImpl(
-    override val extensionId: ExtensionId = "mediawatch",
-    override val mediaReferenceTypeId: ExtensionId = "media",
+    override val mediaReferenceTypeId: String = "media",
 
     override val unsurePrefixes: List<String> = listOf("about ", "at least "),
 
@@ -281,7 +279,7 @@ class MediaWatchExtensionStringsImpl(
                 volume = 1U
             }
             else {
-                onAlert(MediaWatchLogParseAlert.UnknownBookReadPoint(extensionId, text, _text))
+                onAlert(MediaWatchLogParseAlert.UnknownBookReadPoint(text, _text))
                 return null
             }
         }

@@ -1,10 +1,10 @@
 package dev.toastbits.lifelog.application.logview.data.ui.model
 
-import dev.toastbits.lifelog.application.core.model.LogEventData
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.model.entity.date.LogDate
+import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 
 data class LogEventReference(val date: LogDate, val logIndex: Int)
 
-operator fun LogDatabase.get(reference: LogEventReference): LogEventData =
-    LogEventData(days[reference.date]!![reference.logIndex], reference.date, configuration)
+operator fun LogDatabase.get(reference: LogEventReference): LogEvent =
+    days[reference.date]!![reference.logIndex]

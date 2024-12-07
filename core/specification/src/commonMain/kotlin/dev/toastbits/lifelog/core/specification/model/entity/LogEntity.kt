@@ -3,39 +3,27 @@ package dev.toastbits.lifelog.core.specification.model.entity
 import dev.toastbits.lifelog.core.specification.extension.ExtensionId
 import dev.toastbits.lifelog.core.specification.localisation.LogStringId
 import dev.toastbits.lifelog.core.specification.model.UserContent
-import dev.toastbits.lifelog.core.specification.model.string.StringId
+import dev.toastbits.lifelog.core.specification.model.entity.property.LogEntityProperty
 
 // An entity is anything that can be referenced in user content
 interface LogEntity {
     val extensionId: ExtensionId?
 
-    var inlineComment: UserContent?
-    var aboveComment: UserContent?
+    val inlineComment: UserContent?
+    val aboveComment: UserContent?
 
     fun copy(
         inlineComment: UserContent?,
-        aboveComment: UserContent?,
-        properties: Map<StringId, Property<*, *>>
+        aboveComment: UserContent?
     ): LogEntity
 
-    fun getCompanion(): LogEntityCompanion<*> = Companion
-
-    data class Property<T: LogEntity, V>(
-        val name: StringId,
-        val accessor: T.() -> V
-    )
+    fun getCompanion(): LogEntityCompanion<out LogEntity> = Companion
 
     companion object: LogEntityCompanion<LogEntity>(null) {
-        override fun getAllProperties(): List<Property<*, *>> =
+        override fun getProperties(): List<LogEntityProperty<LogEntity, *>> =
             listOf(
-                LogStringId.Property.LogEntity.COMMENT.property { inlineComment }
+                LogStringId.Property.LogEntity.INLINE_COMMENT.userContentProperty({ inlineComment }, { copy(inlineComment = it, aboveComment = aboveComment) }),
+                LogStringId.Property.LogEntity.ABOVE_COMMENT.userContentProperty({ aboveComment }, { copy(inlineComment = inlineComment, aboveComment = it) })
             )
     }
-}
-
-abstract class LogEntityCompanion<T: LogEntity>(vararg val parents: LogEntityCompanion<*>?) {
-    abstract fun getAllProperties(): List<LogEntity.Property<*, *>>
-
-    fun <V> StringId.property(accessor: T.() -> V) =
-        LogEntity.Property(this, accessor)
 }

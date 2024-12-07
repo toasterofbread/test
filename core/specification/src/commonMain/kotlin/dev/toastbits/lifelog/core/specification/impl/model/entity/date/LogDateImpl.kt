@@ -3,23 +3,32 @@ package dev.toastbits.lifelog.core.specification.impl.model.entity.date
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import dev.toastbits.lifelog.core.specification.model.entity.LogEntity
 import dev.toastbits.lifelog.core.specification.model.entity.date.LogDate
-import dev.toastbits.lifelog.core.specification.model.string.StringId
 import kotlinx.datetime.LocalDate
 
 data class LogDateImpl(
-    override var date: LocalDate,
-    override var ambiguous: Boolean,
-    override var inlineComment: UserContent? = null,
-    override var aboveComment: UserContent? = null
+    override val date: LocalDate,
+    override val ambiguous: Boolean,
+    override val inlineComment: UserContent? = null,
+    override val aboveComment: UserContent? = null
 ): LogDate {
     override fun equals(other: Any?): Boolean =
         other is LogDate && date == other.date && ambiguous == other.ambiguous
 
     override fun copy(
         inlineComment: UserContent?,
-        aboveComment: UserContent?,
-        properties: Map<StringId, LogEntity.Property<*, *>>
+        aboveComment: UserContent?
     ): LogEntity =
+        copy(
+            date = date,
+            ambiguous = ambiguous,
+            inlineComment = inlineComment,
+            aboveComment = aboveComment
+        )
+
+    override fun copy(
+        date: LocalDate,
+        ambiguous: Boolean
+    ): LogDate =
         copy(
             date = date,
             ambiguous = ambiguous,

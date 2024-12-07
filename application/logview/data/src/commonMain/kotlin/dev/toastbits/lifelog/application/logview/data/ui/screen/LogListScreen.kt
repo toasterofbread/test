@@ -41,8 +41,9 @@ import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
 import dev.toastbits.lifelog.application.core.FullContentScreen
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.DefaultLogTimelineColumn
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.model.LogTimelineState
-import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventChanges
+import dev.toastbits.lifelog.application.logview.data.ui.model.LogEntityChanges
 import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventReference
+import dev.toastbits.lifelog.application.logview.data.ui.model.get
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import lifelog.application.logview.data.generated.resources.Res
@@ -55,7 +56,7 @@ import org.jetbrains.compose.resources.stringResource
 class LogListScreen(
     private val logDatabase: LogDatabase,
     private val logSaveScreenProvider: LogSaveScreenProvider
-): ResponsiveTwoPaneScreen<LogEventScreen>(
+): ResponsiveTwoPaneScreen<LogEventScreen<LogEvent>>(
     initialStartPaneRatioSource =
         InitialPaneRatioSource.Remembered(
             "logview.data.ui.screen.LogListScreen",
@@ -64,10 +65,10 @@ class LogListScreen(
     alwaysShowEndPane = true
 ), FullContentScreen {
     private var timelineState: LogTimelineState? = null
-    private var viewingEventScreen: LogEventScreen? by mutableStateOf(null)
+    private var viewingEventScreen: LogEventScreen<LogEvent>? by mutableStateOf(null)
     private var showSearchBar: Boolean by mutableStateOf(false)
 
-    private val eventChanges: MutableMap<LogEventReference, LogEventChanges> = mutableStateMapOf()
+    private val eventChanges: MutableMap<LogEventReference, LogEntityChanges<LogEvent>> = mutableStateMapOf()
 
     private fun applyChangesToDatabase(): LogDatabase? {
         if (eventChanges.isEmpty()) {
@@ -78,17 +79,19 @@ class LogListScreen(
             days = logDatabase.days.toMutableMap().also { days ->
                 for ((ref, changes) in eventChanges) {
                     val events: List<LogEvent> = days[ref.date]!!
-                    days[ref.date] = events.toMutableList().apply { set(ref.logIndex, changes.applyTo(get(ref.logIndex))) }
+                    days[ref.date] = events.toMutableList().apply {
+                        set(ref.logIndex, changes.applyTo(get(ref.logIndex)))
+                    }
                 }
             }
         )
     }
 
     @Composable
-    override fun getCurrentData(): LogEventScreen? = viewingEventScreen
+    override fun getCurrentData(): LogEventScreen<LogEvent>? = viewingEventScreen
 
     @Composable
-    override fun PrimaryPane(data: LogEventScreen?, contentPadding: PaddingValues, modifier: Modifier) {
+    override fun PrimaryPane(data: LogEventScreen<LogEvent>?, contentPadding: PaddingValues, modifier: Modifier) {
         val currentTimelineState: LogTimelineState =
             remember {
                 LogTimelineState(
@@ -105,13 +108,17 @@ class LogListScreen(
             setShowSearchBar = { showSearchBar = it },
             modifier = modifier,
             onEventSelected = { eventReference ->
+                val event: LogEvent = logDatabase[eventReference]
                 viewingEventScreen =
                     LogEventScreen(
-                        eventReference,
+                        event,
+                        eventReference.date,
                         logDatabase,
-                        changes = eventChanges[eventReference] ?: LogEventChanges.EMPTY,
-                        updateChanges = { newChanges ->
-                            if (newChanges.hasChanges()) {
+                        initialChanges =
+                            eventChanges[eventReference]
+                            ?: LogEntityChanges.createEmpty(),
+                        onChangesChanged = { newChanges ->
+                            if (newChanges.hasChanges(event)) {
                                 eventChanges[eventReference] = newChanges
                             }
                             else {
@@ -168,7 +175,7 @@ class LogListScreen(
 
                 Row {
                     IconButton({
-                        val changes: Map<LogEventReference, LogEventChanges> = eventChanges.toMap()
+                        val changes: Map<LogEventReference, LogEntityChanges<LogEvent>> = eventChanges.toMap()
                         if (changes.isNotEmpty()) {
                             navigator.pushScreen(
                                 LogListChangesScreen(
@@ -176,9 +183,10 @@ class LogListScreen(
                                     changes,
                                     discardChanges = { eventReference ->
                                         eventChanges.remove(eventReference)
-                                        if (viewingEventScreen?.eventReference == eventReference) {
-                                            viewingEventScreen?.setChanges(null)
-                                        }
+                                        // TODO
+//                                        if (viewingEventScreen?.eventReference == eventReference) {
+//                                            viewingEventScreen?.setChanges(null)
+//                                        }
                                         if (eventChanges.isEmpty() && navigator.currentScreen is LogListChangesScreen) {
                                             navigator.navigateBackward()
                                         }
@@ -213,7 +221,7 @@ class LogListScreen(
     }
 
     @Composable
-    override fun SecondaryPane(data: LogEventScreen?, contentPadding: PaddingValues, modifier: Modifier) {
+    override fun SecondaryPane(data: LogEventScreen<LogEvent>?, contentPadding: PaddingValues, modifier: Modifier) {
         if (data == null) {
             return
         }

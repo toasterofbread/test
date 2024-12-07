@@ -15,16 +15,4 @@ data class TestLogEvent(
 ) : LogEvent {
     override fun getIcon(): LogEvent.Icon = LogEvent.Icon.Comment
     override suspend fun getTitle(locale: String): LogDisplayText = LogDisplayText.OfString("")
-    override fun copy(
-        content: UserContent?,
-        inlineComment: UserContent?,
-        aboveComment: UserContent?,
-        properties: Map<StringId, LogEntity.Property<*, *>>?
-    ): LogEvent =
-        copy(
-            reference = reference,
-            inlineComment = inlineComment,
-            content = content,
-            aboveComment = aboveComment
-        )
 }

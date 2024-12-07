@@ -14,16 +14,25 @@ internal fun applyMovieOrShowEventMetadata(
     strings: MediaWatchExtensionStrings,
     logStrings: LogFileConverterStrings,
     onAlert: (LogParseAlert) -> Unit
-) {
+): MovieOrShowMediaConsumeEvent {
+    var currentEvent: MovieOrShowMediaConsumeEvent = event
     val parts: List<String> = text.split(',')
 
     for (part in parts) {
-        if (event.watchedRange == null && applyEventWatchedRangeString(text, event, strings, logStrings, onAlert)) {
-            continue
+        if (currentEvent.watchedRange == null) {
+            val newEvent: MovieOrShowMediaConsumeEvent? =
+                applyEventWatchedRangeString(text, currentEvent, strings, logStrings, onAlert)
+
+            if (newEvent != null) {
+                currentEvent = newEvent
+                continue
+            }
         }
 
         TODO("$part | $text")
     }
+
+    return currentEvent
 }
 
 private fun applyEventWatchedRangeString(
@@ -32,19 +41,20 @@ private fun applyEventWatchedRangeString(
     strings: MediaWatchExtensionStrings,
     logStrings: LogFileConverterStrings,
     onAlert: (LogParseAlert) -> Unit
-): Boolean {
+): MovieOrShowMediaConsumeEvent? {
+    var currentEvent: MovieOrShowMediaConsumeEvent = event
+
     var text: String = text
     for (prefix in strings.unsurePrefixes) {
         if (text.startsWith(prefix)) {
-            event.watchedRangeUnsure = true
+            currentEvent = currentEvent.copy(watchedRangeUnsure = true)
             text = text.drop(prefix.length).trimStart()
         }
     }
 
     val range: MovieOrShowMediaConsumeEvent.WatchedRange? = strings.parseLowercaseMovieOrShowWatchedRange(text, logStrings)
     if (range != null) {
-        event.watchedRange = range
-        return true
+        return currentEvent.copy(watchedRange = range)
     }
 
     for (prefix in strings.movieOrShowEpisodeRangePrefixes) {
@@ -52,9 +62,9 @@ private fun applyEventWatchedRangeString(
             val episodeRangeText: String = text.drop(prefix.length).trimStart()
 
             val (lhs: MediaRangeValue?, rhs: MediaRangeValue?) = parseMediaRangeString(episodeRangeText, strings, onAlert)
-            event.watchedRange = MovieOrShowMediaConsumeEvent.WatchedRange.Episodes(lhs, rhs)
-
-            return true
+            return currentEvent.copy(
+                watchedRange = MovieOrShowMediaConsumeEvent.WatchedRange.Episodes(lhs, rhs)
+            )
         }
     }
 
@@ -73,25 +83,23 @@ private fun applyEventWatchedRangeString(
             val episodeRangeText: String = text.drop(episodePrefix.length).trimStart()
             val rangeValue: MediaRangeValue? = MediaRangeValue.fromString(episodeRangeText)
             if (rangeValue != null) {
-                event.watchedRange = MovieOrShowMediaConsumeEvent.WatchedRange.Episodes(startEpisode = null, endEpisode = rangeValue)
+                currentEvent = currentEvent.copy(watchedRange = MovieOrShowMediaConsumeEvent.WatchedRange.Episodes(startEpisode = null, endEpisode = rangeValue))
             }
 
-            return true
+            return currentEvent
         }
 
-        applyEventFirstDurationRangeString(text, event, strings, onAlert)
-        return true
+        return applyEventFirstDurationRangeString(text, currentEvent, strings, onAlert)
     }
 
     for (prefix in strings.mediaDurationRangeFromPrefixes) {
         if (text.startsWith(prefix)) {
             val durationRangeText: String = text.drop(prefix.length).trimStart()
-            applyEventFromDurationRangeString(durationRangeText, event, strings, onAlert)
-            return true
+            return applyEventFromDurationRangeString(durationRangeText, currentEvent, strings, onAlert)
         }
     }
 
-    return false
+    return null
 }
 
 private fun applyEventFirstDurationRangeString(
@@ -99,18 +107,20 @@ private fun applyEventFirstDurationRangeString(
     event: MovieOrShowMediaConsumeEvent,
     strings: MediaWatchExtensionStrings,
     onAlert: (LogParseAlert) -> Unit
-) {
+): MovieOrShowMediaConsumeEvent {
     val duration: Duration? = strings.mediaDurationFormats.firstNotNullOfOrNull { it.parseOrNull(text) }
     if (duration == null) {
-        onAlert(MediaWatchLogParseAlert.UnknownDurationFormat(strings.extensionId, text))
-        return
+        onAlert(MediaWatchLogParseAlert.UnknownDurationFormat(text))
+        return event
     }
 
-    event.watchedRange =
+    return event.copy(
+        watchedRange =
         MovieOrShowMediaConsumeEvent.WatchedRange.Times(
             startTime = null,
             endTime = duration
         )
+    )
 }
 
 private fun applyEventFromDurationRangeString(
@@ -118,17 +128,19 @@ private fun applyEventFromDurationRangeString(
     event: MovieOrShowMediaConsumeEvent,
     strings: MediaWatchExtensionStrings,
     onAlert: (LogParseAlert) -> Unit
-) {
+): MovieOrShowMediaConsumeEvent {
     val duration: Duration? = strings.mediaDurationFormats.firstNotNullOfOrNull { it.parseOrNull(text) }
     if (duration == null) {
-        onAlert(MediaWatchLogParseAlert.UnknownDurationFormat(strings.extensionId, text))
-        return
+        onAlert(MediaWatchLogParseAlert.UnknownDurationFormat(text))
+        return event
     }
 
-    event.watchedRange =
-        MovieOrShowMediaConsumeEvent.WatchedRange.Times(
-            startTime = duration,
-            endTime = null
-        )
+    return event.copy(
+        watchedRange =
+            MovieOrShowMediaConsumeEvent.WatchedRange.Times(
+                startTime = duration,
+                endTime = null
+            )
+    )
 }
 

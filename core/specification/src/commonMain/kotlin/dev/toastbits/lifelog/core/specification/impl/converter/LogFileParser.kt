@@ -302,11 +302,16 @@ internal class LogFileParser(
         }
 
         val content: UserContent? =
-            parseUserContent(contentLines.joinToString("\n").trimIndent(), -1).takeIf { it.isNotEmpty() }
+            parseUserContent(contentLines.joinToString("\n").trimIndent(), -1)
+                .takeIf { !it.isEmpty() }
 
-        val event: LogEvent = eventType.parseEvent(eventPrefixIndex, body, metadata, content, referenceParser, userContentParser, strings, ::onAlert)
-        event.inlineComment = inlineComment
-        event.aboveComment = aboveComment
+        val event: LogEvent =
+            eventType
+                .parseEvent(eventPrefixIndex, body, metadata, content, referenceParser, userContentParser, strings, ::onAlert)
+                .copy(
+                    inlineComment = inlineComment,
+                    aboveComment = aboveComment
+                )
 
         getDayEvents().add(event)
     }

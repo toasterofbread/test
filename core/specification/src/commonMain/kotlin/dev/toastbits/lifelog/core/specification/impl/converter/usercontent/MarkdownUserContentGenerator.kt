@@ -16,7 +16,7 @@ class MarkdownUserContentGenerator: UserContentGenerator {
         for (part in content.parts) {
             builder.addPart(part)
         }
-    }.trim()
+    }
 
     private class StringBuilderWrapper(
         private val stringBuilder: StringBuilder,

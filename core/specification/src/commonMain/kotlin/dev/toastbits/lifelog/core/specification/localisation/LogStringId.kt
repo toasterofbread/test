@@ -1,14 +1,18 @@
 package dev.toastbits.lifelog.core.specification.localisation
 
+import dev.toastbits.lifelog.core.specification.extension.ExtensionId
 import dev.toastbits.lifelog.core.specification.extension.SpecificationExtension
-import dev.toastbits.lifelog.core.specification.model.entity.LogDisplayText
 import dev.toastbits.lifelog.core.specification.model.string.Locale
 import dev.toastbits.lifelog.core.specification.model.string.StringId
 
 internal sealed interface LogStringId: StringId {
+    override val extensionId: ExtensionId?
+        get() = null
+
     sealed interface Property: LogStringId {
         enum class LogEntity: Property {
-            COMMENT
+            INLINE_COMMENT,
+            ABOVE_COMMENT
         }
         enum class LogEvent: Property {
             CONTENT

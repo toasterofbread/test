@@ -3,7 +3,6 @@ package dev.toastbits.lifelog.core.specification.impl.model.entity.event
 import dev.toastbits.lifelog.core.specification.localisation.LogStringId
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import dev.toastbits.lifelog.core.specification.model.entity.LogDisplayText
-import dev.toastbits.lifelog.core.specification.model.entity.LogEntity
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogCommentEvent
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import dev.toastbits.lifelog.core.specification.model.string.StringId
@@ -24,10 +23,17 @@ data class LogCommentEventImpl(
     override suspend fun getTitle(locale: String): LogDisplayText? = null
 
     override fun copy(
-        content: UserContent?,
         inlineComment: UserContent?,
-        aboveComment: UserContent?,
-        properties: Map<StringId, LogEntity.Property<*, *>>?
+        aboveComment: UserContent?
+    ): LogEvent =
+        copy(
+            content = content,
+            inlineComment = inlineComment,
+            aboveComment = aboveComment
+        )
+
+    override fun copy(
+        content: UserContent?
     ): LogEvent =
         copy(
             content = content,

@@ -14,7 +14,7 @@ class MediaWatchExtension(
     mediaConsumeEventType: MediaConsumeEventType = MediaConsumeEventTypeImpl(strings),
     mediaReferenceType: MediaReferenceType = MediaReferenceType(strings)
 ): SpecificationExtension {
-    override val id: ExtensionId get() = strings.extensionId
+    override val id: ExtensionId get() = ID
 
     override val extraEventTypes: List<LogEventType> =
         listOf(
@@ -25,4 +25,8 @@ class MediaWatchExtension(
         listOf(
             mediaReferenceType
         )
+
+    companion object {
+        const val ID: String = "mediawatch"
+    }
 }

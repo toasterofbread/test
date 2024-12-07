@@ -21,16 +21,17 @@ import dev.toastbits.lifelog.application.core.FullContentScreen
 import dev.toastbits.lifelog.application.core.ui.GenericTopBar
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.DefaultLogTimelineColumn
 import dev.toastbits.lifelog.application.logview.data.ui.component.timeline.model.LogTimelineState
-import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventChanges
+import dev.toastbits.lifelog.application.logview.data.ui.model.LogEntityChanges
 import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventReference
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
+import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import lifelog.application.logview.data.generated.resources.Res
 import lifelog.application.logview.data.generated.resources.log_view_screen_title_review_changes
 import org.jetbrains.compose.resources.stringResource
 
 class LogListChangesScreen(
     private val logDatabase: LogDatabase,
-    eventChanges: Map<LogEventReference, LogEventChanges>,
+    eventChanges: Map<LogEventReference, LogEntityChanges<LogEvent>>,
     private val discardChanges: (LogEventReference) -> Unit
 ): ResponsiveTwoPaneScreen<LogEventChangesScreen>(
     initialStartPaneRatioSource =
@@ -40,7 +41,7 @@ class LogListChangesScreen(
     ),
     alwaysShowEndPane = true
 ), FullContentScreen {
-    private var eventChanges: Map<LogEventReference, LogEventChanges> by mutableStateOf(eventChanges)
+    private var eventChanges: Map<LogEventReference, LogEntityChanges<LogEvent>> by mutableStateOf(eventChanges)
     private var timelineState: LogTimelineState? = null
     private var viewingEventScreen: LogEventChangesScreen? by mutableStateOf(
         eventChanges.entries.firstOrNull()?.let { (eventReference, eventChanges) ->

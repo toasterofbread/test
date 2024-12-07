@@ -55,7 +55,7 @@ class MediaConsumeEventTypeImpl(
             }
 
         if (urlReferences.isNotEmpty()) {
-            onAlert(MediaWatchLogParseAlert.URLInMediaTitle(strings.extensionId, body))
+            onAlert(MediaWatchLogParseAlert.URLInMediaTitle(body))
         }
 
         val mediaId: String =
@@ -64,17 +64,18 @@ class MediaConsumeEventTypeImpl(
             }?.path?.segments?.lastOrNull() ?: body.trim()
 
         val entityType: MediaEntityType = getPrefixIndexMediaEntityType(prefixIndex)
-        val mediaReference: MediaReference = entityType.createReference(mediaId, this.strings.extensionId, this.strings.mediaReferenceTypeId)
+        val mediaReference: MediaReference = entityType.createReference(mediaId, this.strings.mediaReferenceTypeId)
 
-        val event: MediaConsumeEvent = entityType.createConsumeEvent(mediaReference, this.strings.extensionId)
-        event.content = content
+        val event: MediaConsumeEvent =
+            entityType.createConsumeEvent(mediaReference)
+                .copy(content = content)
 
         if (metadata != null) {
-            applyEventMetadata(metadata, event,
-                this.strings, logStrings, onAlert)
+            return applyEventMetadata(metadata, event, this.strings, logStrings, onAlert)
         }
-
-        return event
+        else {
+            return event
+        }
     }
 
     override fun generateEvent(

@@ -13,6 +13,7 @@ import dev.toastbits.lifelog.core.specification.converter.alert.SpecificationLog
 import dev.toastbits.lifelog.core.specification.extension.ExtensionRegistry
 import dev.toastbits.lifelog.core.specification.impl.converter.DateLineParser
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReference
+import dev.toastbits.lifelog.extension.gdocs.GDocsExtension
 import dev.toastbits.lifelog.extension.gdocs.GDocsExtensionStrings
 import dev.toastbits.lifelog.extension.gdocs.MediaExtension
 import dev.toastbits.lifelog.extension.gdocs.alert.GDocsLogParseAlert
@@ -34,12 +35,12 @@ class GDocsDatabaseFileStructurePreprocessor(
     ): FileStructure {
         val mediaExtension: MediaExtension? = extensionRegistry.getAllExtensions().filterIsInstance<MediaExtension>().firstOrNull()
         if (mediaExtension == null) {
-            onAlert(ParseAlertData(GDocsLogParseAlert.MediaExtensionNotPresent(gdocsStrings.extensionId), null, null))
+            onAlert(ParseAlertData(GDocsLogParseAlert.MediaExtensionNotPresent, null, null))
         }
 
         val mediaReferenceType: MediaReferenceType? = mediaExtension?.extraInLogReferenceTypes?.firstOrNull { it is MediaReferenceType } as MediaReferenceType?
         if (mediaReferenceType == null) {
-            onAlert(ParseAlertData(GDocsLogParseAlert.MediaReferenceTypeNotPresent(gdocsStrings.extensionId), null, null))
+            onAlert(ParseAlertData(GDocsLogParseAlert.MediaReferenceTypeNotPresent, null, null))
         }
 
         val newStructure: MutableFileStructure = MutableFileStructure()
@@ -160,7 +161,7 @@ class GDocsDatabaseFileStructurePreprocessor(
     ) {
         val mediaReference: MediaReference =
             MediaReference(
-                extensionId = gdocsStrings.extensionId,
+                extensionId = GDocsExtension.ID,
                 index = index,
                 type = MediaReference.Type.IMAGE_PNG,
                 logDate = date,
@@ -234,7 +235,7 @@ class GDocsDatabaseFileStructurePreprocessor(
                 if (mediaReferenceType != null) {
                     val reference: LogEntityReference =
                         MediaReference(
-                            extensionId = gdocsStrings.extensionId,
+                            extensionId = GDocsExtension.ID,
                             index = imageIndex,
                             type = MediaReference.Type.IMAGE_PNG,
                             logDate = date,

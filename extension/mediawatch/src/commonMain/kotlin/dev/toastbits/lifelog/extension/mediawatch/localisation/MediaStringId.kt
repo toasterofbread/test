@@ -1,10 +1,14 @@
 package dev.toastbits.lifelog.extension.mediawatch.localisation
 
+import dev.toastbits.lifelog.core.specification.extension.ExtensionId
 import dev.toastbits.lifelog.core.specification.extension.SpecificationExtension
 import dev.toastbits.lifelog.core.specification.model.string.Locale
 import dev.toastbits.lifelog.core.specification.model.string.StringId
+import dev.toastbits.lifelog.extension.mediawatch.MediaWatchExtension
 
 internal sealed interface MediaStringId: StringId {
+    override val extensionId: ExtensionId get() = MediaWatchExtension.ID
+
     sealed interface Property: MediaStringId {
         enum class MediaEntity: Property {
             ITERATION

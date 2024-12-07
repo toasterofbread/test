@@ -1,6 +1,5 @@
 package dev.toastbits.lifelog.application.usercontent
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -20,7 +19,6 @@ import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.TextStyle
@@ -28,7 +26,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import com.seiko.imageloader.rememberImagePainter
 import dev.toastbits.composekit.components.LocalContext
 import dev.toastbits.composekit.context.PlatformContext
 import dev.toastbits.composekit.theme.ThemeValues
@@ -69,8 +66,9 @@ fun UserContentPart(part: UserContent.Part, textStyle: TextStyle) {
                 }
             }
             is UserContent.Part.Image -> {
-                val painter: Painter = rememberImagePainter(part.location)
-                Image(painter, contentDescription = null)
+                Text("Image<${part.location}> // TODO")
+//                val painter: Painter = rememberImagePainter(part.location)
+//                Image(painter, contentDescription = null)
             }
             is UserContent.Part.Single -> {
                 SinglePart(part)

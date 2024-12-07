@@ -1,6 +1,5 @@
 package dev.toastbits.lifelog.application.logview.data.ui.component.event
 
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
@@ -9,32 +8,36 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.components.utils.composable.SubtleLoadingIndicator
+import dev.toastbits.composekit.components.utils.composable.crossfade.NullCrossfade
 import dev.toastbits.lifelog.application.logview.data.ui.model.LogEventViewScreenState
+import dev.toastbits.lifelog.application.logview.data.ui.model.rememberLoadedOrNull
 import dev.toastbits.lifelog.application.usercontent.UserContentDisplay
 
 @Composable
 internal fun LogEventUserContent(
     state: LogEventViewScreenState,
-    loadingNextStateType: LogEventViewScreenState.Type?,
     modifier: Modifier = Modifier,
-    updateState: (LogEventViewScreenState) -> Unit
+    updateState: (LogEventViewScreenState.Loaded) -> Unit
 ) {
-    Crossfade(
-        loadingNextStateType,
+    val loadedState: LogEventViewScreenState.Loaded? by state.rememberLoadedOrNull()
+
+    NullCrossfade(
+        loadedState,
         modifier.fillMaxWidth()
-    ) { loadingType ->
-        if (loadingType != null) {
+    ) { loaded ->
+        if (loaded == null) {
             SubtleLoadingIndicator(Modifier.padding(top = 50.dp))
         }
         else {
-            when (val currentState: LogEventViewScreenState = state) {
-                is LogEventViewScreenState.Edit -> {
-                    val textFieldState: TextFieldState = remember { TextFieldState(currentState.content) }
+            when (loaded) {
+                is LogEventViewScreenState.Loaded.Edit -> {
+                    val textFieldState: TextFieldState = remember { TextFieldState(loaded.content) }
 
                     BasicTextField(
                         textFieldState,
@@ -43,13 +46,10 @@ internal fun LogEventUserContent(
                     )
 
                     LaunchedEffect(textFieldState.text) {
-                        updateState(currentState.copy(textFieldState.text.toString()))
+                        updateState(loaded.copy(textFieldState.text.toString()))
                     }
                 }
-                is LogEventViewScreenState.Preview ->
-                    UserContentDisplay(
-                        currentState.content
-                    )
+                is LogEventViewScreenState.Loaded.Preview -> UserContentDisplay(loaded.content)
             }
         }
     }

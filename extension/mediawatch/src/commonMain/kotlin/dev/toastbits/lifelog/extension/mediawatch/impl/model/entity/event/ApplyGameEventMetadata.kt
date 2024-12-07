@@ -11,16 +11,25 @@ internal fun applyGameEventMetadata(
     strings: MediaWatchExtensionStrings,
     logStrings: LogFileConverterStrings,
     onAlert: (LogParseAlert) -> Unit
-) {
+): GameMediaConsumeEvent {
+    var currentEvent: GameMediaConsumeEvent = event
     val parts: List<String> = text.split(',')
 
     for (part in parts) {
-        if (event.playedRange == null && applyEventPlayedRangeString(text, event, strings, logStrings, onAlert)) {
-            continue
+        if (currentEvent.playedRange == null) {
+            val newEvent: GameMediaConsumeEvent? =
+                applyEventPlayedRangeString(text, currentEvent, strings, logStrings, onAlert)
+
+            if (newEvent != null) {
+                currentEvent = newEvent
+                continue
+            }
         }
 
         TODO("$part | $text")
     }
+
+    return currentEvent
 }
 
 private fun applyEventPlayedRangeString(
@@ -29,12 +38,13 @@ private fun applyEventPlayedRangeString(
     strings: MediaWatchExtensionStrings,
     logStrings: LogFileConverterStrings,
     onAlert: (LogParseAlert) -> Unit
-): Boolean {
+): GameMediaConsumeEvent? {
     val range: GameMediaConsumeEvent.PlayedRange? = strings.parseLowercaseGamePlayedRange(text, logStrings)
     if (range != null) {
-        event.playedRange = range
-        return true
+        return event.copy(
+            playedRange = range
+        )
     }
 
-    return false
+    return null
 }

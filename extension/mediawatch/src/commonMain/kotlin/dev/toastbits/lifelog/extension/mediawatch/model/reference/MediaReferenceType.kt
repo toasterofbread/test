@@ -7,6 +7,7 @@ import dev.toastbits.lifelog.core.specification.database.LogDataFile
 import dev.toastbits.lifelog.core.specification.extension.ExtensionId
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReference
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceType
+import dev.toastbits.lifelog.extension.mediawatch.MediaWatchExtension
 import dev.toastbits.lifelog.extension.mediawatch.MediaWatchExtensionStrings
 import dev.toastbits.lifelog.extension.mediawatch.impl.model.mapper.createReference
 import dev.toastbits.lifelog.extension.mediawatch.util.MediaEntityType
@@ -15,14 +16,14 @@ class MediaReferenceType(
     private val strings: MediaWatchExtensionStrings
 ): LogEntityReferenceType.InMetadata() {
     override val id: String get() = strings.mediaReferenceTypeId
-    override val extensionId: ExtensionId get() = strings.extensionId
+    override val extensionId: ExtensionId = MediaWatchExtension.ID
 
     override fun parseReference(
         path: List<String>,
         onAlert: (LogParseAlert) -> Unit
     ): LogEntityReference.InMetadata? {
         val (entityType: MediaEntityType, mediaId: String) = parsePath(path, onAlert) ?: return null
-        return entityType.createReference(mediaId, extensionId, strings.mediaReferenceTypeId)
+        return entityType.createReference(mediaId, strings.mediaReferenceTypeId)
     }
 
     override fun parseReferenceMetadata(
