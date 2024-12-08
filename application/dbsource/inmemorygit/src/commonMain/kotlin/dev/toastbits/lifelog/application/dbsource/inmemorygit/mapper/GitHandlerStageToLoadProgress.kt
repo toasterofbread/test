@@ -20,17 +20,19 @@ import org.jetbrains.compose.resources.StringResource
 internal fun GitHandlerStage.toLoadProgress(part: Long?, total: Long?): LoadProgress {
     val type: LoadProgress.Type =
         when (this) {
-            GitHandlerStage.Clone.PULL -> LoadProgress.Type.NETWORK
-            GitHandlerStage.ResolveRef -> LoadProgress.Type.NETWORK
-            GitHandlerStage.PackFileParse.PREPARE_PACK -> LoadProgress.Type.GENERIC
-            GitHandlerStage.PackFileParse.READ_HEADER -> LoadProgress.Type.GENERIC
-            GitHandlerStage.PackFileParse.PARSE_OBJECTS -> LoadProgress.Type.GENERIC
-            GitHandlerStage.PackFileParse.CHECKSUM -> LoadProgress.Type.GENERIC
-            GitHandlerStage.RenderCommitTree -> LoadProgress.Type.GENERIC
-            GitHandlerStage.SerialisingFileStructure -> LoadProgress.Type.GENERIC
-            GitHandlerStage.WritingObjectsToCache -> LoadProgress.Type.GENERIC
-            GitHandlerStage.PackFileGenerate -> LoadProgress.Type.GENERIC
-            GitHandlerStage.Push -> LoadProgress.Type.NETWORK
+            GitHandlerStage.Clone.PULL -> LoadProgress.Type.Network
+            GitHandlerStage.ResolveRef -> LoadProgress.Type.Network
+            GitHandlerStage.PackFileParse.PREPARE_PACK -> LoadProgress.Type.Generic
+            GitHandlerStage.PackFileParse.READ_HEADER -> LoadProgress.Type.Generic
+            GitHandlerStage.PackFileParse.PARSE_OBJECTS -> LoadProgress.Type.Generic
+            GitHandlerStage.PackFileParse.CHECKSUM -> LoadProgress.Type.Generic
+            is GitHandlerStage.RenderCommitTree ->
+                currentObject?.let { LoadProgress.Type.Object(it) }
+                    ?: LoadProgress.Type.Generic
+            GitHandlerStage.SerialisingFileStructure -> LoadProgress.Type.Generic
+            GitHandlerStage.WritingObjectsToCache -> LoadProgress.Type.Generic
+            GitHandlerStage.PackFileGenerate -> LoadProgress.Type.Generic
+            GitHandlerStage.Push -> LoadProgress.Type.Network
         }
 
     val messageResource: StringResource =
@@ -41,7 +43,7 @@ internal fun GitHandlerStage.toLoadProgress(part: Long?, total: Long?): LoadProg
             GitHandlerStage.PackFileParse.READ_HEADER -> Res.string.accessor_progress_pack_file_parse_reading_header
             GitHandlerStage.PackFileParse.PARSE_OBJECTS -> Res.string.accessor_progress_pack_file_parse_parsing_objects
             GitHandlerStage.PackFileParse.CHECKSUM -> Res.string.accessor_progress_pack_file_parse_checksum
-            GitHandlerStage.RenderCommitTree -> Res.string.accessor_progress_rendering_commit_tree
+            is GitHandlerStage.RenderCommitTree -> Res.string.accessor_progress_rendering_commit_tree
             GitHandlerStage.SerialisingFileStructure -> Res.string.accessor_progress_serialising_file_structure
             GitHandlerStage.WritingObjectsToCache -> Res.string.accessor_progress_writing_objects_to_cache
             GitHandlerStage.PackFileGenerate -> Res.string.accessor_progress_pack_file_generating

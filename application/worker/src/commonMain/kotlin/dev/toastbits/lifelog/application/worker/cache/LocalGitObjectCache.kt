@@ -45,10 +45,14 @@ class LocalGitObjectCache private constructor(
         }
     }
 
-    override suspend fun getAvailableObjects(type: GitObject.Type?): Sequence<GitObjectRegistry.GitObjectInfo> = mutex.withLock {
+    override suspend fun hasObject(hash: String): Boolean =
+        objects.contains(hash)
+            || database.objectQueries.getType(repositoryIdentifier, hash).awaitAsOneOrNull() != null
+
+    override suspend fun getAvailableObjects(types: List<GitObject.Type>?): Sequence<GitObjectRegistry.GitObjectInfo> = mutex.withLock {
         (
             database.objectQueries
-                .list(repositoryIdentifier, type?.ordinal?.toLong())
+                .list(repositoryIdentifier, (types ?: GitObject.Type.entries).map { it.ordinal.toLong() })
                 .awaitAsList()
                 .asSequence()
                 .mapNotNull { obj ->
@@ -61,34 +65,58 @@ class LocalGitObjectCache private constructor(
         )
     }
 
-    override suspend fun hasObject(ref: String): Boolean =
-        objects.contains(ref)
-            || database.objectQueries.getType(repositoryIdentifier, ref).awaitAsOneOrNull() != null
+    override suspend fun hasObjects(hashes: List<String>): List<Boolean> {
+        val ret: MutableList<Boolean> = mutableListOf()
+        val neededHashes: MutableMap<String, Int> = mutableMapOf()
 
-    override suspend fun readObjectOrNull(ref: String): GitObject? = mutex.withLock {
-        objects[ref]?.obj
-        ?: database.objectQueries.get(repositoryIdentifier, ref).awaitAsOneOrNull()?.let { (dataBase64, type) ->
-            GitObject(base64.decode(dataBase64), type.toGitObjectType(), ref)
+        for ((index, hash) in hashes.withIndex()) {
+            val hasObject: Boolean = objects.contains(hash)
+            ret.add(hasObject)
+
+            if (!hasObject) {
+                neededHashes[hash] = index
+            }
+        }
+
+        if (neededHashes.isNotEmpty()) {
+            val databaseHashes: List<String> =
+                database.objectQueries
+                    .listHashes(repositoryIdentifier, neededHashes.keys)
+                    .awaitAsList()
+
+            for (hash in databaseHashes) {
+                val index: Int = neededHashes[hash]!!
+                ret[index] = true
+            }
+        }
+
+        return ret
+    }
+
+    override suspend fun readObjectOrNull(hash: String): GitObject? = mutex.withLock {
+        objects[hash]?.obj
+        ?: database.objectQueries.get(repositoryIdentifier, hash).awaitAsOneOrNull()?.let { (dataBase64, type) ->
+            GitObject(base64.decode(dataBase64), type.toGitObjectType(), hash)
         }
     }
 
-    override suspend fun readObjects(refs: List<String>): List<GitObject> {
+    override suspend fun readObjects(hashes: List<String>): List<GitObject> {
         val ret: MutableList<GitObject> = mutableListOf()
-        val neededRefs: MutableList<String> = mutableListOf()
-        for (ref in refs) {
-            val obj: GitObject? = objects[ref]?.obj
+        val neededHashes: MutableList<String> = mutableListOf()
+        for (hash in hashes) {
+            val obj: GitObject? = objects[hash]?.obj
             if (obj != null) {
                 ret.add(obj)
             }
             else {
-                neededRefs.add(ref)
+                neededHashes.add(hash)
             }
         }
 
-        if (neededRefs.isNotEmpty()) {
+        if (neededHashes.isNotEmpty()) {
             ret.addAll(
-                database.objectQueries.getMultiple(repositoryIdentifier, neededRefs).awaitAsList().map { (ref, type, dataBase64) ->
-                    GitObject(base64.decode(dataBase64), type.toGitObjectType(), ref)
+                database.objectQueries.getMultiple(repositoryIdentifier, neededHashes).awaitAsList().map { (hash, type, dataBase64) ->
+                    GitObject(base64.decode(dataBase64), type.toGitObjectType(), hash)
                 }
             )
         }

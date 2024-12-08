@@ -2,6 +2,8 @@ package dev.toastbits.lifelog.application.dbsource.domain.accessor
 
 import androidx.compose.runtime.Composable
 import dev.toastbits.kogit.memory.handler.GitCommitGenerator.UserInfo
+import dev.toastbits.kogit.memory.model.GitObjectRegistry
+import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor.LoadProgress
 import dev.toastbits.lifelog.application.dbsource.domain.model.LogDatabaseParseResult
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import okio.Path
@@ -20,20 +22,21 @@ interface DatabaseAccessor {
     fun getFileLineUri(filePath: Path, lineIndex: UInt?): String?
 
     interface LoadProgress {
+        val type: Type
         val isError: Boolean get() = false
 
         fun getMessageResource(): StringResource
 
-        @Composable
-        fun getProgressMessage(): String? = null
+        suspend fun getProgressMessage(): String? = null
 
         interface Absolute: LoadProgress {
             val progressFraction: Float
         }
 
-        enum class Type {
-            GENERIC,
-            NETWORK;
+        sealed interface Type {
+            data object Generic: Type
+            data object Network: Type
+            data class Object(val currentObject: GitObjectRegistry.GitObjectInfo): Type
         }
 
         companion object
@@ -50,5 +53,6 @@ interface OfflineDatabaseAccessor: DatabaseAccessor {
 
 fun DatabaseAccessor.LoadProgress.Companion.message(resource: StringResource): DatabaseAccessor.LoadProgress =
     object : DatabaseAccessor.LoadProgress {
+        override val type: LoadProgress.Type = LoadProgress.Type.Generic
         override fun getMessageResource(): StringResource = resource
     }

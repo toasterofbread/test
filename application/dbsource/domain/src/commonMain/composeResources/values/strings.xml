@@ -5,4 +5,8 @@
 
     <string name="database_accessor_load_progress_network_$bytes">$bytes bytes</string>
     <string name="database_accessor_load_progress_network_$bytes_of_$total_$percent">$bytes bytes out of $bytes ($percent%)</string>
+
+    <string name="database_accessor_load_progress_object_$part_$type_$hash">$part</string>
+    <string name="database_accessor_load_progress_object_$total_$type_$hash">total $total</string>
+    <string name="database_accessor_load_progress_object_$part_of_$total_$type_$hash">$part of $total</string>
 </resources>

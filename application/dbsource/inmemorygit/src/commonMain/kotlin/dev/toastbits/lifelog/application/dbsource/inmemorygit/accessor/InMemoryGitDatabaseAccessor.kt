@@ -90,7 +90,7 @@ class InMemoryGitDatabaseAccessor(
                 branch = GitRef.Branch(configuration.branchName),
                 gitCredentials = gitCredentials,
                 fileStructure = fileStructure.toSerialisable {
-                    onProgress(LoadProgress.Type.GENERIC.create(it.toLong(), null, Res.string.accessor_progress_serialising_file_structure))
+                    onProgress(LoadProgress.Type.Generic.create(it.toLong(), null, Res.string.accessor_progress_serialising_file_structure))
                 }
             )
 
