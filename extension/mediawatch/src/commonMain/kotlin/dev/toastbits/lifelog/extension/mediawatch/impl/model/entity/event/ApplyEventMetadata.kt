@@ -85,7 +85,8 @@ private fun applyEventIterationString(
             else -> null
         }
 
-    if (number == null && iterationText.endsWith("th")) {
+    val suffixes: List<String> = listOf("st", "nd", "rd", "th")
+    if (number == null && suffixes.any { iterationText.endsWith(it) }) {
         number = iterationText.dropLast(2).trimEnd().toIntOrNull()
     }
 

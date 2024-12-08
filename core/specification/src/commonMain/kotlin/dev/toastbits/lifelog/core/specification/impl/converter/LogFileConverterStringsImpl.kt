@@ -7,9 +7,7 @@ import dev.toastbits.lifelog.core.specification.converter.logDateFormatOf
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
-import kotlinx.datetime.format.alternativeParsing
 import kotlinx.datetime.format.char
-import kotlinx.datetime.format.optional
 
 data class LogFileConverterStringsImpl(
     override val metadataDirectoryName: String = "metadata",
@@ -133,7 +131,18 @@ data class LogFileConverterStringsImpl(
             8 -> "eighth"
             9 -> "ninth"
             10 -> "tenth"
-            else -> "${number}th"
+            else -> {
+                val suffix: String =
+                    if (number < 20) "th"
+                    else when (number.toString().lastOrNull()) {
+                        '1' -> "st"
+                        '2' -> "nd"
+                        '3' -> "rd"
+                        else -> "th"
+                    }
+
+                "$number$suffix"
+            }
         }
 }
 
