@@ -15,6 +15,8 @@
     <string name="log_view_screen_button_save">Save changes</string>
     <string name="log_view_screen_button_discard_event_changes">Discard changes for this event</string>
     <string name="log_view_screen_title_review_changes">Review changes</string>
+    <string name="log_view_screen_column_title_old">Current</string>
+    <string name="log_view_screen_column_title_new">Updated</string>
 
     <string name="event_screen_metadata_heading_$verb_on_$date">$verb on $date</string>
 </resources>

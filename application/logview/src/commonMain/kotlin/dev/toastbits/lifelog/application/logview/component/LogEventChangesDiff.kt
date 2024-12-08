@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -14,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.components.utils.composable.pane.ResizableSyncedSplitColumn
@@ -36,8 +38,12 @@ import io.github.petertrr.diffutils.text.DiffRowGenerator
 import lifelog.application.logview.generated.resources.Res
 import lifelog.application.logview.generated.resources.`log_view_screen_$x_content_changes_made`
 import lifelog.application.logview.generated.resources.`log_view_screen_$x_property_changes_made`
+import lifelog.application.logview.generated.resources.log_view_screen_column_title_new
+import lifelog.application.logview.generated.resources.log_view_screen_column_title_old
 import org.jetbrains.compose.resources.PluralStringResource
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun <T: LogEvent> LogEventChangesDiff(
@@ -71,6 +77,19 @@ fun <T: LogEvent> LogEventChangesDiff(
             }
         ) { isStart: Boolean, stage: DiffStage<T> ->
             when (stage) {
+                is DiffStage.Title -> {
+                    val titleStringResource: StringResource =
+                        if (isStart) Res.string.log_view_screen_column_title_old
+                        else Res.string.log_view_screen_column_title_new
+
+                    Text(
+                        stringResource(titleStringResource),
+                        Modifier
+                            .padding(vertical = 15.dp)
+                            .alpha(0.7f),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
                 is DiffStage.Heading -> {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -168,6 +187,7 @@ private fun ContentChangeText(
 }
 
 private sealed interface DiffStage<T: LogEntity> {
+    class Title<T: LogEntity>: DiffStage<T>
     sealed interface Heading<T: LogEntity>: DiffStage<T> {
         val changeCount: Int
         data class Properties<T: LogEntity>(override val changeCount: Int): Heading<T>
@@ -187,6 +207,8 @@ private fun <T : LogEvent> buildDiffStages(
     eventReference: LogEventReference,
 ): List<DiffStage<T>> =
     buildList {
+        add(DiffStage.Title())
+
         val propertyChanges: List<LogEntityChanges.Change<T, *>> =
             changes.changesList.filter { it.property != LogEvent.PROPERTY_CONTENT }
 
