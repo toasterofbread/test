@@ -59,7 +59,7 @@ class UserContentLogEntityProperty<T: LogEntity>(
         getValue(entity) != null
 
     override fun areValuesEquivalent(a: UserContent?, b: UserContent?): Boolean =
-        a == b || ((a != null && b != null) && (a.isEmpty() && b.isEmpty()) || a?.normalised() == b?.normalised())
+        (a?.normalised() ?: UserContent.EMPTY) == (b?.normalised() ?: UserContent.EMPTY)
 }
 
 class LocalDateLogEntityProperty<T: LogEntity>(
