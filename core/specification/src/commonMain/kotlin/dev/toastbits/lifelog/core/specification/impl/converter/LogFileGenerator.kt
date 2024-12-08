@@ -151,7 +151,7 @@ internal class LogFileGenerator(
             event
         )
 
-        event.content?.also { content ->
+        event.content?.normalised()?.takeIf { !it.isBlank() }?.also { content ->
             addLine("")
             val contentTextLines: List<String> = userContentGenerator.generateUserContent(content, referenceGenerator, ::onAlert).split('\n')
             for (line in contentTextLines) {

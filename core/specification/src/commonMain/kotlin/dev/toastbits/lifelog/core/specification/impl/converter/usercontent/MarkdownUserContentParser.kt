@@ -27,11 +27,12 @@ class MarkdownUserContentParser: UserContentParser {
         referenceParser: LogEntityReferenceParser,
         onAlert: (alert: LogParseAlert, line: Int) -> Unit
     ): UserContent {
+        val inputText: String = text.trim()
         val parts: MutableList<UserContent.Part> = mutableListOf()
 
         val nodes: MutableList<ASTNode> =
             mutableListOf(
-                MarkdownParser(getFlavour()).buildMarkdownTreeFromString(text)
+                MarkdownParser(getFlavour()).buildMarkdownTreeFromString(inputText)
             )
 
         var currentLine: Int = 0
@@ -44,7 +45,7 @@ class MarkdownUserContentParser: UserContentParser {
 
             if (linkOpeningBracket && node.type.name != ")") {
                 linkOpeningBracket = false
-                linkDestinationText += node.getTextInNode(text)
+                linkDestinationText += node.getTextInNode(inputText)
                 linkOpeningBracket = true
                 return emptyList()
             }
@@ -68,7 +69,7 @@ class MarkdownUserContentParser: UserContentParser {
                 "ATX_CONTENT",
                 "ATX_HEADER" -> return node.children.getParts()
                 "TEXT", "WHITE_SPACE", "CODE_FENCE_CONTENT" -> {
-                    val nodeText: String = node.getTextInNode(text).toString()
+                    val nodeText: String = node.getTextInNode(inputText).toString()
                     return listOf(UserContent.Part.Single(nodeText))
                 }
                 "EOL" -> {
@@ -110,7 +111,7 @@ class MarkdownUserContentParser: UserContentParser {
                         linkNode = linkNode.children.getOrNull(1)
                     }
 
-                    return listOfNotNull(UserContent.Part.Image(linkNode?.getTextInNode(text).toString()))
+                    return listOfNotNull(UserContent.Part.Image(linkNode?.getTextInNode(inputText).toString()))
                 }
                 "ATX_1", "ATX_2", "ATX_3", "ATX_4", "ATX_5", "ATX_6" -> {
                     val level: Int = node.type.name.last().digitToInt()
@@ -128,7 +129,7 @@ class MarkdownUserContentParser: UserContentParser {
                     )
                 }
                 "GFM_AUTOLINK" -> {
-                    val link: String = node.getTextInNode(text).toString()
+                    val link: String = node.getTextInNode(inputText).toString()
                     return listOf(UserContent.Part.Single(link))
                 }
                 "LINK_LABEL" -> {
@@ -148,14 +149,14 @@ class MarkdownUserContentParser: UserContentParser {
                                 linkTextParts = linkTextNodes.flatMap { getNodeParts(it) }
                             }
                             "LINK_DESTINATION" -> {
-                                var linkText: String = linkChild.getTextInNode(text).toString()
+                                var linkText: String = linkChild.getTextInNode(inputText).toString()
                                 if (linkText.startsWith('<') && linkText.endsWith('>')) {
                                     linkText = linkText.substring(1, linkText.length - 1)
                                 }
                                 linkReference = referenceParser.parseReference(linkText, onAlert = { onAlert(it, currentLine) })
                             }
                             "(", ")" -> {}
-                            else -> onAlert(node.toUnhandledAlert("LINK", text), currentLine)
+                            else -> onAlert(node.toUnhandledAlert("LINK", inputText), currentLine)
                         }
                     }
 
@@ -189,11 +190,11 @@ class MarkdownUserContentParser: UserContentParser {
                     }
 
                     if (node.type.name.length == 1) {
-                        val nodeText: String = node.getTextInNode(text).toString()
+                        val nodeText: String = node.getTextInNode(inputText).toString()
                         return listOf(UserContent.Part.Single(nodeText))
                     }
 
-                    onAlert(node.toUnhandledAlert("TOP", text), currentLine)
+                    onAlert(node.toUnhandledAlert("TOP", inputText), currentLine)
                     return emptyList()
                 }
             }

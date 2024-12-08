@@ -14,6 +14,7 @@ data class UserContent(
         fun asText(): String
         fun withModifiers(mods: Set<Mod>): Part
         fun isEmpty(): Boolean
+        fun isBlank(): Boolean
 
         data class Single(
             val text: String,
@@ -23,6 +24,7 @@ data class UserContent(
             override fun asText(): String = text
             override fun withModifiers(mods: Set<Mod>): Part = copy(mods = mods)
             override fun isEmpty(): Boolean = text.isEmpty()
+            override fun isBlank(): Boolean = text.isBlank()
         }
 
         data class Composite(
@@ -31,7 +33,8 @@ data class UserContent(
         ): Part {
             override fun asText(): String = parts.joinToString("") { it.asText() }
             override fun withModifiers(mods: Set<Mod>): Part = copy(mods = mods)
-            override fun isEmpty(): Boolean = parts.any { it.isEmpty() }
+            override fun isEmpty(): Boolean = parts.all { it.isEmpty() }
+            override fun isBlank(): Boolean = parts.all { it.isBlank() }
         }
 
         data class Image(
@@ -42,6 +45,7 @@ data class UserContent(
             override fun asText(): String = "<image at $location>"
             override fun withModifiers(mods: Set<Mod>): Part = copy(mods = mods)
             override fun isEmpty(): Boolean = location.isEmpty()
+            override fun isBlank(): Boolean = location.isBlank()
         }
     }
 
@@ -60,7 +64,10 @@ data class UserContent(
     fun normalised(): UserContent = UserContent(parts.normalised())
 
     fun isEmpty(): Boolean =
-        parts.any { it.isEmpty() }
+        parts.all { it.isEmpty() }
+
+    fun isBlank(): Boolean =
+        parts.all { it.isBlank() }
 
     companion object {
         fun single(text: String, mods: Set<Mod> = emptySet()): UserContent =
