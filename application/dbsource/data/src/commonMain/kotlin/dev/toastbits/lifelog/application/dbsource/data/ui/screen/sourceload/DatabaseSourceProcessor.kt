@@ -1,6 +1,8 @@
 package dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -12,24 +14,20 @@ import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
 import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
 import dev.toastbits.lifelog.application.dbsource.data.ui.component.DatabaseSourceConfigurationPreview
-import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step.LoadStep
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
-import dev.toastbits.lifelog.core.specification.converter.LogFileConverter
+import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
 import lifelog.application.dbsource.data.generated.resources.Res
 import lifelog.application.dbsource.data.generated.resources.button_database_loader_cancel
 import lifelog.application.dbsource.data.generated.resources.button_database_loader_proceed
@@ -37,68 +35,23 @@ import lifelog.application.dbsource.data.generated.resources.database_loader_pro
 import lifelog.application.dbsource.data.generated.resources.database_loader_proceed_tooltip_load_in_progress
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration
-import kotlin.time.TimeMark
-import kotlin.time.TimeSource
 
 @Composable
-internal fun <R> DatabaseSourceLoader(
+internal fun <R> DatabaseSourceProcessor(
     sourceConfiguration: DatabaseSourceConfiguration,
     databaseAccessor: DatabaseAccessor,
-    initialStep: LoadStep<R>,
-    getAlerts: (R) -> List<LogFileConverter.AlertOnLine<*>>,
+    loadException: Throwable?,
+    finishedStepsProgress: MutableList<DatabaseAccessor.LoadProgress>,
+    currentProgress: DatabaseAccessor.LoadProgress?,
+    loadResult: Pair<R, Duration>?,
+    getAlerts: (R) -> List<Alert>,
     modifier: Modifier = Modifier,
-    onProceeded: (R) -> Unit,
+    onUserProceeded: ((R) -> Unit)?,
     autoProceed: Boolean = false,
-    canProceedWith: (R) -> Boolean = { true },
+    canProceedWith: (R) -> Boolean = { true }
 ) {
     val navigator: Navigator = LocalNavigator.current
     val theme: ThemeValues = LocalComposeKitTheme.current
-
-    var loadException: Throwable? by remember { mutableStateOf(null) }
-    var currentStep: LoadStep<R> by remember { mutableStateOf(initialStep) }
-
-    val finishedStepsProgress: MutableList<DatabaseAccessor.LoadProgress> = remember { mutableStateListOf() }
-    var currentProgress: DatabaseAccessor.LoadProgress? by remember { mutableStateOf(null) }
-
-    val loadStartTime: TimeMark = remember { TimeSource.Monotonic.markNow() }
-    var loadResult: Pair<R, Duration>? by remember { mutableStateOf(null) }
-
-    LaunchedEffect(currentStep) {
-        val result: LoadStep.ExecuteResult<R> =
-            currentStep.execute(databaseAccessor) { progress ->
-                if (progress.isError) {
-                    finishedStepsProgress.add(progress)
-                    return@execute
-                }
-
-                val current: DatabaseAccessor.LoadProgress? = currentProgress
-                if (current != null && current.getMessageResource() != progress.getMessageResource()) {
-                    finishedStepsProgress.add(current)
-                }
-                currentProgress = progress
-            }
-
-        currentProgress?.also {
-            finishedStepsProgress.add(it)
-            currentProgress = null
-        }
-
-        when (result) {
-            is LoadStep.ExecuteResult.Done -> {
-                loadResult = result.result to loadStartTime.elapsedNow()
-
-                if (autoProceed && canProceedWith(result.result)) {
-                    onProceeded(result.result)
-                }
-            }
-            is LoadStep.ExecuteResult.ExceptionThrown -> {
-                result.exception.printStackTrace()
-                loadException = result.exception
-            }
-
-            is LoadStep.ExecuteResult.NextStep -> currentStep = result.nextStep
-        }
-    }
 
     Column(modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
         DatabaseSourceConfigurationPreview(sourceConfiguration)
@@ -118,18 +71,29 @@ internal fun <R> DatabaseSourceLoader(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End)
         ) {
-            Button({ navigator.navigateBackward() }) {
-                Text(stringResource(Res.string.button_database_loader_cancel))
-            }
-
-            if (autoProceed) {
-                return@Row
-            }
-
             val allowProceed: Boolean =
                 remember(loadResult) {
                     loadResult?.first?.let { canProceedWith(it) } ?: false
                 }
+
+            Button({ navigator.navigateBackward() }) {
+                val proceedTextOpacity: Float by animateFloatAsState(if (onUserProceeded == null && allowProceed) 1f else 0f)
+
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        stringResource(Res.string.button_database_loader_cancel),
+                        Modifier.graphicsLayer { alpha = 1f - proceedTextOpacity }
+                    )
+                    Text(
+                        stringResource(Res.string.button_database_loader_proceed),
+                        Modifier.graphicsLayer { alpha = proceedTextOpacity }
+                    )
+                }
+            }
+
+            if (autoProceed || onUserProceeded == null) {
+                return@Row
+            }
 
             TooltipBox(
                 TooltipDefaults.rememberPlainTooltipPositionProvider(),
@@ -155,7 +119,7 @@ internal fun <R> DatabaseSourceLoader(
                         }
 
                         loadResult?.first?.also {
-                            onProceeded(it)
+                            onUserProceeded(it)
                         }
                     },
                     enabled = allowProceed

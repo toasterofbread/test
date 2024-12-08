@@ -7,6 +7,6 @@ sealed interface LogConvertAlert {
     val alertExtensionId: ExtensionId?
 
     enum class Severity {
-        WARNING, ERROR
+        ERROR, WARNING
     }
 }

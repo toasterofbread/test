@@ -49,7 +49,7 @@ sealed interface MediaConsumeEvent: LogEvent {
         override fun getProperties(): List<LogEntityProperty<MediaConsumeEvent, *>> =
             listOf(
                 MediaStringId.Property.MediaConsumeEvent.MEDIA_REFERENCE.entityReferenceProperty({ mediaReference }, { copy(it as MediaReference, iteration, iterationsUnsure) }),
-                MediaStringId.Property.MediaEntity.ITERATION.intProperty({ iteration }, { copy(mediaReference, it, iterationsUnsure) }, 0 .. Int.MAX_VALUE)
+                MediaStringId.Property.MediaEntity.ITERATION.intProperty({ iteration }, { copy(mediaReference, it, iterationsUnsure) }, 1 .. Int.MAX_VALUE)
             )
     }
 }

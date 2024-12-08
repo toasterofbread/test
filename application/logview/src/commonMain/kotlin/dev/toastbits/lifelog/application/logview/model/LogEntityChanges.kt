@@ -17,6 +17,7 @@ class LogEntityChanges<T: LogEntity> private constructor(
         return currentEntity
     }
 
+    @Suppress("UNCHECKED_CAST")
     fun <V> copyWithProperty(property: LogEntityProperty<in T, V>, newValue: V): LogEntityChanges<T> =
         copyWithChange(Change(property as LogEntityProperty<T, V>, newValue))
 

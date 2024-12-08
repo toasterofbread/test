@@ -3,6 +3,7 @@ package dev.toastbits.lifelog.application.worker.command
 import dev.toastbits.kogit.core.filestructure.SerialisableFileStructure
 import dev.toastbits.kogit.core.model.GitCredentials
 import dev.toastbits.kogit.memory.handler.GitCommitGenerator.UserInfo
+import dev.toastbits.kogit.memory.handler.GitPusher
 import dev.toastbits.kogit.memory.handler.stage.GitHandlerStage
 import dev.toastbits.kogit.memory.helper.GitHelper
 import dev.toastbits.kogit.memory.model.GitObject
@@ -58,7 +59,7 @@ data class WorkerCommandInMemoryGitCommit(
             }
 
         val headCommit: GitObject = cache.readObject(headCommitRef)
-        val newCommit: GitObject =
+        val pushResponse: GitPusher.Response =
             gitHelper.commitAndPushFileStructure(
                 headCommit,
                 fileStructure,
@@ -70,12 +71,12 @@ data class WorkerCommandInMemoryGitCommit(
                 return it.toResult()
             }
 
-        return WorkerCommandResult.Success(Response(newCommit.hash))
+        return WorkerCommandResult.Success(Response(pushResponse))
     }
 
     @Serializable
     data class Progress(val stage: GitHandlerStage, val part: Long?, val total: Long?): WorkerCommandProgress
 
     @Serializable
-    data class Response(val newCommitRef: String): WorkerCommandResponse
+    data class Response(val pushResponse: GitPusher.Response): WorkerCommandResponse
 }

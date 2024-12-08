@@ -1,19 +1,13 @@
 package dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload
 
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import dev.toastbits.composekit.navigation.navigator.Navigator
-import dev.toastbits.composekit.navigation.screen.Screen
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step.LoadStep
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step.LoadStepCheckIfUpToDate
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step.LoadStepLoadOnline
-import dev.toastbits.lifelog.application.dbsource.data.ui.util.rememberDatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.OfflineDatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
+import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
 import dev.toastbits.lifelog.application.dbsource.domain.model.LogDatabaseParseResult
 import dev.toastbits.lifelog.core.specification.converter.alert.LogConvertAlert
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
@@ -22,39 +16,43 @@ import lifelog.application.dbsource.data.generated.resources.database_loader_tit
 import org.jetbrains.compose.resources.stringResource
 
 class DatabaseSourceLoadScreen(
-    private val sourceConfiguration: DatabaseSourceConfiguration,
+    sourceConfiguration: DatabaseSourceConfiguration,
     private val onLoaded: (LogDatabase) -> Unit,
-    private val autoProceed: Boolean = false
-): Screen {
+    autoProceed: Boolean = false
+): DatabaseSourceProcessScreen<LogDatabaseParseResult>(
+    sourceConfiguration = sourceConfiguration,
+    autoProceed = autoProceed
+) {
     override val title: String
         @Composable
         get() = stringResource(Res.string.database_loader_title)
 
-    @Composable
-    override fun Content(navigator: Navigator, modifier: Modifier, contentPadding: PaddingValues) {
-        val databaseAccessor: DatabaseAccessor = rememberDatabaseAccessor(sourceConfiguration)
+    override fun getInitialStep(databaseAccessor: DatabaseAccessor): LoadStep<LogDatabaseParseResult> =
+        if (databaseAccessor is OfflineDatabaseAccessor)
+            LoadStepCheckIfUpToDate(databaseAccessor)
+        else
+            LoadStepLoadOnline
 
-        val initialStep: LoadStep<LogDatabaseParseResult> =
-            remember(databaseAccessor) {
-                if (databaseAccessor is OfflineDatabaseAccessor)
-                    LoadStepCheckIfUpToDate(databaseAccessor)
-                else
-                    LoadStepLoadOnline
-            }
+    override fun canProceedWithResult(result: LogDatabaseParseResult): Boolean =
+        result.alerts.none { it.alert.severity == LogConvertAlert.Severity.ERROR }
 
-        DatabaseSourceLoader(
-            sourceConfiguration = sourceConfiguration,
-            databaseAccessor = databaseAccessor,
-            initialStep = initialStep,
-            getAlerts = { it.alerts },
-            modifier = modifier.padding(contentPadding),
-            onProceeded = {
-                onLoaded(it.database)
-            },
-            autoProceed = autoProceed,
-            canProceedWith = { result ->
-                result.alerts.none { it.alert.severity == LogConvertAlert.Severity.ERROR }
-            }
-        )
+    override fun getResultAlerts(result: LogDatabaseParseResult): List<Alert> =
+        result.alerts.map {
+            Alert(
+                message = it.alert.toString(),
+                filePath = it.filePath,
+                lineIndex = it.lineIndex,
+                severity =
+                    when (it.alert.severity) {
+                        LogConvertAlert.Severity.ERROR -> Alert.Severity.ERROR
+                        LogConvertAlert.Severity.WARNING -> Alert.Severity.WARNING
+                    }
+            )
+        }
+
+    override fun hasUserProceedAction(): Boolean = true
+
+    override fun onUserProceeded(result: LogDatabaseParseResult) {
+        onLoaded(result.database)
     }
 }

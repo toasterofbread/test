@@ -70,14 +70,15 @@ import kotlin.time.Duration.Companion.milliseconds
 private val CHANGES_UPDATE_DELAY: Duration = 500.milliseconds
 
 class LogEventScreen<T: LogEvent>(
-    private val event: T,
+    event: T,
     private val date: LogDate,
     private val logDatabase: LogDatabase,
     initialChanges: LogEntityChanges<T>,
-    private val onChangesChanged: (LogEntityChanges<T>) -> Unit
+    private val onChangesChanged: (T, LogEntityChanges<T>) -> Unit
 ): Screen {
     private val coroutineScope: CoroutineScope = CoroutineScope(Job())
 
+    var event: T by mutableStateOf(event)
     private var changes: LogEntityChanges<T> by mutableStateOf(initialChanges)
     private var state: LogEventViewScreenState by mutableStateOf(LogEventViewScreenState.Loaded.Preview(getCurrentContent()))
 
@@ -152,7 +153,7 @@ class LogEventScreen<T: LogEvent>(
                 changes.copyWithProperty(
                     LogEvent.PROPERTY_CONTENT, newContent
                 )
-            onChangesChanged(changes)
+            onChangesChanged(event, changes)
         }
 
         BoxWithConstraints(modifier) {

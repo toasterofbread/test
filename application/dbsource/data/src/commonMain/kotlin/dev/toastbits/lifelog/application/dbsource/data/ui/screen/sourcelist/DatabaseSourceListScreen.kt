@@ -12,6 +12,7 @@ import dev.toastbits.kogit.memory.handler.GitCommitGenerator.UserInfo
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceconfiguration.DatabaseSourceConfigurationScreen
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.DatabaseSourceLoadScreen
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.DatabaseSourceSaveScreen
+import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
 import dev.toastbits.lifelog.application.logview.screen.LogListScreen
@@ -22,8 +23,6 @@ import dev.toastbits.lifelog.application.settings.domain.model.SerialisedDatabas
 import dev.toastbits.lifelog.application.settings.domain.model.deserialiseConfiguration
 import dev.toastbits.lifelog.application.settings.domain.model.serialiseConfiguration
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
 import lifelog.application.dbsource.data.generated.resources.Res
 import lifelog.application.dbsource.data.generated.resources.button_configure_database_source_cancel
 import lifelog.application.dbsource.data.generated.resources.button_configure_database_source_save
@@ -37,10 +36,12 @@ class LogSaveScreenProviderImpl(
     override fun invoke(
         database: LogDatabase,
         autoProceed: Boolean,
-        onFinished: () -> Unit
+        onProceeded: ((DatabaseAccessor.SaveResult) -> Unit)?,
+        onSaveFinished: (DatabaseAccessor.SaveResult) -> Unit
     ): Screen {
+        // TODO
         val user: UserInfo =
-            UserInfo("Talo Halton", "talohalton@gmail.com", Clock.System.now(), TimeZone.currentSystemDefault())
+            UserInfo.ofNow("Talo Halton", "talohalton@gmail.com")
 
         return DatabaseSourceSaveScreen(
             database = database,
@@ -48,7 +49,8 @@ class LogSaveScreenProviderImpl(
             author = user,
             committer = user,
             sourceConfiguration = sourceConfiguration,
-            onFinished = onFinished,
+            onProceeded = onProceeded,
+            onSaveFinished = onSaveFinished,
             autoProceed = autoProceed
         )
     }

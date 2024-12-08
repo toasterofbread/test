@@ -2,6 +2,7 @@ package dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.ste
 
 import dev.toastbits.kogit.memory.handler.GitCommitGenerator.UserInfo
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
+import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor.SaveResult
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 
 internal data class LoadStepSaveOnline(
@@ -9,8 +10,8 @@ internal data class LoadStepSaveOnline(
     val message: String,
     val author: UserInfo,
     val committer: UserInfo
-): LoadStep<Unit> {
-    override suspend fun execute(accessor: DatabaseAccessor, onProgress: (DatabaseAccessor.LoadProgress) -> Unit): LoadStep.ExecuteResult<Unit> =
+): LoadStep<SaveResult> {
+    override suspend fun execute(accessor: DatabaseAccessor, onProgress: (DatabaseAccessor.LoadProgress) -> Unit): LoadStep.ExecuteResult<SaveResult> =
         accessor.saveOnlineDatabase(
             database,
             message,
@@ -20,7 +21,7 @@ internal data class LoadStepSaveOnline(
         )
             .fold(
                 onSuccess = {
-                    LoadStep.ExecuteResult.Done(Unit)
+                    LoadStep.ExecuteResult.Done(it)
                 },
                 onFailure = {
                     LoadStep.ExecuteResult.ExceptionThrown(it)

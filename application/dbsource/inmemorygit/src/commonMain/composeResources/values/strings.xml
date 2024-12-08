@@ -30,4 +30,7 @@
     <string name="accessor_progress_potential_error">An unknown error occurred (could be unrelated)</string>
     <string name="accessor_progress_waiting_for_worker">Waiting for worker</string>
     <string name="accessor_progress_worker_started">Worker started</string>
+
+    <string name="git_pusher_response_warning_repository_moved_$to">Repository moved to $to</string>
+    <string name="git_pusher_response_message_unknown_$text">Unknown message: $text</string>
 </resources>

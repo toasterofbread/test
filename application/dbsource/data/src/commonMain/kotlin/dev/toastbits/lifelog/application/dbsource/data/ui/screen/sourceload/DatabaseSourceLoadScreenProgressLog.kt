@@ -26,8 +26,7 @@ import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
 import dev.toastbits.lifelog.application.core.ui.LinkText
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
-import dev.toastbits.lifelog.core.specification.converter.LogFileConverter
-import dev.toastbits.lifelog.core.specification.converter.alert.LogConvertAlert
+import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
 import lifelog.application.dbsource.data.generated.resources.Res
 import lifelog.application.dbsource.data.generated.resources.button_database_loader_go_to_file
 import lifelog.application.dbsource.data.generated.resources.`database_loader_finished_$duration_$warnings_$errors`
@@ -36,7 +35,7 @@ import kotlin.time.Duration
 
 @Composable
 internal fun DatabaseSourceLoadScreenProgressLog(
-    result: Pair<List<LogFileConverter.AlertOnLine<*>>, Duration>?,
+    result: Pair<List<Alert>, Duration>?,
     databaseAccessor: DatabaseAccessor,
     finishedStepsProgress: List<DatabaseAccessor.LoadProgress>,
     currentProgress: DatabaseAccessor.LoadProgress?,
@@ -52,11 +51,12 @@ internal fun DatabaseSourceLoadScreenProgressLog(
         }
     }
 
-    val (warnings, errors) = remember(result?.first) {
-        result?.first?.let { alerts ->
-            alerts.filter { it.alert.severity == LogConvertAlert.Severity.WARNING } to alerts.filter { it.alert.severity == LogConvertAlert.Severity.ERROR }
-        } ?: Pair(emptyList(), emptyList())
-    }
+    val (warnings: List<Alert>, errors: List<Alert>) =
+        remember(result?.first) {
+            result?.first?.let { alerts ->
+                alerts.filter { it.severity == Alert.Severity.WARNING } to alerts.filter { it.severity == Alert.Severity.ERROR }
+            } ?: Pair(emptyList(), emptyList())
+        }
 
     val loadExceptionStackTrace: List<String>? = remember(loadException) {
         loadException?.stackTraceToString()?.split('\n')
@@ -114,38 +114,37 @@ internal fun DatabaseSourceLoadScreenProgressLog(
 
 @Composable
 private fun AlertLine(
-    alert: LogFileConverter.AlertOnLine<*>,
+    alert: Alert,
     databaseAccessor: DatabaseAccessor
 ) {
     val theme: ThemeValues = LocalComposeKitTheme.current
 
     CompositionLocalProvider(
-        LocalTextStyle provides MaterialTheme.typography.labelLarge.copy(
-            color =
-                when (alert.alert.severity) {
-                    LogConvertAlert.Severity.WARNING -> theme.onBackground
-                    LogConvertAlert.Severity.ERROR -> theme.error
-                }
-        )
+        LocalTextStyle provides MaterialTheme.typography.labelLarge.copy(color = theme.error)
     ) {
         Row {
+            // TODO | Localise
             Text(
-                when (alert.alert.severity) {
-                    LogConvertAlert.Severity.WARNING -> "Warning"
-                    LogConvertAlert.Severity.ERROR -> "Error"
-                } + " at "
+                when (alert.severity) {
+                    Alert.Severity.ERROR -> "Error"
+                    Alert.Severity.WARNING -> "Warning"
+                    Alert.Severity.UNKNOWN -> "Unknown"
+                }
             )
 
-            LinkText(
-                text = alert.filePath.toString() + alert.lineIndex?.let { ":$it" }.orEmpty(),
-                url = remember(alert) { alert.getUri(databaseAccessor) },
-                linkContentDescription = stringResource(Res.string.button_database_loader_go_to_file)
-            )
+            if (alert.filePath != null) {
+                Text(" at ")
+                LinkText(
+                    text = alert.filePath.toString() + alert.lineIndex?.let { ":$it" }.orEmpty(),
+                    url = remember(alert) { alert.getUri(databaseAccessor) },
+                    linkContentDescription = stringResource(Res.string.button_database_loader_go_to_file)
+                )
+            }
 
-            Text(" | $alert")
+            Text(" | ${alert.message}")
         }
     }
 }
 
-private fun LogFileConverter.AlertOnLine<*>.getUri(databaseAccessor: DatabaseAccessor): String? =
+private fun Alert.getUri(databaseAccessor: DatabaseAccessor): String? =
     filePath?.let { databaseAccessor.getFileLineUri(it, lineIndex) }

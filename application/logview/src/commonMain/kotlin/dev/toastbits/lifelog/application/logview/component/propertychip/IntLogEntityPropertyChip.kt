@@ -51,6 +51,7 @@ internal fun <T: LogEntity> IntLogEntityPropertyChip(
                     if (inputValid) {
                         onEdit?.invoke(currentInput)
                     }
+                    showInputDialog = false
                 },
                 enabled = inputValid
             ) {

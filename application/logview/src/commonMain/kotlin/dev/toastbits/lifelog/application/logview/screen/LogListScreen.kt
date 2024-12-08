@@ -35,6 +35,7 @@ import dev.toastbits.composekit.components.utils.modifier.horizontal
 import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
 import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.ResponsiveTwoPaneScreen
+import dev.toastbits.composekit.navigation.screen.Screen
 import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.composekit.theme.onAccent
 import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
@@ -44,6 +45,7 @@ import dev.toastbits.lifelog.application.logview.component.timeline.model.LogTim
 import dev.toastbits.lifelog.application.logview.model.LogEntityChanges
 import dev.toastbits.lifelog.application.logview.model.LogEventReference
 import dev.toastbits.lifelog.application.logview.model.get
+import dev.toastbits.lifelog.application.logview.model.getOrNull
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import lifelog.application.logview.generated.resources.Res
@@ -54,7 +56,7 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 class LogListScreen(
-    private val logDatabase: LogDatabase,
+    initialLogDatabase: LogDatabase,
     private val logSaveScreenProvider: LogSaveScreenProvider
 ): ResponsiveTwoPaneScreen<LogEventScreen<LogEvent>>(
     initialStartPaneRatioSource =
@@ -70,27 +72,11 @@ class LogListScreen(
     )
 
     private var timelineState: LogTimelineState? = null
+    private var logDatabase: LogDatabase by mutableStateOf(initialLogDatabase)
     private var viewingEventScreen: EventScreen? by mutableStateOf(null)
     private var showSearchBar: Boolean by mutableStateOf(false)
 
     private val eventChanges: MutableMap<LogEventReference, LogEntityChanges<LogEvent>> = mutableStateMapOf()
-
-    private fun applyChangesToDatabase(): LogDatabase? {
-        if (eventChanges.isEmpty()) {
-            return null
-        }
-
-        return logDatabase.copy(
-            days = logDatabase.days.toMutableMap().also { days ->
-                for ((ref, changes) in eventChanges) {
-                    val events: List<LogEvent> = days[ref.date]!!
-                    days[ref.date] = events.toMutableList().apply {
-                        set(ref.logIndex, changes.applyTo(get(ref.logIndex)))
-                    }
-                }
-            }
-        )
-    }
 
     @Composable
     override fun getCurrentData(): LogEventScreen<LogEvent>? = viewingEventScreen?.screen
@@ -116,18 +102,17 @@ class LogListScreen(
             setShowSearchBar = { showSearchBar = it },
             modifier = modifier,
             onEventSelected = { eventReference ->
-                val event: LogEvent = logDatabase[eventReference]
                 viewingEventScreen =
                     EventScreen(
                         eventReference,
                         LogEventScreen(
-                            event,
-                            eventReference.date,
-                            logDatabase,
+                            event = logDatabase[eventReference],
+                            date = eventReference.date,
+                            logDatabase = logDatabase,
                             initialChanges =
                                 eventChanges[eventReference]
                                 ?: LogEntityChanges.createEmpty(),
-                            onChangesChanged = { newChanges: LogEntityChanges<LogEvent> ->
+                            onChangesChanged = { event: LogEvent, newChanges: LogEntityChanges<LogEvent> ->
                                 if (newChanges.hasChanges(event)) {
                                     eventChanges[eventReference] = newChanges
                                 }
@@ -205,21 +190,7 @@ class LogListScreen(
                         Icon(Icons.Default.Visibility, stringResource(Res.string.log_view_screen_button_review_changes))
                     }
 
-                    IconButton({
-                        val database: LogDatabase =
-                            applyChangesToDatabase()
-                                ?: return@IconButton
-
-                        navigator.pushScreen(
-                            logSaveScreenProvider(
-                                database = database,
-                                autoProceed = false,
-                                onFinished = {
-                                    navigator.navigateBackward()
-                                }
-                            )
-                        )
-                    }) {
+                    IconButton({ saveChanges(navigator) }) {
                         Icon(Icons.Default.Save, stringResource(Res.string.log_view_screen_button_save))
                     }
                 }
@@ -238,5 +209,57 @@ class LogListScreen(
         }
 
         data.Content(LocalNavigator.current, modifier.fillMaxSize(), contentPadding)
+    }
+
+    private fun applyChangesToDatabase(): LogDatabase? {
+        if (eventChanges.isEmpty()) {
+            return null
+        }
+
+        return logDatabase.copy(
+            days = logDatabase.days.toMutableMap().also { days ->
+                for ((ref, changes) in eventChanges) {
+                    val events: List<LogEvent> = days[ref.date]!!
+                    days[ref.date] = events.toMutableList().apply {
+                        set(ref.logIndex, changes.applyTo(get(ref.logIndex)))
+                    }
+                }
+            }
+        )
+    }
+
+    private fun saveChanges(navigator: Navigator) {
+        val newDatabase: LogDatabase =
+            applyChangesToDatabase() ?: return
+
+        val saveScreen: Screen =
+            logSaveScreenProvider(
+                database = newDatabase,
+                autoProceed = false,
+                onProceeded = null,
+                onSaveFinished = { result ->
+                    if (result.isSuccess) {
+                        onDatabaseSaved(newDatabase)
+                    }
+                }
+            )
+
+        navigator.pushScreen(saveScreen)
+    }
+
+    private fun onDatabaseSaved(newDatabase: LogDatabase) {
+        logDatabase = newDatabase
+        eventChanges.clear()
+
+        viewingEventScreen?.also {
+            val newEvent: LogEvent? = logDatabase.getOrNull(it.eventReference)
+            if (newEvent == null) {
+                viewingEventScreen = null
+            }
+            else {
+                it.screen.event = newEvent
+                it.screen.updateChanges(null)
+            }
+        }
     }
 }

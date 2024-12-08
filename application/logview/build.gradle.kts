@@ -14,6 +14,7 @@ kotlin {
                 implementation(projects.application.core)
                 implementation(projects.application.usercontent)
                 implementation(projects.application.settings.data)
+                implementation(projects.application.dbsource.domain)
                 implementation(projects.core.specification)
 
                 implementation(libs.composekit.theme)

@@ -4,13 +4,16 @@ import dev.toastbits.kogit.core.filestructure.FileStructure
 import dev.toastbits.kogit.core.filestructure.toSerialisable
 import dev.toastbits.kogit.core.model.GitCredentials
 import dev.toastbits.kogit.memory.handler.GitCommitGenerator.UserInfo
+import dev.toastbits.kogit.memory.handler.GitPusher
 import dev.toastbits.kogit.memory.model.GitRef
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor.LoadProgress
+import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor.SaveResult
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.create
 import dev.toastbits.lifelog.application.dbsource.domain.model.LogDatabaseParseResult
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.configuration.InMemoryGitDatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.mapper.toLoadProgress
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.mapper.toSaveResult
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.util.GitRepositoryFileUrlProvider
 import dev.toastbits.lifelog.application.worker.WorkerClient
 import dev.toastbits.lifelog.application.worker.command.WorkerCommandInMemoryGitClone
@@ -72,7 +75,7 @@ class InMemoryGitDatabaseAccessor(
         author: UserInfo,
         committer: UserInfo,
         onProgress: (LoadProgress) -> Unit
-    ): Result<Unit> = runCatching {
+    ): Result<SaveResult> = runCatching {
         val databaseConfiguration: LogDatabaseConfiguration = databaseConfigurationProvider()
         val gitCredentials: GitCredentials? = gitCredentialsProvider()
 
@@ -94,17 +97,18 @@ class InMemoryGitDatabaseAccessor(
                 }
             )
 
-        workerClient.executeCommand<WorkerCommandInMemoryGitCommit.Response>(
-            command,
-            onProgress = { progress ->
-                val loadProgress: LoadProgress =
-                    progress.toLoadProgress()
-                        ?: return@executeCommand
-                onProgress(loadProgress)
-            }
-        ).getOrThrow().getOrThrow()
+        val pushResponse: GitPusher.Response =
+            workerClient.executeCommand<WorkerCommandInMemoryGitCommit.Response>(
+                command,
+                onProgress = { progress ->
+                    val loadProgress: LoadProgress =
+                        progress.toLoadProgress()
+                            ?: return@executeCommand
+                    onProgress(loadProgress)
+                }
+            ).getOrThrow().getOrThrow().pushResponse
 
-        return@runCatching
+        return@runCatching pushResponse.toSaveResult()
     }
 
     override fun getFileLineUri(filePath: Path, lineIndex: UInt?): String? =

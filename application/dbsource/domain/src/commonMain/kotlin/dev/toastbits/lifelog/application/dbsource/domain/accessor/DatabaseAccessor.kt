@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import dev.toastbits.kogit.memory.handler.GitCommitGenerator.UserInfo
 import dev.toastbits.kogit.memory.model.GitObjectRegistry
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor.LoadProgress
+import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
 import dev.toastbits.lifelog.application.dbsource.domain.model.LogDatabaseParseResult
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import okio.Path
@@ -17,7 +18,12 @@ interface DatabaseAccessor {
         author: UserInfo,
         committer: UserInfo,
         onProgress: (LoadProgress) -> Unit
-    ): Result<Unit>
+    ): Result<SaveResult>
+
+    data class SaveResult(
+        val isSuccess: Boolean,
+        val alerts: List<Alert>
+    )
 
     fun getFileLineUri(filePath: Path, lineIndex: UInt?): String?
 
