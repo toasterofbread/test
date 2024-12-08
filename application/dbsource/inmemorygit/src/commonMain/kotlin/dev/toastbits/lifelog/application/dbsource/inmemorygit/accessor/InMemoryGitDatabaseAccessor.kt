@@ -12,6 +12,8 @@ import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccess
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.create
 import dev.toastbits.lifelog.application.dbsource.domain.model.LogDatabaseParseResult
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.configuration.InMemoryGitDatabaseSourceConfiguration
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.Res
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.accessor_progress_serialising_file_structure
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.mapper.toLoadProgress
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.mapper.toSaveResult
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.util.GitRepositoryFileUrlProvider
@@ -27,8 +29,6 @@ import dev.toastbits.lifelog.core.specification.converter.ParseAlertData
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguration
 import kotlinx.coroutines.CoroutineDispatcher
-import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.Res
-import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.accessor_progress_serialising_file_structure
 import okio.Path
 
 class InMemoryGitDatabaseAccessor(
@@ -97,7 +97,7 @@ class InMemoryGitDatabaseAccessor(
                 }
             )
 
-        val pushResponse: GitPusher.Response =
+        val pushResult: GitPusher.Result =
             workerClient.executeCommand<WorkerCommandInMemoryGitCommit.Response>(
                 command,
                 onProgress = { progress ->
@@ -108,7 +108,7 @@ class InMemoryGitDatabaseAccessor(
                 }
             ).getOrThrow().getOrThrow().pushResponse
 
-        return@runCatching pushResponse.toSaveResult()
+        return@runCatching pushResult.toSaveResult()
     }
 
     override fun getFileLineUri(filePath: Path, lineIndex: UInt?): String? =

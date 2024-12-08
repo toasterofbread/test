@@ -59,7 +59,7 @@ data class WorkerCommandInMemoryGitCommit(
             }
 
         val headCommit: GitObject = cache.readObject(headCommitRef)
-        val pushResponse: GitPusher.Response =
+        val pushResult: GitPusher.Result =
             gitHelper.commitAndPushFileStructure(
                 headCommit,
                 fileStructure,
@@ -71,12 +71,12 @@ data class WorkerCommandInMemoryGitCommit(
                 return it.toResult()
             }
 
-        return WorkerCommandResult.Success(Response(pushResponse))
+        return WorkerCommandResult.Success(Response(pushResult))
     }
 
     @Serializable
     data class Progress(val stage: GitHandlerStage, val part: Long?, val total: Long?): WorkerCommandProgress
 
     @Serializable
-    data class Response(val pushResponse: GitPusher.Response): WorkerCommandResponse
+    data class Response(val pushResponse: GitPusher.Result): WorkerCommandResponse
 }

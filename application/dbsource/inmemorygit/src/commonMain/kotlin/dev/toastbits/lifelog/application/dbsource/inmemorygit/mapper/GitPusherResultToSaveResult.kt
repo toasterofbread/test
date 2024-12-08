@@ -8,7 +8,7 @@ import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resource
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.`git_pusher_response_warning_repository_moved_$to`
 import org.jetbrains.compose.resources.getString
 
-internal suspend fun GitPusher.Response.toSaveResult(): SaveResult =
+internal suspend fun GitPusher.Result.toSaveResult(): SaveResult =
     SaveResult(
         isSuccess = isSuccess,
         alerts = messages.map {
