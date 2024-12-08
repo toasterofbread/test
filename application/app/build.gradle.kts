@@ -1,3 +1,4 @@
+
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinWasmJsTargetDsl
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
@@ -72,8 +73,9 @@ compose.desktop {
 
         buildTypes.release {
             proguard {
-                // TODO
-                isEnabled = false
+                isEnabled = true
+                version.set("7.5.0")
+                configurationFiles.from(project.file("proguard-rules.pro"))
             }
         }
 
