@@ -28,6 +28,7 @@ import dev.toastbits.lifelog.core.specification.model.entity.property.LocalDateL
 import dev.toastbits.lifelog.core.specification.model.entity.property.LogEntityProperty
 import dev.toastbits.lifelog.core.specification.model.entity.property.UserContentLogEntityProperty
 
+@Suppress("UNCHECKED_CAST", "USELESS_CAST")
 @Composable
 fun <T: LogEntity, V> LogEntityProperty<T, V>.PropertyChip(
     entity: T,
@@ -66,7 +67,7 @@ fun <T: LogEntity, V> LogEntityProperty<T, V>.PropertyChip(
                 is IntLogEntityProperty ->
                     IntLogEntityPropertyChip(
                         propertyName,
-                        getValue(entity),
+                        getValue(entity) as Int?, // Optimised WASM build fails without this cast
                         entity,
                         this@PropertyChip,
                         propertyOnEdit as ((Int?) -> Unit)?
