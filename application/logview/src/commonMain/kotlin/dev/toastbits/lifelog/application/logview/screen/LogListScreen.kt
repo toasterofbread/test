@@ -194,12 +194,8 @@ class LogListScreen(
                                     changes,
                                     discardChanges = { eventReference ->
                                         eventChanges.remove(eventReference)
-                                        // TODO
-//                                        if (viewingEventScreen?.eventReference == eventReference) {
-//                                            viewingEventScreen?.setChanges(null)
-//                                        }
-                                        if (eventChanges.isEmpty() && navigator.currentScreen is LogListChangesScreen) {
-                                            navigator.navigateBackward()
+                                        if (viewingEventScreen?.eventReference == eventReference) {
+                                            viewingEventScreen?.screen?.updateChanges(null)
                                         }
                                     }
                                 )
