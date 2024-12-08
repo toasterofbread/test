@@ -7,20 +7,19 @@ import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.gestures.BringIntoViewSpec
 import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -30,17 +29,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.components.platform.composable.BackHandler
-import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyColumn
+import dev.toastbits.composekit.components.platform.composable.ScrollBarColumn
 import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyRow
 import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.Screen
+import dev.toastbits.composekit.util.bottom
 import dev.toastbits.composekit.util.plus
+import dev.toastbits.composekit.util.top
 import dev.toastbits.lifelog.application.logview.component.event.LogEventMetadata
 import dev.toastbits.lifelog.application.logview.component.event.LogEventUserContent
 import dev.toastbits.lifelog.application.logview.component.propertychip.withProperties
@@ -152,7 +155,7 @@ class LogEventScreen<T: LogEvent>(
             onChangesChanged(changes)
         }
 
-        Box(modifier) {
+        BoxWithConstraints(modifier) {
             CompositionLocalProvider(
                 LocalBringIntoViewSpec provides object : BringIntoViewSpec {
                     override fun calculateScrollDistance(
@@ -162,39 +165,48 @@ class LogEventScreen<T: LogEvent>(
                     ): Float = 0f
                 }
             ) {
-                ScrollBarLazyColumn(
-                    contentPadding = contentPadding + PaddingValues(bottom = bottomContentHeight),
+                val scrollBarContentPadding: PaddingValues =
+                    contentPadding + PaddingValues(bottom = bottomContentHeight)
+
+                ScrollBarColumn(
+                    contentPadding = scrollBarContentPadding,
                     scrollBarContentPadding = contentPadding,
                     scrollBarSpacing = scrollBarSpacing,
-                    scrollBarThickness = scrollBarThickness
+                    scrollBarThickness = scrollBarThickness,
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
-                    item {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(20.dp)
-                        ) {
-                            val modifiedEvent: T =
-                                remember(changes, event) {
-                                    changes.applyTo(event)
+                    val modifiedEvent: T =
+                        remember(changes, event) {
+                            changes.applyTo(event)
+                        }
+
+                    LogEventMetadata(modifiedEvent, date, logDatabase.configuration)
+
+                    PropertiesRow(
+                        modifiedEvent,
+                        Modifier.height(58.dp),
+                        listOf(LogEvent.PROPERTY_CONTENT)
+                    )
+
+                    var contentPosition: Dp by remember { mutableStateOf(0.dp) }
+                    LogEventUserContent(
+                        state,
+                        Modifier
+                            .onGloballyPositioned {
+                                with (density) {
+                                    contentPosition = it.positionInParent().y.toDp()
                                 }
-
-                            LogEventMetadata(modifiedEvent, date, logDatabase.configuration)
-
-                            PropertiesRow(
-                                modifiedEvent,
-                                Modifier.height(58.dp),
-                                listOf(LogEvent.PROPERTY_CONTENT)
+                            }
+                            .heightIn(
+                                min =
+                                    this@BoxWithConstraints.maxHeight
+                                        - contentPosition
+                                        - scrollBarContentPadding.top
+                                        - scrollBarContentPadding.bottom
                             )
 
-                            val content: UserContent? = event.content
-                            if (content != null) {
-                                LogEventUserContent(state) {
-                                    state = it
-                                }
-                            }
-                            else {
-                                Text("No content // TODO")
-                            }
-                        }
+                    ) {
+                        state = it
                     }
                 }
             }

@@ -24,6 +24,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.components.LocalContext
@@ -37,6 +38,9 @@ import dev.toastbits.lifelog.application.usercontent.model.ModsState
 import dev.toastbits.lifelog.application.usercontent.model.getState
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReference
+import lifelog.application.usercontent.generated.resources.Res
+import lifelog.application.usercontent.generated.resources.user_content_display_empty_indicator
+import org.jetbrains.compose.resources.stringResource
 
 private val LocalReference: ProvidableCompositionLocal<LogEntityReference?> =
     compositionLocalOf { null }
@@ -48,9 +52,17 @@ fun UserContentDisplay(
     textStyle: TextStyle = LocalTextStyle.current
 ) {
     SelectionContainer(modifier) {
-        FlowRow {
-            for (part in content.parts) {
-                UserContentPart(part, textStyle)
+        val isBlank: Boolean =
+            remember(content) { content.isBlank() }
+
+        if (isBlank) {
+            BlankUserContentIndicator(Modifier.fillMaxWidth())
+        }
+        else {
+            FlowRow {
+                for (part in content.parts) {
+                    UserContentPart(part, textStyle)
+                }
             }
         }
     }
@@ -75,6 +87,16 @@ fun UserContentPart(part: UserContent.Part, textStyle: TextStyle) {
             }
         }
     }
+}
+
+@Composable
+private fun BlankUserContentIndicator(modifier: Modifier = Modifier) {
+    Text(
+        stringResource(Res.string.user_content_display_empty_indicator),
+        modifier.padding(top = 15.dp),
+        color = LocalComposeKitTheme.current.vibrantAccent,
+        textAlign = TextAlign.Center
+    )
 }
 
 @Composable

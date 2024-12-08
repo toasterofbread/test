@@ -1,6 +1,9 @@
 package dev.toastbits.lifelog.application.logview.component.event
 
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.TextFieldState
@@ -29,28 +32,31 @@ internal fun LogEventUserContent(
 
     NullCrossfade(
         loadedState,
-        modifier.fillMaxWidth()
+        modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min)
     ) { loaded ->
-        if (loaded == null) {
-            SubtleLoadingIndicator(Modifier.padding(top = 50.dp))
-        }
-        else {
-            when (loaded) {
-                is LogEventViewScreenState.Loaded.Edit -> {
-                    val textFieldState: TextFieldState = remember { TextFieldState(loaded.content) }
+        when (loaded) {
+            null ->
+                SubtleLoadingIndicator(Modifier.padding(top = 50.dp))
 
-                    BasicTextField(
-                        textFieldState,
-                        textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
-                        cursorBrush = SolidColor(LocalContentColor.current)
-                    )
+            is LogEventViewScreenState.Loaded.Edit -> {
+                val textFieldState: TextFieldState = remember { TextFieldState(loaded.content) }
 
-                    LaunchedEffect(textFieldState.text) {
-                        updateState(loaded.copy(textFieldState.text.toString()))
-                    }
+                BasicTextField(
+                    textFieldState,
+                    Modifier.fillMaxSize(),
+                    textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
+                    cursorBrush = SolidColor(LocalContentColor.current)
+                )
+
+                LaunchedEffect(textFieldState.text) {
+                    updateState(loaded.copy(textFieldState.text.toString()))
                 }
-                is LogEventViewScreenState.Loaded.Preview -> UserContentDisplay(loaded.content)
             }
+
+            is LogEventViewScreenState.Loaded.Preview ->
+                UserContentDisplay(loaded.content, Modifier.fillMaxSize())
         }
     }
 }
