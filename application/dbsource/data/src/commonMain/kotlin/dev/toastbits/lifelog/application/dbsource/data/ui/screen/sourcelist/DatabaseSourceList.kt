@@ -23,13 +23,13 @@ import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyColu
 import dev.toastbits.lifelog.application.dbsource.data.ui.component.DatabaseSourceConfigurationPreview
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
-import lifelog.application.dbsource.data.generated.resources.Res
-import lifelog.application.dbsource.data.generated.resources.button_delete_database_source
-import lifelog.application.dbsource.data.generated.resources.button_delete_database_source_cancel
-import lifelog.application.dbsource.data.generated.resources.button_delete_database_source_confirm
-import lifelog.application.dbsource.data.generated.resources.database_source_list_no_sources_added
-import lifelog.application.dbsource.data.generated.resources.dialog_delete_database_source_title
-import lifelog.application.dbsource.data.generated.resources.edit_delete_database_source
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_delete_database_source
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_delete_database_source_cancel
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_delete_database_source_confirm
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_source_list_no_sources_added
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.dialog_delete_database_source_title
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.edit_delete_database_source
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

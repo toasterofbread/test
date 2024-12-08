@@ -37,8 +37,8 @@ import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
 import dev.toastbits.composekit.util.thenWith
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
-import lifelog.application.dbsource.data.generated.resources.Res
-import lifelog.application.dbsource.data.generated.resources.database_source_is_set_to_auto_open
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_source_is_set_to_auto_open
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

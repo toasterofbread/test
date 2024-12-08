@@ -35,11 +35,11 @@ import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import io.github.petertrr.diffutils.diff
 import io.github.petertrr.diffutils.text.DiffRow
 import io.github.petertrr.diffutils.text.DiffRowGenerator
-import lifelog.application.logview.generated.resources.Res
-import lifelog.application.logview.generated.resources.`log_view_screen_$x_content_changes_made`
-import lifelog.application.logview.generated.resources.`log_view_screen_$x_property_changes_made`
-import lifelog.application.logview.generated.resources.log_view_screen_column_title_new
-import lifelog.application.logview.generated.resources.log_view_screen_column_title_old
+import dev.toastbits.lifelog.application.logview.generated.resources.Res
+import dev.toastbits.lifelog.application.logview.generated.resources.`log_view_screen_$x_content_changes_made`
+import dev.toastbits.lifelog.application.logview.generated.resources.`log_view_screen_$x_property_changes_made`
+import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_column_title_new
+import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_column_title_old
 import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource

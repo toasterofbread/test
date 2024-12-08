@@ -27,8 +27,8 @@ import dev.toastbits.lifelog.core.specification.converter.ParseAlertData
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguration
 import kotlinx.coroutines.CoroutineDispatcher
-import lifelog.application.dbsource.inmemorygit.generated.resources.Res
-import lifelog.application.dbsource.inmemorygit.generated.resources.accessor_progress_serialising_file_structure
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.Res
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.accessor_progress_serialising_file_structure
 import okio.Path
 
 class InMemoryGitDatabaseAccessor(

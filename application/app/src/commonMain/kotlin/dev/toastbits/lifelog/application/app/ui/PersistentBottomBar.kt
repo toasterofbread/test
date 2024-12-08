@@ -12,12 +12,12 @@ import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
 import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.lifelog.application.core.ui.LinkText
-import lifelog.application.app.generated.resources.Res
-import lifelog.application.app.generated.resources.app_footer_author_prefix
-import lifelog.application.app.generated.resources.app_footer_author_suffix
-import lifelog.application.app.generated.resources.app_footer_body
-import lifelog.application.app.generated.resources.author_name
-import lifelog.application.app.generated.resources.author_url
+import dev.toastbits.lifelog.application.app.generated.resources.Res
+import dev.toastbits.lifelog.application.app.generated.resources.app_footer_author_prefix
+import dev.toastbits.lifelog.application.app.generated.resources.app_footer_author_suffix
+import dev.toastbits.lifelog.application.app.generated.resources.app_footer_body
+import dev.toastbits.lifelog.application.app.generated.resources.author_name
+import dev.toastbits.lifelog.application.app.generated.resources.author_url
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

@@ -48,10 +48,10 @@ import dev.toastbits.lifelog.application.logview.model.get
 import dev.toastbits.lifelog.application.logview.model.getOrNull
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
-import lifelog.application.logview.generated.resources.Res
-import lifelog.application.logview.generated.resources.`log_view_screen_$x_changes_made_popup`
-import lifelog.application.logview.generated.resources.log_view_screen_button_review_changes
-import lifelog.application.logview.generated.resources.log_view_screen_button_save
+import dev.toastbits.lifelog.application.logview.generated.resources.Res
+import dev.toastbits.lifelog.application.logview.generated.resources.`log_view_screen_$x_changes_made_popup`
+import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_review_changes
+import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_save
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 

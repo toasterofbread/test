@@ -10,8 +10,8 @@ import dev.toastbits.lifelog.application.worker.mapper.default
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
-import lifelog.application.app.generated.resources.Res
-import lifelog.application.app.generated.resources.app_name
+import dev.toastbits.lifelog.application.app.generated.resources.Res
+import dev.toastbits.lifelog.application.app.generated.resources.app_name
 import org.jetbrains.compose.resources.getString
 import java.awt.Dimension
 

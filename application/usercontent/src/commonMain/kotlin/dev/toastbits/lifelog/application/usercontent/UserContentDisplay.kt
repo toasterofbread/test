@@ -38,8 +38,8 @@ import dev.toastbits.lifelog.application.usercontent.model.ModsState
 import dev.toastbits.lifelog.application.usercontent.model.getState
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReference
-import lifelog.application.usercontent.generated.resources.Res
-import lifelog.application.usercontent.generated.resources.user_content_display_empty_indicator
+import dev.toastbits.lifelog.application.usercontent.generated.resources.Res
+import dev.toastbits.lifelog.application.usercontent.generated.resources.user_content_display_empty_indicator
 import org.jetbrains.compose.resources.stringResource
 
 private val LocalReference: ProvidableCompositionLocal<LogEntityReference?> =

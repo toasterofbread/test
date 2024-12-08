@@ -17,8 +17,8 @@ import dev.toastbits.lifelog.application.core.ui.GenericTopBar
 import dev.toastbits.lifelog.application.settings.data.compositionlocal.LocalSettings
 import dev.toastbits.lifelog.application.settings.data.ui.screen.AppSettingsScreen
 import dev.toastbits.lifelog.application.settings.domain.appsettings.AppSettings
-import lifelog.application.app.generated.resources.Res
-import lifelog.application.app.generated.resources.button_open_settings
+import dev.toastbits.lifelog.application.app.generated.resources.Res
+import dev.toastbits.lifelog.application.app.generated.resources.button_open_settings
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

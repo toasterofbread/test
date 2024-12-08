@@ -34,9 +34,9 @@ import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.type.getLazyListConfigurationItems
 import dev.toastbits.lifelog.application.settings.data.compositionlocal.LocalSettings
-import lifelog.application.dbsource.data.generated.resources.Res
-import lifelog.application.dbsource.data.generated.resources.button_database_source_auto_open
-import lifelog.application.dbsource.data.generated.resources.button_database_source_auto_open_toggle
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_database_source_auto_open
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_database_source_auto_open_toggle
 import org.jetbrains.compose.resources.stringResource
 
 internal class DatabaseSourceConfigurationScreen<T: DatabaseSourceConfiguration>(

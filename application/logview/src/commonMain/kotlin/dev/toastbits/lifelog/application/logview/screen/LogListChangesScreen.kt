@@ -25,8 +25,8 @@ import dev.toastbits.lifelog.application.logview.model.LogEntityChanges
 import dev.toastbits.lifelog.application.logview.model.LogEventReference
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
-import lifelog.application.logview.generated.resources.Res
-import lifelog.application.logview.generated.resources.log_view_screen_title_review_changes
+import dev.toastbits.lifelog.application.logview.generated.resources.Res
+import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_title_review_changes
 import org.jetbrains.compose.resources.stringResource
 
 class LogListChangesScreen(

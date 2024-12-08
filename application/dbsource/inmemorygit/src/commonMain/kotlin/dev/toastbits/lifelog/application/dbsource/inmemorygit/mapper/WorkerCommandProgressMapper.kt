@@ -6,9 +6,9 @@ import dev.toastbits.lifelog.application.worker.command.WorkerCommandClearGitRep
 import dev.toastbits.lifelog.application.worker.command.WorkerCommandInMemoryGitClone
 import dev.toastbits.lifelog.application.worker.command.WorkerCommandInMemoryGitCommit
 import dev.toastbits.lifelog.application.worker.command.WorkerCommandProgress
-import lifelog.application.dbsource.inmemorygit.generated.resources.Res
-import lifelog.application.dbsource.inmemorygit.generated.resources.accessor_progress_waiting_for_worker
-import lifelog.application.dbsource.inmemorygit.generated.resources.accessor_progress_worker_started
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.Res
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.accessor_progress_waiting_for_worker
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.accessor_progress_worker_started
 
 internal fun WorkerCommandProgress.toLoadProgress(): LoadProgress? =
     when (this) {

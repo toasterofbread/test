@@ -23,11 +23,11 @@ import dev.toastbits.lifelog.application.settings.domain.model.SerialisedDatabas
 import dev.toastbits.lifelog.application.settings.domain.model.deserialiseConfiguration
 import dev.toastbits.lifelog.application.settings.domain.model.serialiseConfiguration
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
-import lifelog.application.dbsource.data.generated.resources.Res
-import lifelog.application.dbsource.data.generated.resources.button_configure_database_source_cancel
-import lifelog.application.dbsource.data.generated.resources.button_configure_database_source_save
-import lifelog.application.dbsource.data.generated.resources.button_new_database_source_add
-import lifelog.application.dbsource.data.generated.resources.button_new_database_source_cancel
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_configure_database_source_cancel
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_configure_database_source_save
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_new_database_source_add
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_new_database_source_cancel
 import org.jetbrains.compose.resources.stringResource
 
 class LogSaveScreenProviderImpl(

@@ -27,9 +27,9 @@ import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
 import dev.toastbits.lifelog.application.core.ui.LinkText
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
-import lifelog.application.dbsource.data.generated.resources.Res
-import lifelog.application.dbsource.data.generated.resources.button_database_loader_go_to_file
-import lifelog.application.dbsource.data.generated.resources.`database_loader_finished_$duration_$warnings_$errors`
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_database_loader_go_to_file
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.`database_loader_finished_$duration_$warnings_$errors`
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration
 

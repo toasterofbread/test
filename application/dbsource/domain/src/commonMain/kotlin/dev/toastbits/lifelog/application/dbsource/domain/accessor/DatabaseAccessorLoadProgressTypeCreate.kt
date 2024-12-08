@@ -3,15 +3,15 @@ package dev.toastbits.lifelog.application.dbsource.domain.accessor
 import dev.toastbits.composekit.util.roundTo
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor.LoadProgress
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor.LoadProgress.Absolute
-import lifelog.application.dbsource.domain.generated.resources.Res
-import lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_generic_$part`
-import lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_generic_$part_of_$total`
-import lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_generic_$total`
-import lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_network_$bytes`
-import lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_network_$bytes_of_$total_$percent`
-import lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_object_$part_$type_$hash`
-import lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_object_$part_of_$total_$type_$hash`
-import lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_object_$total_$type_$hash`
+import dev.toastbits.lifelog.application.dbsource.domain.generated.resources.Res
+import dev.toastbits.lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_generic_$part`
+import dev.toastbits.lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_generic_$part_of_$total`
+import dev.toastbits.lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_generic_$total`
+import dev.toastbits.lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_network_$bytes`
+import dev.toastbits.lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_network_$bytes_of_$total_$percent`
+import dev.toastbits.lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_object_$part_$type_$hash`
+import dev.toastbits.lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_object_$part_of_$total_$type_$hash`
+import dev.toastbits.lifelog.application.dbsource.domain.generated.resources.`database_accessor_load_progress_object_$total_$type_$hash`
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 

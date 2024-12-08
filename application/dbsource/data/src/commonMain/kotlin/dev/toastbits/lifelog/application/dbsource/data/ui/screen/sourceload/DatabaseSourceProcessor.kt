@@ -28,11 +28,11 @@ import dev.toastbits.lifelog.application.dbsource.data.ui.component.DatabaseSour
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
-import lifelog.application.dbsource.data.generated.resources.Res
-import lifelog.application.dbsource.data.generated.resources.button_database_loader_cancel
-import lifelog.application.dbsource.data.generated.resources.button_database_loader_proceed
-import lifelog.application.dbsource.data.generated.resources.database_loader_proceed_tooltip_errors_must_be_resolved
-import lifelog.application.dbsource.data.generated.resources.database_loader_proceed_tooltip_load_in_progress
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_database_loader_cancel
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_database_loader_proceed
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_loader_proceed_tooltip_errors_must_be_resolved
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_loader_proceed_tooltip_load_in_progress
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration
 

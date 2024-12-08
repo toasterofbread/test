@@ -11,8 +11,8 @@ import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
 import dev.toastbits.lifelog.application.dbsource.domain.model.LogDatabaseParseResult
 import dev.toastbits.lifelog.core.specification.converter.alert.LogConvertAlert
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
-import lifelog.application.dbsource.data.generated.resources.Res
-import lifelog.application.dbsource.data.generated.resources.database_loader_title
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_loader_title
 import org.jetbrains.compose.resources.stringResource
 
 class DatabaseSourceLoadScreen(

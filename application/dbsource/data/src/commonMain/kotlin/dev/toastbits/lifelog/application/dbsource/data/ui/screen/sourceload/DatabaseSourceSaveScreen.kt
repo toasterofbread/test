@@ -11,8 +11,8 @@ import dev.toastbits.lifelog.application.dbsource.domain.accessor.OfflineDatabas
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
-import lifelog.application.dbsource.data.generated.resources.Res
-import lifelog.application.dbsource.data.generated.resources.database_saver_title
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_saver_title
 import org.jetbrains.compose.resources.stringResource
 
 internal class DatabaseSourceSaveScreen(

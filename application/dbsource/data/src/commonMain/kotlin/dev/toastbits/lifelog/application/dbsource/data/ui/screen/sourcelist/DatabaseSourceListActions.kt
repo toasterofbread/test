@@ -23,8 +23,8 @@ import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyRow
 import dev.toastbits.composekit.components.utils.composable.wave.WaveLineArea
 import dev.toastbits.lifelog.application.dbsource.data.ui.component.DatabaseSourceTypePreview
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
-import lifelog.application.dbsource.data.generated.resources.Res
-import lifelog.application.dbsource.data.generated.resources.database_source_list_add_source
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_source_list_add_source
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

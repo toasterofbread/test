@@ -18,8 +18,8 @@ import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguratio
 import dev.toastbits.lifelog.core.specification.model.entity.LogDisplayText
 import dev.toastbits.lifelog.core.specification.model.entity.date.LogDate
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
-import lifelog.application.logview.generated.resources.Res
-import lifelog.application.logview.generated.resources.`event_screen_metadata_heading_$verb_on_$date`
+import dev.toastbits.lifelog.application.logview.generated.resources.Res
+import dev.toastbits.lifelog.application.logview.generated.resources.`event_screen_metadata_heading_$verb_on_$date`
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

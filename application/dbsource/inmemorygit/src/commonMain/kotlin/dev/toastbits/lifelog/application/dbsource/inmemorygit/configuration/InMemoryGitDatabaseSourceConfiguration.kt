@@ -5,12 +5,12 @@ import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseS
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.type.InMemoryGitDatabaseSourceType
 import kotlinx.serialization.Serializable
-import lifelog.application.dbsource.inmemorygit.generated.resources.Res
-import lifelog.application.dbsource.inmemorygit.generated.resources.source_configuration_repository_url_not_http
-import lifelog.application.dbsource.inmemorygit.generated.resources.source_configuration_repository_url_not_set
-import lifelog.application.dbsource.inmemorygit.generated.resources.source_configuration_branch_not_set
-import lifelog.application.dbsource.inmemorygit.generated.resources.`source_configuration_preview_content_$name_$repositoryUrl_$branch`
-import lifelog.application.dbsource.inmemorygit.generated.resources.`source_configuration_preview_title_$name_$repositoryUrl_$branch`
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.Res
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_configuration_repository_url_not_http
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_configuration_repository_url_not_set
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_configuration_branch_not_set
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.`source_configuration_preview_content_$name_$repositoryUrl_$branch`
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.`source_configuration_preview_title_$name_$repositoryUrl_$branch`
 import org.jetbrains.compose.resources.stringResource
 
 @Serializable

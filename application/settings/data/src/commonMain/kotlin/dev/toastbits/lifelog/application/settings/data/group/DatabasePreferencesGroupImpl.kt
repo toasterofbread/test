@@ -23,11 +23,11 @@ import dev.toastbits.lifelog.core.specification.database.LogFileSplitStrategy
 import dev.toastbits.lifelog.core.specification.extension.ExtensionRegistry
 import dev.toastbits.lifelog.core.specification.impl.converter.LogFileConverterStringsImpl
 import dev.toastbits.lifelog.core.specification.impl.extension.ExtensionRegistryImpl
-import lifelog.application.settings.data.generated.resources.Res
-import lifelog.application.settings.data.generated.resources.pref_database_split_strategy_description
-import lifelog.application.settings.data.generated.resources.pref_database_split_strategy_title
-import lifelog.application.settings.data.generated.resources.prefs_group_database_description
-import lifelog.application.settings.data.generated.resources.prefs_group_database_title
+import dev.toastbits.lifelog.application.settings.data.generated.resources.Res
+import dev.toastbits.lifelog.application.settings.data.generated.resources.pref_database_split_strategy_description
+import dev.toastbits.lifelog.application.settings.data.generated.resources.pref_database_split_strategy_title
+import dev.toastbits.lifelog.application.settings.data.generated.resources.prefs_group_database_description
+import dev.toastbits.lifelog.application.settings.data.generated.resources.prefs_group_database_title
 import org.jetbrains.compose.resources.stringResource
 
 class DatabasePreferencesGroupImpl(preferences: PlatformSettings): PlatformSettingsGroupImpl("DATABASE_SOURCE", preferences), DatabasePreferencesGroup {

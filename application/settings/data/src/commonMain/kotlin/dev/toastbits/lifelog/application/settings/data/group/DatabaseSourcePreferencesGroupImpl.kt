@@ -13,13 +13,13 @@ import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.type.InMemoryGitDatabaseSourceType
 import dev.toastbits.lifelog.application.settings.domain.group.DatabaseSourcePreferencesGroup
 import dev.toastbits.lifelog.application.settings.domain.model.SerialisedDatabaseSourceConfiguration
-import lifelog.application.settings.data.generated.resources.Res
-import lifelog.application.settings.data.generated.resources.prefs_group_database_source_description
-import lifelog.application.settings.data.generated.resources.prefs_group_database_source_title
-import lifelog.application.settings.data.generated.resources.pref_database_source_git_username_title
-import lifelog.application.settings.data.generated.resources.pref_database_source_git_username_description
-import lifelog.application.settings.data.generated.resources.pref_database_source_git_password_title
-import lifelog.application.settings.data.generated.resources.pref_database_source_git_password_description
+import dev.toastbits.lifelog.application.settings.data.generated.resources.Res
+import dev.toastbits.lifelog.application.settings.data.generated.resources.prefs_group_database_source_description
+import dev.toastbits.lifelog.application.settings.data.generated.resources.prefs_group_database_source_title
+import dev.toastbits.lifelog.application.settings.data.generated.resources.pref_database_source_git_username_title
+import dev.toastbits.lifelog.application.settings.data.generated.resources.pref_database_source_git_username_description
+import dev.toastbits.lifelog.application.settings.data.generated.resources.pref_database_source_git_password_title
+import dev.toastbits.lifelog.application.settings.data.generated.resources.pref_database_source_git_password_description
 import org.jetbrains.compose.resources.stringResource
 
 open class DatabaseSourcePreferencesGroupImpl(

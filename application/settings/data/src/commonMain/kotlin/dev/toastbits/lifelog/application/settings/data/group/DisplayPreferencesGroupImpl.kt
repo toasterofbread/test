@@ -11,10 +11,10 @@ import dev.toastbits.composekit.settings.ui.component.item.DropdownSettingsItem
 import dev.toastbits.composekit.settings.ui.component.item.SettingsItem
 import dev.toastbits.lifelog.application.settings.domain.group.DisplayPreferencesGroup
 import dev.toastbits.lifelog.application.settings.domain.model.DisplayDateFormat
-import lifelog.application.settings.data.generated.resources.Res
-import lifelog.application.settings.data.generated.resources.pref_display_date_format_title
-import lifelog.application.settings.data.generated.resources.prefs_group_display_description
-import lifelog.application.settings.data.generated.resources.prefs_group_display_title
+import dev.toastbits.lifelog.application.settings.data.generated.resources.Res
+import dev.toastbits.lifelog.application.settings.data.generated.resources.pref_display_date_format_title
+import dev.toastbits.lifelog.application.settings.data.generated.resources.prefs_group_display_description
+import dev.toastbits.lifelog.application.settings.data.generated.resources.prefs_group_display_title
 import org.jetbrains.compose.resources.stringResource
 
 class DisplayPreferencesGroupImpl(preferences: PlatformSettings): PlatformSettingsGroupImpl("DISPLAY", preferences), DisplayPreferencesGroup {

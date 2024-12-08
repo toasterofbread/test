@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.text.style.TextOverflow
 import dev.toastbits.composekit.components.utils.composable.animatedvisibility.NullableValueAnimatedVisibility
-import lifelog.application.core.generated.resources.Res
-import lifelog.application.core.generated.resources.button_navigate_back
+import dev.toastbits.lifelog.application.core.generated.resources.Res
+import dev.toastbits.lifelog.application.core.generated.resources.button_navigate_back
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

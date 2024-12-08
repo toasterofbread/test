@@ -3,7 +3,7 @@ import util.configureAllKmpTargets
 plugins {
     id("kmp-conventions")
     id("android-library-conventions")
-    id("publishing-conventions")
+//    id("publishing-conventions")
 
     alias(libs.plugins.kotlin)
     alias(libs.plugins.publish)
