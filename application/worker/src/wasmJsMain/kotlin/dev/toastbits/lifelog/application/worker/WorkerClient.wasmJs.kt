@@ -90,7 +90,7 @@ actual class WorkerClient {
                                 else -> return Result.failure(RuntimeException(msg("Received response of unknown type '${response::class}' while waiting for '${R::class}' ($response)")))
                             }
                         is WorkerCommandResult.Progress -> onProgress(result.progress)
-                        is WorkerCommandResult.Exception -> return Result.success(result.cast())
+                        is WorkerCommandResult.Failure -> return Result.success(result.cast())
                     }
                 }
             }

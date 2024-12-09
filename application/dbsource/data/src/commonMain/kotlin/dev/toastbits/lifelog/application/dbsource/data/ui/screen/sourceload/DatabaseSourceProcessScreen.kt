@@ -81,7 +81,7 @@ abstract class DatabaseSourceProcessScreen<R>(
                 }
 
                 val current: DatabaseAccessor.LoadProgress? = currentProgress
-                if (current != null && current.getMessageResource() != progress.getMessageResource()) {
+                if (current != null && (current.isUnique() || current.getMessageResource() != progress.getMessageResource())) {
                     finishedStepsProgress.add(current)
                 }
                 currentProgress = progress

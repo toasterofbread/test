@@ -13,6 +13,7 @@ import dev.toastbits.lifelog.application.worker.mapper.toTransferable
 import dev.toastbits.lifelog.application.worker.model.TransferableFileStructure
 import dev.toastbits.lifelog.application.worker.model.WorkerCommandResult
 import dev.toastbits.lifelog.application.worker.model.toResult
+import dev.toastbits.lifelog.application.worker.model.toWorkerException
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -27,12 +28,12 @@ data class WorkerCommandInMemoryGitClone(
         context: WorkerExecutionContext,
         onProgress: (WorkerCommandProgress) -> Unit
     ): WorkerCommandResult {
-        val cache: LocalGitObjectCache =
+        val cache: LocalGitObjectCache? =
             LocalGitObjectCache.getInstance(repositoryUrl, context.platformContext)
-                .fold(
-                    onSuccess = { it },
-                    onFailure = { return it.toResult() }
-                )
+                .getOrElse {
+                    onProgress(WorkerCommandProgress.FailedToCreateLocalGitObjectCache(it.toWorkerException()))
+                    return@getOrElse null
+                }
 
         val httpClient: HttpClient = HttpClient()
         val gitHelper: GitHelper = GitHelper(
@@ -54,11 +55,13 @@ data class WorkerCommandInMemoryGitClone(
                 onFailure = { return RuntimeException("Cloning $repositoryUrl:$branch with $gitCredentials failed", it).toResult() }
             )
 
-        val toCommit: Int = cache.countObjectsToCommit()
-        if (toCommit > 0) {
-            onProgress(Progress(GitHandlerStage.WritingObjectsToCache, null, toCommit.toLong()))
-            withContext(context.ioDispatcher) {
-                cache.commit()
+        if (cache != null) {
+            val toCommit: Int = cache.countObjectsToCommit()
+            if (toCommit > 0) {
+                onProgress(Progress(GitHandlerStage.WritingObjectsToCache, null, toCommit.toLong()))
+                withContext(context.ioDispatcher) {
+                    cache.commit()
+                }
             }
         }
 

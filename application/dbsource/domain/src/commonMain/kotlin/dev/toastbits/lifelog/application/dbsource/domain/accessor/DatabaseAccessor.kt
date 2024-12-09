@@ -9,6 +9,7 @@ import dev.toastbits.lifelog.application.dbsource.domain.model.LogDatabaseParseR
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import okio.Path
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
 
 interface DatabaseAccessor {
     suspend fun loadOnlineDatabase(onProgress: (LoadProgress) -> Unit): Result<LogDatabaseParseResult>
@@ -32,6 +33,7 @@ interface DatabaseAccessor {
         val isError: Boolean get() = false
 
         fun getMessageResource(): StringResource
+        fun isUnique(): Boolean = false
 
         suspend fun getProgressMessage(): String? = null
 
@@ -61,4 +63,17 @@ fun DatabaseAccessor.LoadProgress.Companion.message(resource: StringResource): D
     object : DatabaseAccessor.LoadProgress {
         override val type: LoadProgress.Type = LoadProgress.Type.Generic
         override fun getMessageResource(): StringResource = resource
+        override fun isUnique(): Boolean = true
+    }
+
+fun DatabaseAccessor.LoadProgress.Companion.error(
+    resource: StringResource,
+    getMessage: suspend (StringResource) -> String = { getString(it) }
+): DatabaseAccessor.LoadProgress =
+    object : DatabaseAccessor.LoadProgress {
+        override val type: LoadProgress.Type = LoadProgress.Type.Generic
+        override val isError: Boolean = true
+        override fun getMessageResource(): StringResource = resource
+        override suspend fun getProgressMessage(): String = getMessage(resource)
+        override fun isUnique(): Boolean = true
     }

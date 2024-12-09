@@ -14,6 +14,7 @@ import dev.toastbits.lifelog.application.worker.cache.LocalGitObjectCache
 import dev.toastbits.lifelog.application.worker.mapper.WorkerExecutionContext
 import dev.toastbits.lifelog.application.worker.model.WorkerCommandResult
 import dev.toastbits.lifelog.application.worker.model.toResult
+import dev.toastbits.lifelog.application.worker.model.toWorkerException
 import io.ktor.client.HttpClient
 import kotlinx.serialization.Serializable
 
@@ -32,12 +33,12 @@ data class WorkerCommandInMemoryGitCommit(
         context: WorkerExecutionContext,
         onProgress: (WorkerCommandProgress) -> Unit
     ): WorkerCommandResult {
-        val cache: MutableGitObjectRegistry =
+        val cache: MutableGitObjectRegistry? =
             LocalGitObjectCache.getInstance(repositoryUrl, context.platformContext)
-                .fold(
-                    onSuccess = { it },
-                    onFailure = { return it.toResult() }
-                )
+                .getOrElse {
+                    onProgress(WorkerCommandProgress.FailedToCreateLocalGitObjectCache(it.toWorkerException()))
+                    return@getOrElse null
+                }
 
         val gitHelper: GitHelper =
             GitHelper(
@@ -58,7 +59,7 @@ data class WorkerCommandInMemoryGitCommit(
                 )
             }
 
-        val headCommit: GitObject = cache.readObject(headCommitRef)
+        val headCommit: GitObject = gitHelper.objectRegistry.readObject(headCommitRef)
         val pushResult: GitPusher.Result =
             gitHelper.commitAndPushFileStructure(
                 headCommit,

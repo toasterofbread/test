@@ -11,8 +11,8 @@ sealed interface WorkerCommandResult {
     @Serializable
     data class Progress(val progress: WorkerCommandProgress): WorkerCommandResult
     @Serializable
-    data class Exception(val stackTraceString: String, val exceptionClass: String): WorkerCommandResult
+    data class Failure(val exception: WorkerException): WorkerCommandResult
 }
 
-fun Throwable.toResult(): WorkerCommandResult.Exception =
-    WorkerCommandResult.Exception(this.stackTraceToString(), this::class.toString())
+fun Throwable.toResult(): WorkerCommandResult.Failure =
+    WorkerCommandResult.Failure(toWorkerException())

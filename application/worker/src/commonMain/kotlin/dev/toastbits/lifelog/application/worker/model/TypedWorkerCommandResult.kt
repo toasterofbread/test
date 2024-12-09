@@ -21,5 +21,5 @@ fun <R: WorkerCommandResponse> WorkerCommandResult.cast(): TypedWorkerCommandRes
     when (this) {
         is WorkerCommandResult.Success -> TypedWorkerCommandResult.Success(response as R)
         is WorkerCommandResult.Progress -> throw IllegalStateException(this.toString())
-        is WorkerCommandResult.Exception -> TypedWorkerCommandResult.Exception(stackTraceString, exceptionClass)
+        is WorkerCommandResult.Failure -> TypedWorkerCommandResult.Exception(exception.stackTraceString, exception.exceptionClass)
     }
