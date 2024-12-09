@@ -14,7 +14,7 @@ build-linux:
   only:
     - main
   script:
-    - ./gradlew packageUberJarForCurrentOS
+    - ./gradlew packageUberJarForCurrentOS packageReleaseUberJarForCurrentOS
   artifacts:
     paths:
       - application/app/build/outputs/jar/*.jar
