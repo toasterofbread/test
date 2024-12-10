@@ -62,7 +62,7 @@ class Application(
     private val settings: AppSettings = AppSettingsImpl(preferences)
 ) {
     private val navigator: Navigator =
-        object : BaseNavigator(initialScreen = DatabaseSourceListScreen()) {
+        object : BaseNavigator(initialScreen = DatabaseSourceListScreen(), isTopLevel = true) {
             override val extraButtonsHandledExternally: Boolean
                 get() = currentScreen !is FullContentScreen
         }
