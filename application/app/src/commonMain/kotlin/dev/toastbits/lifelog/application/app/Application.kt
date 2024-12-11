@@ -9,11 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
@@ -22,19 +20,13 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
-import dev.toastbits.composekit.application.ApplicationTheme
-import dev.toastbits.composekit.components.LocalContext
+import dev.toastbits.composekit.application.ComposeKitApplication
 import dev.toastbits.composekit.components.platform.composable.onWindowBackPressed
 import dev.toastbits.composekit.context.PlatformContext
-import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
-import dev.toastbits.composekit.navigation.navigator.BaseNavigator
-import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.Screen
 import dev.toastbits.composekit.settings.PlatformSettings
-import dev.toastbits.composekit.theme.external.getDefaultCatppuccinThemes
-import dev.toastbits.composekit.theme.model.ThemeValuesData
-import dev.toastbits.composekit.util.copy
-import dev.toastbits.composekit.util.plus
+import dev.toastbits.composekit.util.composable.copy
+import dev.toastbits.composekit.util.composable.plus
 import dev.toastbits.composekit.util.thenIf
 import dev.toastbits.lifelog.application.app.ui.PersistentBottomBar
 import dev.toastbits.lifelog.application.app.ui.PersistentTopBar
@@ -58,40 +50,28 @@ import dev.toastbits.lifelog.extension.mediawatch.MediaWatchExtension
 class Application(
     private val context: PlatformContext,
     private val workerClient: WorkerClient,
-    preferences: PlatformSettings,
-    private val settings: AppSettings = AppSettingsImpl(preferences)
-) {
-    private val navigator: Navigator =
-        object : BaseNavigator(initialScreen = DatabaseSourceListScreen(), isTopLevel = true) {
-            override val extraButtonsHandledExternally: Boolean
-                get() = currentScreen !is FullContentScreen
-        }
+    preferences: PlatformSettings
+): ComposeKitApplication(DatabaseSourceListScreen(), context) {
+    override val settings: AppSettings = AppSettingsImpl(preferences)
+
+    override val extraButtonsHandledExternally: Boolean
+        get() = currentScreen !is FullContentScreen
 
     init {
         registerExtensions()
     }
 
     @Composable
-    fun Main() {
+    override fun Content(contentPadding: PaddingValues) {
         LaunchedEffect(Unit) {
             openAutoOpenSource()
         }
 
-        val theme: ThemeValuesData = remember {
-            getDefaultCatppuccinThemes().first { it.name.lowercase().contains("green") }.theme
-        }
-
         CompositionLocalProvider(
-            LocalContext provides context,
             LocalWorkerClient provides workerClient,
-            LocalSettings provides settings,
-            LocalNavigator provides navigator
+            LocalSettings provides settings
         ) {
-            theme.ApplicationTheme(context, settings) {
-                Scaffold { padding ->
-                    RootContent(padding)
-                }
-            }
+            RootContent(contentPadding)
         }
     }
 

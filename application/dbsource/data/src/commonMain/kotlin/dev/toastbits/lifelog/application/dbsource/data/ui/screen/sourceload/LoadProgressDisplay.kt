@@ -16,7 +16,7 @@ import dev.toastbits.composekit.components.platform.composable.theme.ThemedLinea
 import dev.toastbits.composekit.components.utils.composable.animatedvisibility.NullableValueAnimatedVisibility
 import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
-import dev.toastbits.composekit.util.locale.rememberLocalisedValue
+import dev.toastbits.composekit.util.rememberLocalisedValue
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import org.jetbrains.compose.resources.stringResource
 

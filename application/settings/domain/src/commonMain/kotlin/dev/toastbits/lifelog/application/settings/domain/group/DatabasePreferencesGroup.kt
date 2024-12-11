@@ -1,6 +1,6 @@
 package dev.toastbits.lifelog.application.settings.domain.group
 
-import dev.toastbits.composekit.settings.PlatformSettingsGroup
+import dev.toastbits.composekit.settings.ComposeKitSettingsGroup
 import dev.toastbits.composekit.settings.PlatformSettingsProperty
 import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguration
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverterStrings
@@ -8,7 +8,7 @@ import dev.toastbits.lifelog.core.specification.database.LogFileSplitStrategy
 import dev.toastbits.lifelog.core.specification.extension.ExtensionRegistry
 
 @Suppress("PropertyName")
-interface DatabasePreferencesGroup: PlatformSettingsGroup {
+interface DatabasePreferencesGroup: ComposeKitSettingsGroup {
     val extensionRegistry: ExtensionRegistry
     val logFileConverterStrings: LogFileConverterStrings
 

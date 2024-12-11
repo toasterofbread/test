@@ -1,13 +1,13 @@
 package dev.toastbits.lifelog.application.settings.domain.group
 
-import dev.toastbits.composekit.settings.PlatformSettingsGroup
+import dev.toastbits.composekit.settings.ComposeKitSettingsGroup
 import dev.toastbits.composekit.settings.PlatformSettingsProperty
 import dev.toastbits.kogit.core.model.GitCredentials
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceTypeRegistry
 import dev.toastbits.lifelog.application.settings.domain.model.SerialisedDatabaseSourceConfiguration
 
 @Suppress("PropertyName")
-interface DatabaseSourcePreferencesGroup: PlatformSettingsGroup {
+interface DatabaseSourcePreferencesGroup: ComposeKitSettingsGroup {
     val sourceTypeRegistry: DatabaseSourceTypeRegistry
 
     val AUTO_OPEN_SOURCE_INDEX: PlatformSettingsProperty<Int>

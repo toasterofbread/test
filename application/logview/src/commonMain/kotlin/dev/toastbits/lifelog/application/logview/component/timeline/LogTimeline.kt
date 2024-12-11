@@ -41,7 +41,8 @@ import dev.toastbits.composekit.components.utils.composable.stickyHeaderContentP
 import dev.toastbits.composekit.theme.ThemeValues
 import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
 import dev.toastbits.composekit.theme.vibrantAccent
-import dev.toastbits.composekit.util.locale.LocalLocale
+import dev.toastbits.composekit.util.LocalLocale
+import dev.toastbits.composekit.util.model.Locale
 import dev.toastbits.lifelog.application.logview.component.timeline.item.DateTimelineItem
 import dev.toastbits.lifelog.application.logview.component.timeline.item.EventTimelineItem
 import dev.toastbits.lifelog.application.logview.component.timeline.item.TimelineItem
@@ -81,7 +82,7 @@ internal fun LogTimeline(
 ) {
     val theme: ThemeValues = LocalComposeKitTheme.current
     val density: Density = LocalDensity.current
-    val locale: String = LocalLocale.current
+    val locale: Locale = LocalLocale.current
     val coroutineScope: CoroutineScope = rememberCoroutineScope()
 
     val timelineItems: List<TimelineItem> by
@@ -283,7 +284,7 @@ fun newWavePath(
 private fun Float.toRadians(): Float =
     (this * 180f) / PI.toFloat()
 
-private suspend fun LogEvent.containsText(text: String, locale: String): Boolean {
+private suspend fun LogEvent.containsText(text: String, locale: Locale): Boolean {
     for (content in getAllUserContent()) {
         if (content.containsText(text, ignoreCase = true)) {
             return true

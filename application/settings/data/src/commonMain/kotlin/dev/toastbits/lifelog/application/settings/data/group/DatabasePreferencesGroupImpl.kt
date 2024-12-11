@@ -11,26 +11,26 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
 import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.Screen
+import dev.toastbits.composekit.settings.ComposeKitSettingsGroupImpl
 import dev.toastbits.composekit.settings.PlatformSettings
-import dev.toastbits.composekit.settings.PlatformSettingsGroupImpl
 import dev.toastbits.composekit.settings.PlatformSettingsProperty
 import dev.toastbits.composekit.settings.ui.component.item.ComposableSettingsItem
 import dev.toastbits.composekit.settings.ui.component.item.DropdownSettingsItem
 import dev.toastbits.composekit.settings.ui.component.item.SettingsItem
+import dev.toastbits.lifelog.application.settings.data.generated.resources.Res
+import dev.toastbits.lifelog.application.settings.data.generated.resources.pref_database_split_strategy_description
+import dev.toastbits.lifelog.application.settings.data.generated.resources.pref_database_split_strategy_title
+import dev.toastbits.lifelog.application.settings.data.generated.resources.prefs_group_database_description
+import dev.toastbits.lifelog.application.settings.data.generated.resources.prefs_group_database_title
 import dev.toastbits.lifelog.application.settings.domain.group.DatabasePreferencesGroup
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverterStrings
 import dev.toastbits.lifelog.core.specification.database.LogFileSplitStrategy
 import dev.toastbits.lifelog.core.specification.extension.ExtensionRegistry
 import dev.toastbits.lifelog.core.specification.impl.converter.LogFileConverterStringsImpl
 import dev.toastbits.lifelog.core.specification.impl.extension.ExtensionRegistryImpl
-import dev.toastbits.lifelog.application.settings.data.generated.resources.Res
-import dev.toastbits.lifelog.application.settings.data.generated.resources.pref_database_split_strategy_description
-import dev.toastbits.lifelog.application.settings.data.generated.resources.pref_database_split_strategy_title
-import dev.toastbits.lifelog.application.settings.data.generated.resources.prefs_group_database_description
-import dev.toastbits.lifelog.application.settings.data.generated.resources.prefs_group_database_title
 import org.jetbrains.compose.resources.stringResource
 
-class DatabasePreferencesGroupImpl(preferences: PlatformSettings): PlatformSettingsGroupImpl("DATABASE_SOURCE", preferences), DatabasePreferencesGroup {
+class DatabasePreferencesGroupImpl(preferences: PlatformSettings): ComposeKitSettingsGroupImpl("DATABASE_SOURCE", preferences), DatabasePreferencesGroup {
     @Composable
     override fun getTitle(): String = stringResource(Res.string.prefs_group_database_title)
 

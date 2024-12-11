@@ -18,9 +18,9 @@ kotlin {
             dependencies {
                 api(libs.kotlinx.datetime)
                 api(libs.okio)
+                api(libs.composekit.utilKt)
                 implementation(libs.markdown)
                 implementation(libs.uri.kmp)
-//                implementation(libs.kotlinx.serialization.json)
             }
         }
     }

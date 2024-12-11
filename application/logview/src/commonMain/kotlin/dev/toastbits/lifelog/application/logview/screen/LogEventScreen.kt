@@ -41,9 +41,9 @@ import dev.toastbits.composekit.components.platform.composable.ScrollBarColumn
 import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyRow
 import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.Screen
-import dev.toastbits.composekit.util.bottom
-import dev.toastbits.composekit.util.plus
-import dev.toastbits.composekit.util.top
+import dev.toastbits.composekit.util.composable.bottom
+import dev.toastbits.composekit.util.composable.plus
+import dev.toastbits.composekit.util.composable.top
 import dev.toastbits.lifelog.application.logview.component.event.LogEventMetadata
 import dev.toastbits.lifelog.application.logview.component.event.LogEventUserContent
 import dev.toastbits.lifelog.application.logview.component.propertychip.withProperties

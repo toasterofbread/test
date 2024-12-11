@@ -5,4 +5,4 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import dev.toastbits.lifelog.application.settings.domain.appsettings.AppSettings
 
 val LocalSettings: ProvidableCompositionLocal<AppSettings> =
-    staticCompositionLocalOf { throw IllegalStateException() }
+    staticCompositionLocalOf { throw IllegalStateException("LocalSettings has not been provided in the composition") }

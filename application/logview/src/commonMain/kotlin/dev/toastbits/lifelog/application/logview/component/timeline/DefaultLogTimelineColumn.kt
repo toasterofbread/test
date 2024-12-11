@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.components.platform.composable.BackHandler
 import dev.toastbits.composekit.components.utils.modifier.horizontal
-import dev.toastbits.composekit.util.copy
+import dev.toastbits.composekit.util.composable.copy
 import dev.toastbits.lifelog.application.logview.component.timeline.model.LogTimelineState
 import dev.toastbits.lifelog.application.logview.model.LogEventReference
 import dev.toastbits.lifelog.core.specification.database.LogDatabase

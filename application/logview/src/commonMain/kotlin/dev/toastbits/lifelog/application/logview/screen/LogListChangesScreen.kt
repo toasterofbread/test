@@ -14,9 +14,9 @@ import dev.toastbits.composekit.components.utils.composable.pane.model.InitialPa
 import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
 import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.ResponsiveTwoPaneScreen
-import dev.toastbits.composekit.util.bottom
-import dev.toastbits.composekit.util.copy
-import dev.toastbits.composekit.util.top
+import dev.toastbits.composekit.util.composable.bottom
+import dev.toastbits.composekit.util.composable.copy
+import dev.toastbits.composekit.util.composable.top
 import dev.toastbits.lifelog.application.core.FullContentScreen
 import dev.toastbits.lifelog.application.core.ui.GenericTopBar
 import dev.toastbits.lifelog.application.logview.component.timeline.DefaultLogTimelineColumn

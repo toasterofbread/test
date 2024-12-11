@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
                 WorkerExecutionContext.default(context)
             )
 
-        val prefs: PlatformSettings = PlatformSettingsImpl.getInstance(this, Json)
+        val prefs: PlatformSettings = PlatformSettingsImpl.getInstance(this)
 
         val currentApplication: Application =
             Application(

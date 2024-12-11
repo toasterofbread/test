@@ -1,5 +1,6 @@
 package dev.toastbits.lifelog.core.specification.impl.model.entity.event
 
+import dev.toastbits.composekit.util.model.Locale
 import dev.toastbits.lifelog.core.specification.localisation.LogStringId
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import dev.toastbits.lifelog.core.specification.model.entity.LogDisplayText
@@ -17,10 +18,10 @@ data class LogCommentEventImpl(
 
     override fun getIcon(): LogEvent.Icon = LogEvent.Icon.Comment
 
-    override suspend fun getPreview(locale: String): LogDisplayText =
+    override suspend fun getPreview(locale: Locale): LogDisplayText =
         content?.let { LogDisplayText.OfUserContent(it) } ?: LogDisplayText.OfString("")
 
-    override suspend fun getTitle(locale: String): LogDisplayText? = null
+    override suspend fun getTitle(locale: Locale): LogDisplayText? = null
 
     override fun copy(
         inlineComment: UserContent?,

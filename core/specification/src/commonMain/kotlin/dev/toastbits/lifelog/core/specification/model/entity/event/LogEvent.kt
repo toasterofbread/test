@@ -1,5 +1,6 @@
 package dev.toastbits.lifelog.core.specification.model.entity.event
 
+import dev.toastbits.composekit.util.model.Locale
 import dev.toastbits.lifelog.core.specification.localisation.LogStringId
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import dev.toastbits.lifelog.core.specification.model.entity.LogDisplayText
@@ -19,9 +20,9 @@ interface LogEvent: LogEntity {
 
     fun getIcon(): Icon
 
-    suspend fun getPreview(locale: String): LogDisplayText
+    suspend fun getPreview(locale: Locale): LogDisplayText
 
-    suspend fun getTitle(locale: String): LogDisplayText? =
+    suspend fun getTitle(locale: Locale): LogDisplayText? =
         getPreview(locale)
 
     override fun copy(

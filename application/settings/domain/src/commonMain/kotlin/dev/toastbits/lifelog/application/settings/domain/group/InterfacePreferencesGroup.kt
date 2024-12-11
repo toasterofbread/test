@@ -1,5 +1,5 @@
 package dev.toastbits.lifelog.application.settings.domain.group
 
-import dev.toastbits.composekit.commonsettings.impl.group.ComposeKitInterfacePlatformSettingsGroup
+import dev.toastbits.composekit.commonsettings.impl.group.ComposeKitSettingsGroupInterface
 
-interface InterfacePreferencesGroup: ComposeKitInterfacePlatformSettingsGroup
+interface InterfacePreferencesGroup: ComposeKitSettingsGroupInterface

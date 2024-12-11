@@ -1,5 +1,6 @@
 package dev.toastbits.lifelog.core.specification.model.string
 
+import dev.toastbits.composekit.util.model.Locale
 import dev.toastbits.lifelog.core.specification.extension.SpecificationExtension
 
 abstract class StringLocalisation<E: SpecificationExtension, T: StringId>(val locale: Locale) {

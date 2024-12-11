@@ -5,7 +5,7 @@ import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import dev.toastbits.composekit.settings.PlatformSettings
-import dev.toastbits.composekit.settings.PlatformSettingsGroupImpl
+import dev.toastbits.composekit.settings.ComposeKitSettingsGroupImpl
 import dev.toastbits.composekit.settings.PlatformSettingsProperty
 import dev.toastbits.composekit.settings.ui.component.item.SettingsItem
 import dev.toastbits.composekit.settings.ui.component.item.TextFieldSettingsItem
@@ -24,7 +24,7 @@ import org.jetbrains.compose.resources.stringResource
 
 open class DatabaseSourcePreferencesGroupImpl(
     preferences: PlatformSettings
-): PlatformSettingsGroupImpl("DATABASE_SOURCE", preferences), DatabaseSourcePreferencesGroup {
+): ComposeKitSettingsGroupImpl("DATABASE_SOURCE", preferences), DatabaseSourcePreferencesGroup {
     @Composable
     override fun getTitle(): String = stringResource(Res.string.prefs_group_database_source_title)
 

@@ -1,6 +1,6 @@
 package dev.toastbits.lifelog.extension.mediawatch.localisation
 
-import dev.toastbits.lifelog.core.specification.model.string.Locale
+import dev.toastbits.composekit.util.model.Locale
 import dev.toastbits.lifelog.core.specification.model.string.StringLocalisation
 import dev.toastbits.lifelog.extension.mediawatch.MediaWatchExtension
 import dev.toastbits.lifelog.extension.mediawatch.util.MediaEntityType

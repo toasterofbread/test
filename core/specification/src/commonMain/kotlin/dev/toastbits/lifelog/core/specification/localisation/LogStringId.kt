@@ -1,8 +1,8 @@
 package dev.toastbits.lifelog.core.specification.localisation
 
+import dev.toastbits.composekit.util.model.Locale
 import dev.toastbits.lifelog.core.specification.extension.ExtensionId
 import dev.toastbits.lifelog.core.specification.extension.SpecificationExtension
-import dev.toastbits.lifelog.core.specification.model.string.Locale
 import dev.toastbits.lifelog.core.specification.model.string.StringId
 
 internal sealed interface LogStringId: StringId {

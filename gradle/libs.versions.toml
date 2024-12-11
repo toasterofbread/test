@@ -12,7 +12,7 @@ kotlin = "2.1.0"
 compose = "1.8.0-dev1905"
 agp = "8.7.2"
 vanniktech-publish = "0.29.0"
-composekit = "955c996e"
+composekit = "beecf756"
 kogit = "0.0.5-SNAPSHOT"
 ktor = "3.0.1"
 okio = "3.9.1"
@@ -35,6 +35,7 @@ navigation-common-ktx = "2.8.4"
 
 [libraries]
 composekit-util = { module = "dev.toastbits:composekit-util", version.ref = "composekit" }
+composekit-utilKt= { module = "dev.toastbits:composekit-utilKt", version.ref = "composekit" }
 composekit-context = { module = "dev.toastbits:composekit-context", version.ref = "composekit" }
 composekit-settings = { module = "dev.toastbits:composekit-settings", version.ref = "composekit" }
 composekit-theme = { module = "dev.toastbits:composekit-theme", version.ref = "composekit" }

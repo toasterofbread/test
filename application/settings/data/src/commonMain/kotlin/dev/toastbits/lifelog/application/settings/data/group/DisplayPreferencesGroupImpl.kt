@@ -5,7 +5,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import dev.toastbits.composekit.settings.PlatformSettings
-import dev.toastbits.composekit.settings.PlatformSettingsGroupImpl
+import dev.toastbits.composekit.settings.ComposeKitSettingsGroupImpl
 import dev.toastbits.composekit.settings.PlatformSettingsProperty
 import dev.toastbits.composekit.settings.ui.component.item.DropdownSettingsItem
 import dev.toastbits.composekit.settings.ui.component.item.SettingsItem
@@ -17,7 +17,7 @@ import dev.toastbits.lifelog.application.settings.data.generated.resources.prefs
 import dev.toastbits.lifelog.application.settings.data.generated.resources.prefs_group_display_title
 import org.jetbrains.compose.resources.stringResource
 
-class DisplayPreferencesGroupImpl(preferences: PlatformSettings): PlatformSettingsGroupImpl("DISPLAY", preferences), DisplayPreferencesGroup {
+class DisplayPreferencesGroupImpl(preferences: PlatformSettings): ComposeKitSettingsGroupImpl("DISPLAY", preferences), DisplayPreferencesGroup {
     @Composable
     override fun getTitle(): String = stringResource(Res.string.prefs_group_display_title)
 
