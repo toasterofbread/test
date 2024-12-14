@@ -51,7 +51,12 @@ class Application(
     private val context: PlatformContext,
     private val workerClient: WorkerClient,
     preferences: PlatformSettings
-): ComposeKitApplication(DatabaseSourceListScreen(), context) {
+): ComposeKitApplication(
+    DatabaseSourceListScreen(),
+    context,
+    baseUiScale = BASE_UI_SCALE,
+    baseFontScale = BASE_FONT_SCALE
+) {
     override val settings: AppSettings = AppSettingsImpl(preferences)
 
     override val extraButtonsHandledExternally: Boolean
@@ -150,5 +155,10 @@ class Application(
         settings.Database.extensionRegistry.registerExtension(MediaExtension())
         settings.Database.extensionRegistry.registerExtension(MediaWatchExtension())
         settings.Database.extensionRegistry.registerExtension(GDocsExtension())
+    }
+
+    companion object {
+        const val BASE_UI_SCALE: Float = 1.0f
+        const val BASE_FONT_SCALE: Float = 1.2f
     }
 }

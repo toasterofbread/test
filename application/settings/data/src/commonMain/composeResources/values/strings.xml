@@ -1,7 +1,5 @@
 <resources>
-    <string name="screen_app_settings">Settings</string>
-
-    <!--  Settings  -->
+    <string name="language_name">If you're seeing this in-app, a bug has occurred.</string>
 
     <string name="prefs_group_database_title">Database</string>
     <string name="prefs_group_database_description">TODO</string>
