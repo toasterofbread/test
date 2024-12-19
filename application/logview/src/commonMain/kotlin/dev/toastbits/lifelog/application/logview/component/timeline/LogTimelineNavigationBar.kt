@@ -29,9 +29,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.components.utils.composable.PlatformClickableIconButton
-import dev.toastbits.composekit.theme.ThemeValues
-import dev.toastbits.composekit.theme.onAccent
-import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
+import dev.toastbits.composekit.theme.core.ThemeValues
+import dev.toastbits.composekit.theme.core.onAccent
+import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
 
 @Composable
 internal fun LogTimelineNavigationBar(

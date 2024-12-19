@@ -20,7 +20,7 @@ kotlin {
                 implementation(projects.core.specification)
 
                 implementation(libs.kogit.core)
-                implementation(libs.composekit.theme)
+                implementation(libs.composekit.theme.core)
                 implementation(libs.composekit.util)
                 implementation(libs.composekit.navigation)
                 implementation(libs.composekit.components)

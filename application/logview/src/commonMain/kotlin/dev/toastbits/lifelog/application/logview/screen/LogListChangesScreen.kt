@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.toastbits.composekit.components.ui.component.GenericTopBar
 import dev.toastbits.composekit.components.utils.composable.pane.model.InitialPaneRatioSource
 import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
 import dev.toastbits.composekit.navigation.navigator.Navigator
@@ -18,15 +19,14 @@ import dev.toastbits.composekit.util.composable.bottom
 import dev.toastbits.composekit.util.composable.copy
 import dev.toastbits.composekit.util.composable.top
 import dev.toastbits.lifelog.application.core.FullContentScreen
-import dev.toastbits.lifelog.application.core.ui.GenericTopBar
 import dev.toastbits.lifelog.application.logview.component.timeline.DefaultLogTimelineColumn
 import dev.toastbits.lifelog.application.logview.component.timeline.model.LogTimelineState
+import dev.toastbits.lifelog.application.logview.generated.resources.Res
+import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_title_review_changes
 import dev.toastbits.lifelog.application.logview.model.LogEntityChanges
 import dev.toastbits.lifelog.application.logview.model.LogEventReference
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
-import dev.toastbits.lifelog.application.logview.generated.resources.Res
-import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_title_review_changes
 import org.jetbrains.compose.resources.stringResource
 
 class LogListChangesScreen(
@@ -128,6 +128,6 @@ class LogListChangesScreen(
             return
         }
 
-        data.Content(LocalNavigator.current, modifier, contentPadding)
+        data.Content(modifier, contentPadding)
     }
 }

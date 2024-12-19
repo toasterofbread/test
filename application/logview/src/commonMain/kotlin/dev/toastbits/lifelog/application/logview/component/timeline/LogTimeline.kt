@@ -1,18 +1,10 @@
 package dev.toastbits.lifelog.application.logview.component.timeline
 
-import androidx.compose.animation.core.DurationBasedAnimationSpec
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
@@ -20,13 +12,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
@@ -38,9 +28,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyColumn
 import dev.toastbits.composekit.components.utils.composable.stickyHeaderContentPaddingAware
-import dev.toastbits.composekit.theme.ThemeValues
-import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
-import dev.toastbits.composekit.theme.vibrantAccent
+import dev.toastbits.composekit.components.utils.composable.wave.fullWavePath
+import dev.toastbits.composekit.theme.core.ThemeValues
+import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
 import dev.toastbits.composekit.util.LocalLocale
 import dev.toastbits.composekit.util.model.Locale
 import dev.toastbits.lifelog.application.logview.component.timeline.item.DateTimelineItem
@@ -55,9 +45,6 @@ import dev.toastbits.lifelog.core.specification.model.entity.LogDisplayText
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlin.math.PI
-import kotlin.math.ceil
-import kotlin.math.sin
 
 private val WAVE_SIZE: Dp = 15.dp
 private val WAVE_THICKNESS: Dp = 1.5.dp
@@ -186,7 +173,14 @@ internal fun LogTimeline(
                     val path: Path = Path()
                     val maxOffset: Float = 100f
                     val offset: Float = ((waveOffset % maxOffset) / maxOffset).let { if (it < 0f) 1f + it else it }
-                    fullWavePath(path, WAVE_SIZE.toPx(), WAVE_WAVELENGTH.toPx(), size.height, 0f, offset)
+                    fullWavePath(
+                        path = path,
+                        height = WAVE_SIZE.toPx(),
+                        length = size.height,
+                        waveLength = WAVE_WAVELENGTH.toPx(),
+                        outerRotationDegrees = 0f,
+                        offset = offset
+                    )
                     drawPath(path, theme.accent, style = Stroke(WAVE_THICKNESS.toPx()))
                 }
             }
@@ -228,62 +222,6 @@ private fun LazyListScope.timelineItem(
     }
 }
 
-fun fullWavePath(
-    path: Path,
-    height: Float,
-    waveLength: Float,
-    length: Float,
-    outerRotationDegrees: Float = 0f,
-    offset: Float = 0f
-): Path {
-    for (direction in listOf(-1, 1)) {
-        newWavePath(path, direction, height, waveLength, length, outerRotationDegrees, offset)
-    }
-    return path
-}
-
-// TODO | Move back to ComposeKit
-fun newWavePath(
-    path: Path,
-    direction: Int,
-    height: Float,
-    waveLength: Float,
-    length: Float,
-    outerRotationDegrees: Float = 0f,
-    offset: Float = 0f
-): Path {
-    require(offset in 0f .. 1f) { offset }
-
-    val halfPeriod: Float = waveLength / 2f
-    val effectiveWidth: Float = ceil(length / halfPeriod) * halfPeriod
-
-    val rotationAdj: Float = sin(outerRotationDegrees.toRadians())
-    val yOffset: Float = -(length * rotationAdj * 0.5f)
-
-    val xOffset: Float = offset * halfPeriod * 2
-    val xAdjustedOffset = (xOffset % effectiveWidth) - (if (xOffset > 0f) effectiveWidth else 0f)
-    path.moveTo(x = -halfPeriod / 2 + xAdjustedOffset, y = yOffset)
-
-    for (i in 0 until ceil((effectiveWidth * 2) / halfPeriod + 1).toInt()) {
-        if ((i % 2 == 0) != (direction == 1)) {
-            path.relativeMoveTo(halfPeriod, 0f)
-            continue
-        }
-
-        path.relativeQuadraticTo(
-            dx1 = halfPeriod / 2,
-            dy1 = height / 2 * direction,
-            dx2 = halfPeriod,
-            dy2 = 0f
-        )
-    }
-
-    return path
-}
-
-private fun Float.toRadians(): Float =
-    (this * 180f) / PI.toFloat()
-
 private suspend fun LogEvent.containsText(text: String, locale: Locale): Boolean {
     for (content in getAllUserContent()) {
         if (content.containsText(text, ignoreCase = true)) {
@@ -305,122 +243,3 @@ private suspend fun LogEvent.containsText(text: String, locale: Locale): Boolean
 
     return false
 }
-
-@Composable
-fun WaveBorder(
-    modifier: Modifier = Modifier,
-    waveColour: Color = LocalComposeKitTheme.current.vibrantAccent,
-    waveLength: Dp = 70.dp,
-    waveThickness: Dp = 2.dp,
-    animation: DurationBasedAnimationSpec<Float>? = tween(2000, easing = LinearEasing)
-) {
-    val offset: Float by
-        animation?.let {
-            rememberInfiniteTransition().animateFloat(
-                initialValue = 0f,
-                targetValue = 1f,
-                animationSpec = infiniteRepeatable(
-                    animation = it,
-                    repeatMode = RepeatMode.Restart
-                )
-            )
-        } ?: mutableStateOf(0f)
-
-    Canvas(
-        modifier
-            .height(15.dp)
-            .clipToBounds()
-    ) {
-        val path: Path = Path()
-
-        fullWavePath(
-            path,
-            size.height,
-            waveLength.toPx(),
-            size.width,
-            offset = offset
-        )
-
-        translate(top = size.height / 2f) {
-            drawPath(path, waveColour, style = Stroke(waveThickness.toPx()))
-        }
-    }
-}
-
-//@Composable
-//fun WaveBorderBox(
-//    waveColour: Color,
-//    waveLength: Dp,
-//    waveThickness: Dp,
-//    modifier: Modifier = Modifier,
-//    waveHeight: Dp = 10.dp,
-//    content: @Composable BoxScope.(PaddingValues) -> Unit
-//) {
-//    val infiniteTransition: InfiniteTransition = rememberInfiniteTransition()
-//    val offset: Float by infiniteTransition.animateFloat(
-//        initialValue = 0f,
-//        targetValue = 1f,
-//        animationSpec = infiniteRepeatable(
-//            animation = tween(1500, easing = LinearEasing),
-//            repeatMode = RepeatMode.Restart
-//        )
-//    )
-//
-//    Box(modifier) {
-//        Canvas(
-//            Modifier
-//                .matchParentSize()
-//                .clip(RoundedCornerShape(35.dp))
-//        ) {
-//            val path: Path = Path()
-//
-//            fullWavePath(
-//                path,
-//                waveHeight.toPx(),
-//                waveLength.toPx(),
-//                size.width,
-//                offset = offset
-//            )
-//
-//            clipRect {
-//                val halfWaveHeight: Float = waveHeight.toPx() / 2f
-//                val halfWaveLength: Float = waveLength.toPx() / 2f
-//
-//                translate(top = halfWaveHeight) {
-//                    drawPath(path, waveColour, style = Stroke(waveThickness.toPx()))
-//                }
-//
-//                translate(top = size.height - halfWaveHeight, left = halfWaveLength) {
-//                    rotate(180f, pivot = Offset.Zero) {
-//                        drawPath(path, waveColour, style = Stroke(waveThickness.toPx()))
-//                    }
-//                }
-//
-//                path.reset()
-//                fullWavePath(
-//                    path,
-//                    waveHeight.toPx(),
-//                    waveLength.toPx(),
-//                    size.height,
-//                    offset = offset
-//                )
-//
-//                translate(left = halfWaveHeight, top = halfWaveLength) {
-//                    rotate(270f, pivot = Offset.Zero) {
-//                        drawPath(path, waveColour, style = Stroke(waveThickness.toPx()))
-//                    }
-//                }
-//
-//                translate(left = size.width - halfWaveHeight) {
-//                    rotate(90f, pivot = Offset.Zero) {
-//                        drawPath(path, waveColour, style = Stroke(waveThickness.toPx()))
-//                    }
-//                }
-//            }
-//        }
-//
-//        Box {
-//            content(PaddingValues(waveHeight + 5.dp))
-//        }
-//    }
-//}

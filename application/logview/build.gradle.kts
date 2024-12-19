@@ -17,7 +17,7 @@ kotlin {
                 implementation(projects.application.dbsource.domain)
                 implementation(projects.core.specification)
 
-                implementation(libs.composekit.theme)
+                implementation(libs.composekit.theme.core)
                 implementation(libs.composekit.components)
                 implementation(libs.composekit.util)
                 implementation(libs.composekit.navigation)

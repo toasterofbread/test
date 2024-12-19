@@ -6,9 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import dev.toastbits.composekit.settings.PlatformSettings
 import dev.toastbits.composekit.settings.ComposeKitSettingsGroupImpl
-import dev.toastbits.composekit.settings.PlatformSettingsProperty
-import dev.toastbits.composekit.settings.ui.component.item.SettingsItem
-import dev.toastbits.composekit.settings.ui.component.item.TextFieldSettingsItem
+import dev.toastbits.composekit.settingsitem.domain.PlatformSettingsProperty
+import dev.toastbits.composekit.settingsitem.domain.SettingsItem
+import dev.toastbits.composekit.settingsitem.presentation.ui.component.item.TextFieldSettingsItem
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceTypeRegistry
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.type.InMemoryGitDatabaseSourceType
 import dev.toastbits.lifelog.application.settings.domain.group.DatabaseSourcePreferencesGroup

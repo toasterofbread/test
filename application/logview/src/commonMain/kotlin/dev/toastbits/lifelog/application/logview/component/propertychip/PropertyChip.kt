@@ -15,9 +15,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dev.toastbits.composekit.theme.ThemeValues
-import dev.toastbits.composekit.theme.onAccent
-import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
+import dev.toastbits.composekit.theme.core.ThemeValues
+import dev.toastbits.composekit.theme.core.onAccent
+import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
 import dev.toastbits.lifelog.application.core.ui.util.rememberLocalisedString
 import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguration
 import dev.toastbits.lifelog.core.specification.model.entity.LogEntity

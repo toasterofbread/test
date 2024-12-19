@@ -26,17 +26,16 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyColumn
 import dev.toastbits.composekit.components.utils.composable.animatedvisibility.NullableValueAnimatedVisibility
-import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.Screen
-import dev.toastbits.composekit.settings.ui.component.item.SettingsItem
-import dev.toastbits.composekit.theme.ThemeValues
-import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
-import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
-import dev.toastbits.lifelog.application.dbsource.domain.type.getLazyListConfigurationItems
-import dev.toastbits.lifelog.application.settings.data.compositionlocal.LocalSettings
+import dev.toastbits.composekit.settingsitem.domain.SettingsItem
+import dev.toastbits.composekit.theme.core.ThemeValues
+import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_database_source_auto_open
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_database_source_auto_open_toggle
+import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
+import dev.toastbits.lifelog.application.dbsource.domain.type.getLazyListConfigurationItems
+import dev.toastbits.lifelog.application.settings.data.compositionlocal.LocalSettings
 import org.jetbrains.compose.resources.stringResource
 
 internal class DatabaseSourceConfigurationScreen<T: DatabaseSourceConfiguration>(
@@ -48,7 +47,7 @@ internal class DatabaseSourceConfigurationScreen<T: DatabaseSourceConfiguration>
     private val getCancelText: @Composable () -> String
 ): Screen {
     @Composable
-    override fun Content(navigator: Navigator, modifier: Modifier, contentPadding: PaddingValues) {
+    override fun Content(modifier: Modifier, contentPadding: PaddingValues) {
         val autoOpenIndex: Int by LocalSettings.current.DatabaseSource.AUTO_OPEN_SOURCE_INDEX.observe()
 
         val theme: ThemeValues = LocalComposeKitTheme.current

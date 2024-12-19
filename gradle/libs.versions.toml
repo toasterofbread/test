@@ -12,7 +12,7 @@ kotlin = "2.1.0"
 compose = "1.8.0-alpha01"
 agp = "8.7.2"
 vanniktech-publish = "0.29.0"
-composekit = "35ed8f82"
+composekit = "0.1.0-SNAPSHOT"
 kogit = "0.0.5-SNAPSHOT"
 ktor = "3.0.1"
 okio = "3.9.1"
@@ -23,7 +23,7 @@ image-loader = "1.9.0"
 diff = "0.7.0"
 uri-kmp = "0.0.18"
 
-mokkery = "2.6.0-SNAPSHOT"
+mokkery = "2.6.1"
 assertk = "0.28.1"
 
 markdown = "0.7.3"
@@ -34,15 +34,17 @@ androidx-activity-compose = "1.9.3"
 navigation-common-ktx = "2.8.4"
 
 [libraries]
-composekit-util = { module = "dev.toastbits:composekit-util", version.ref = "composekit" }
-composekit-utilKt= { module = "dev.toastbits:composekit-utilKt", version.ref = "composekit" }
-composekit-context = { module = "dev.toastbits:composekit-context", version.ref = "composekit" }
-composekit-settings = { module = "dev.toastbits:composekit-settings", version.ref = "composekit" }
-composekit-theme = { module = "dev.toastbits:composekit-theme", version.ref = "composekit" }
-composekit-navigation = { module = "dev.toastbits:composekit-navigation", version.ref = "composekit" }
-composekit-components = { module = "dev.toastbits:composekit-components", version.ref = "composekit" }
-composekit-commonsettings = { module = "dev.toastbits:composekit-commonsettings", version.ref = "composekit" }
 composekit-application = { module = "dev.toastbits:composekit-application", version.ref = "composekit" }
+composekit-commonsettings = { module = "dev.toastbits:composekit-commonsettings", version.ref = "composekit" }
+composekit-components = { module = "dev.toastbits:composekit-components", version.ref = "composekit" }
+composekit-context = { module = "dev.toastbits:composekit-context", version.ref = "composekit" }
+composekit-navigation = { module = "dev.toastbits:composekit-navigation", version.ref = "composekit" }
+composekit-settings = { module = "dev.toastbits:composekit-settings", version.ref = "composekit" }
+composekit-settingsitem = { module = "dev.toastbits:composekit-settingsitem-presentation", version.ref = "composekit" }
+composekit-theme-config = { module = "dev.toastbits:composekit-theme-config", version.ref = "composekit" }
+composekit-theme-core = { module = "dev.toastbits:composekit-theme-core", version.ref = "composekit" }
+composekit-util = { module = "dev.toastbits:composekit-util", version.ref = "composekit" }
+composekit-utilKt = { module = "dev.toastbits:composekit-utilKt", version.ref = "composekit" }
 kogit-core = { module = "dev.toastbits:kogit-core", version.ref = "kogit" }
 kogit-memory = { module = "dev.toastbits:kogit-memory", version.ref = "kogit" }
 kogit-system = { module = "dev.toastbits:kogit-system", version.ref = "kogit" }

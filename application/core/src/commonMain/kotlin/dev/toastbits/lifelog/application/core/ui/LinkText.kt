@@ -1,6 +1,5 @@
 package dev.toastbits.lifelog.application.core.ui
 
-import androidx.compose.foundation.clickable
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,9 +13,10 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import dev.toastbits.composekit.components.LocalContext
+import dev.toastbits.composekit.components.platform.composable.platformClickable
 import dev.toastbits.composekit.context.PlatformContext
-import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
-import dev.toastbits.composekit.theme.vibrantAccent
+import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
+import dev.toastbits.composekit.theme.core.vibrantAccent
 import dev.toastbits.composekit.util.thenWith
 
 @Composable
@@ -41,9 +41,10 @@ fun LinkText(
             modifier.thenWith(
                 url?.takeIf { text.isNotEmpty() && context.canOpenUrl() }
             ) { url ->
-                clickable {
-                    context.openUrl(url)
-                }
+                platformClickable(
+                    onClick = { context.openUrl(url) },
+                    onAlt2Click = { context.openUrl(url) }
+                )
                 .semantics {
                     if (linkContentDescription != null) {
                         contentDescription = linkContentDescription

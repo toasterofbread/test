@@ -52,7 +52,7 @@ kotlin {
                 implementation(libs.composekit.context)
                 implementation(libs.composekit.components)
                 implementation(libs.composekit.navigation)
-                implementation(libs.composekit.theme)
+                implementation(libs.composekit.theme.core)
                 implementation(libs.composekit.util)
 
                 implementation(libs.okio)

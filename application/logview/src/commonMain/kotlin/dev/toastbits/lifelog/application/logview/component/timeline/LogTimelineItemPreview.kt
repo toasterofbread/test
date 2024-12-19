@@ -39,9 +39,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import dev.toastbits.composekit.components.utils.modifier.background
 import dev.toastbits.composekit.components.utils.modifier.border
-import dev.toastbits.composekit.theme.ThemeValues
-import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
-import dev.toastbits.composekit.theme.vibrantAccent
+import dev.toastbits.composekit.theme.core.ThemeValues
+import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
+import dev.toastbits.composekit.theme.core.vibrantAccent
 import dev.toastbits.composekit.util.thenIf
 import dev.toastbits.composekit.util.thenWith
 import dev.toastbits.lifelog.application.logview.component.timeline.item.EventTimelineItem

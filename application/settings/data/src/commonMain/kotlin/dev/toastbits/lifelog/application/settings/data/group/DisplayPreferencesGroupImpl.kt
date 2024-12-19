@@ -6,9 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import dev.toastbits.composekit.settings.PlatformSettings
 import dev.toastbits.composekit.settings.ComposeKitSettingsGroupImpl
-import dev.toastbits.composekit.settings.PlatformSettingsProperty
-import dev.toastbits.composekit.settings.ui.component.item.DropdownSettingsItem
-import dev.toastbits.composekit.settings.ui.component.item.SettingsItem
+import dev.toastbits.composekit.settingsitem.domain.PlatformSettingsProperty
+import dev.toastbits.composekit.settingsitem.presentation.ui.component.item.DropdownSettingsItem
+import dev.toastbits.composekit.settingsitem.domain.SettingsItem
 import dev.toastbits.lifelog.application.settings.domain.group.DisplayPreferencesGroup
 import dev.toastbits.lifelog.application.settings.domain.model.DisplayDateFormat
 import dev.toastbits.lifelog.application.settings.data.generated.resources.Res

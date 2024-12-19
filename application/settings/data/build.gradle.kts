@@ -18,6 +18,7 @@ kotlin {
 
                 implementation(libs.composekit.navigation)
                 implementation(libs.composekit.components)
+                implementation(libs.composekit.settingsitem)
             }
         }
     }

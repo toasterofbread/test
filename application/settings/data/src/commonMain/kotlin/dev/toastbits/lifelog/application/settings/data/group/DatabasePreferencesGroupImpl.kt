@@ -9,14 +9,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
-import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.Screen
 import dev.toastbits.composekit.settings.ComposeKitSettingsGroupImpl
 import dev.toastbits.composekit.settings.PlatformSettings
-import dev.toastbits.composekit.settings.PlatformSettingsProperty
-import dev.toastbits.composekit.settings.ui.component.item.ComposableSettingsItem
-import dev.toastbits.composekit.settings.ui.component.item.DropdownSettingsItem
-import dev.toastbits.composekit.settings.ui.component.item.SettingsItem
+import dev.toastbits.composekit.settingsitem.domain.PlatformSettingsProperty
+import dev.toastbits.composekit.settingsitem.domain.SettingsItem
+import dev.toastbits.composekit.settingsitem.presentation.ui.component.item.ComposableSettingsItem
+import dev.toastbits.composekit.settingsitem.presentation.ui.component.item.DropdownSettingsItem
 import dev.toastbits.lifelog.application.settings.data.generated.resources.Res
 import dev.toastbits.lifelog.application.settings.data.generated.resources.pref_database_split_strategy_description
 import dev.toastbits.lifelog.application.settings.data.generated.resources.pref_database_split_strategy_title
@@ -62,7 +61,6 @@ class DatabasePreferencesGroupImpl(preferences: PlatformSettings): ComposeKitSet
                         object : Screen {
                             @Composable
                             override fun Content(
-                                navigator: Navigator,
                                 modifier: Modifier,
                                 contentPadding: PaddingValues
                             ) {

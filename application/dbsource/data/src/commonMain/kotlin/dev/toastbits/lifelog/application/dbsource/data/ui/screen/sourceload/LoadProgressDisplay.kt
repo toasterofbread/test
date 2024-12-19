@@ -14,8 +14,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.components.platform.composable.theme.ThemedLinearProgressIndicator
 import dev.toastbits.composekit.components.utils.composable.animatedvisibility.NullableValueAnimatedVisibility
-import dev.toastbits.composekit.theme.ThemeValues
-import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
+import dev.toastbits.composekit.theme.core.ThemeValues
+import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
 import dev.toastbits.composekit.util.rememberLocalisedValue
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import org.jetbrains.compose.resources.stringResource

@@ -21,14 +21,15 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.toastbits.composekit.components.ui.component.GenericTopBar
+import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
 import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.Screen
-import dev.toastbits.composekit.theme.ThemeValues
-import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
+import dev.toastbits.composekit.theme.core.ThemeValues
+import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
 import dev.toastbits.composekit.util.composable.bottom
 import dev.toastbits.composekit.util.composable.copy
 import dev.toastbits.composekit.util.getContrasted
-import dev.toastbits.lifelog.application.core.ui.GenericTopBar
 import dev.toastbits.lifelog.application.logview.component.LogEventChangesDiff
 import dev.toastbits.lifelog.application.logview.generated.resources.Res
 import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_discard_event_changes
@@ -47,9 +48,10 @@ class LogEventChangesScreen(
     private val onDiscardChanges: (() -> Unit)?
 ): Screen {
     @Composable
-    override fun Content(navigator: Navigator, modifier: Modifier, contentPadding: PaddingValues) {
+    override fun Content(modifier: Modifier, contentPadding: PaddingValues) {
         val theme: ThemeValues = LocalComposeKitTheme.current
         val density: Density = LocalDensity.current
+        val navigator: Navigator = LocalNavigator.current
         val event: LogEvent = logDatabase[eventReference]
 
         Column(

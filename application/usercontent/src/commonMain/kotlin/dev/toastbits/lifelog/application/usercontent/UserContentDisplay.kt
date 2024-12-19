@@ -29,9 +29,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.components.LocalContext
 import dev.toastbits.composekit.context.PlatformContext
-import dev.toastbits.composekit.theme.ThemeValues
-import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
-import dev.toastbits.composekit.theme.vibrantAccent
+import dev.toastbits.composekit.theme.core.ThemeValues
+import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
+import dev.toastbits.composekit.theme.core.vibrantAccent
 import dev.toastbits.composekit.util.indexOfFirstOrNull
 import dev.toastbits.composekit.util.thenWith
 import dev.toastbits.lifelog.application.usercontent.model.ModsState

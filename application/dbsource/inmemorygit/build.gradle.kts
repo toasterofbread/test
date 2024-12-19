@@ -19,6 +19,7 @@ kotlin {
 
                 implementation(libs.kogit.core)
                 implementation(libs.composekit.settings)
+                implementation(libs.composekit.settingsitem)
                 implementation(libs.ktor.core)
                 implementation(libs.kotlinx.serialization.json)
             }

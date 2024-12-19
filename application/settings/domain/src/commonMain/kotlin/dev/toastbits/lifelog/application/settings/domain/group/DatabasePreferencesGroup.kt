@@ -1,9 +1,9 @@
 package dev.toastbits.lifelog.application.settings.domain.group
 
 import dev.toastbits.composekit.settings.ComposeKitSettingsGroup
-import dev.toastbits.composekit.settings.PlatformSettingsProperty
-import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguration
+import dev.toastbits.composekit.settingsitem.domain.PlatformSettingsProperty
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverterStrings
+import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguration
 import dev.toastbits.lifelog.core.specification.database.LogFileSplitStrategy
 import dev.toastbits.lifelog.core.specification.extension.ExtensionRegistry
 

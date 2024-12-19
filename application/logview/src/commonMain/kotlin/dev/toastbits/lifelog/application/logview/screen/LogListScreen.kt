@@ -36,22 +36,22 @@ import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
 import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.ResponsiveTwoPaneScreen
 import dev.toastbits.composekit.navigation.screen.Screen
-import dev.toastbits.composekit.theme.ThemeValues
-import dev.toastbits.composekit.theme.onAccent
-import dev.toastbits.composekit.theme.ui.LocalComposeKitTheme
+import dev.toastbits.composekit.theme.core.ThemeValues
+import dev.toastbits.composekit.theme.core.onAccent
+import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
 import dev.toastbits.lifelog.application.core.FullContentScreen
 import dev.toastbits.lifelog.application.logview.component.timeline.DefaultLogTimelineColumn
 import dev.toastbits.lifelog.application.logview.component.timeline.model.LogTimelineState
+import dev.toastbits.lifelog.application.logview.generated.resources.Res
+import dev.toastbits.lifelog.application.logview.generated.resources.`log_view_screen_$x_changes_made_popup`
+import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_review_changes
+import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_save
 import dev.toastbits.lifelog.application.logview.model.LogEntityChanges
 import dev.toastbits.lifelog.application.logview.model.LogEventReference
 import dev.toastbits.lifelog.application.logview.model.get
 import dev.toastbits.lifelog.application.logview.model.getOrNull
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
-import dev.toastbits.lifelog.application.logview.generated.resources.Res
-import dev.toastbits.lifelog.application.logview.generated.resources.`log_view_screen_$x_changes_made_popup`
-import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_review_changes
-import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_save
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -208,7 +208,7 @@ class LogListScreen(
             viewingEventScreen = null
         }
 
-        data.Content(LocalNavigator.current, modifier.fillMaxSize(), contentPadding)
+        data.Content(modifier.fillMaxSize(), contentPadding)
     }
 
     private fun applyChangesToDatabase(): LogDatabase? {

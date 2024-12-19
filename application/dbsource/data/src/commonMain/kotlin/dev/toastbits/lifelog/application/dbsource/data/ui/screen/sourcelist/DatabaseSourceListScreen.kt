@@ -6,9 +6,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
 import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.Screen
 import dev.toastbits.kogit.memory.handler.GitCommitGenerator.UserInfo
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_configure_database_source_cancel
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_configure_database_source_save
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_new_database_source_add
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_new_database_source_cancel
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceconfiguration.DatabaseSourceConfigurationScreen
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.DatabaseSourceLoadScreen
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.DatabaseSourceSaveScreen
@@ -23,11 +29,6 @@ import dev.toastbits.lifelog.application.settings.domain.model.SerialisedDatabas
 import dev.toastbits.lifelog.application.settings.domain.model.deserialiseConfiguration
 import dev.toastbits.lifelog.application.settings.domain.model.serialiseConfiguration
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
-import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
-import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_configure_database_source_cancel
-import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_configure_database_source_save
-import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_new_database_source_add
-import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_new_database_source_cancel
 import org.jetbrains.compose.resources.stringResource
 
 class LogSaveScreenProviderImpl(
@@ -58,8 +59,9 @@ class LogSaveScreenProviderImpl(
 
 class DatabaseSourceListScreen: Screen {
     @Composable
-    override fun Content(navigator: Navigator, modifier: Modifier, contentPadding: PaddingValues) {
+    override fun Content(modifier: Modifier, contentPadding: PaddingValues) {
         val settings: AppSettings = LocalSettings.current
+        val navigator: Navigator = LocalNavigator.current
         val autoOpenIndex: Int by settings.DatabaseSource.AUTO_OPEN_SOURCE_INDEX.observe()
 
         var serialisedSourceConfigurations: List<SerialisedDatabaseSourceConfiguration> by settings.DatabaseSource.DATABASE_SOURCES.observe()
