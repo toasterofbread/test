@@ -25,7 +25,7 @@ The goals areto have:
 
 ## Related libraries
 
-- [KoGit](https://gitlab.com/toasterofbread/kogit) - A limited-functionality Git client written pure multiplatform Kotlin (originally a module in LifeLog)
+- [KoGit](https://gitlab.com/toasterofbread/kogit) - A limited-functionality Git client written in pure multiplatform Kotlin (originally a module in LifeLog)
 - [ComposeKit](https://gitlab.com/toasterofbread/composekit) - Several modules in ComposeKit (such as navigation) as well as its modularisation refactor were written specifically for LifeLog
 
 ## Development
