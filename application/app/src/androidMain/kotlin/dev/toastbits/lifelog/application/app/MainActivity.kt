@@ -12,13 +12,12 @@ import dev.toastbits.lifelog.application.worker.WorkerClient
 import dev.toastbits.lifelog.application.worker.mapper.WorkerExecutionContext
 import dev.toastbits.lifelog.application.worker.mapper.default
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.serialization.json.Json
 
 class MainActivity : ComponentActivity() {
     private var application: Application? = null
-    private val coroutineScope: CoroutineScope = CoroutineScope(Job())
+    private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

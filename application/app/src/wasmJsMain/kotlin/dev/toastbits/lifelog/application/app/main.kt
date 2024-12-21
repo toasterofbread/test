@@ -7,10 +7,10 @@ import dev.toastbits.composekit.settings.cookies.BrowserCookies
 import dev.toastbits.composekit.settings.cookies.CookiesPlatformSettings
 import dev.toastbits.lifelog.application.worker.WorkerClient
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 
 fun main() {
-    val coroutineScope: CoroutineScope = CoroutineScope(Job())
+    val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob())
 
     val context: PlatformContext = PlatformContext(coroutineScope)
     val workerClient: WorkerClient = WorkerClient()

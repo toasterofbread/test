@@ -32,7 +32,7 @@ The goals areto have:
 
 ### Running the project (debug)
 
-#### JVM
+#### Desktop
 
 ```shell
 ./gradlew application:app:run
@@ -44,7 +44,7 @@ The goals areto have:
 ./gradlew application:app:installDebug
 ```
 
-#### WASM
+#### Web
 
 Note: LifeLog is developed and tested on Firefox. Issues may arise when using other browsers.
 

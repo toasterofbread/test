@@ -10,7 +10,7 @@ import dev.toastbits.lifelog.application.settings.domain.group.InterfacePreferen
 
 @Suppress("PropertyName")
 interface AppSettings: ComposeKitSettings {
-    val allGroups: List<ComposeKitSettingsGroup> get() =
+    override val allGroups: List<ComposeKitSettingsGroup> get() =
         listOf(
             Database,
             DatabaseSource,

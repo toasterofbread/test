@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,21 +37,24 @@ import dev.toastbits.lifelog.application.dbsource.data.generated.resources.butto
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.type.getLazyListConfigurationItems
 import dev.toastbits.lifelog.application.settings.data.compositionlocal.LocalSettings
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
 internal class DatabaseSourceConfigurationScreen<T: DatabaseSourceConfiguration>(
     private val initialConfiguration: T,
     private val index: Int,
-    private val onSaved: (configuration: T, autoOpen: Boolean) -> Unit,
+    private val onSaved: suspend (configuration: T, autoOpen: Boolean) -> Unit,
     private val onCancelled: () -> Unit,
     private val getSaveText: @Composable () -> String,
     private val getCancelText: @Composable () -> String
 ): Screen {
     @Composable
     override fun Content(modifier: Modifier, contentPadding: PaddingValues) {
-        val autoOpenIndex: Int by LocalSettings.current.DatabaseSource.AUTO_OPEN_SOURCE_INDEX.observe()
-
         val theme: ThemeValues = LocalComposeKitTheme.current
+        val coroutineScope: CoroutineScope = rememberCoroutineScope()
+
+        val autoOpenIndex: Int by LocalSettings.current.DatabaseSource.AUTO_OPEN_SOURCE_INDEX.observe()
         var currentConfiguration: T by remember { mutableStateOf(initialConfiguration) }
         var saved: Boolean by remember { mutableStateOf(false) }
         var autoOpen: Boolean by remember { mutableStateOf(autoOpenIndex == index) }
@@ -124,7 +128,9 @@ internal class DatabaseSourceConfigurationScreen<T: DatabaseSourceConfiguration>
                             }
                             saved = true
 
-                            onSaved(currentConfiguration, autoOpen)
+                            coroutineScope.launch {
+                                onSaved(currentConfiguration, autoOpen)
+                            }
                         },
                         enabled = invalidReasonMessages.isEmpty()
                     ) {

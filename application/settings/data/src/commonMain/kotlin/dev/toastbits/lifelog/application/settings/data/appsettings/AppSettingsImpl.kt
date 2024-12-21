@@ -14,11 +14,11 @@ import dev.toastbits.lifelog.application.settings.domain.group.DisplayPreference
 import dev.toastbits.lifelog.application.settings.domain.group.InterfacePreferencesGroup
 
 class AppSettingsImpl(
-    override val prefs: PlatformSettings
+    override val preferences: PlatformSettings
 ): AppSettings {
-    override val Database: DatabasePreferencesGroup = DatabasePreferencesGroupImpl(prefs)
-    override val DatabaseSource: DatabaseSourcePreferencesGroup = DatabaseSourcePreferencesGroupImpl(prefs)
-    override val Interface: InterfacePreferencesGroup = InterfacePreferencesGroupImpl(prefs)
-    override val Theme: ComposeKitSettingsGroupTheme = ThemePreferencesGroupImpl(prefs)
-    override val Display: DisplayPreferencesGroup = DisplayPreferencesGroupImpl(prefs)
+    override val Database: DatabasePreferencesGroup = DatabasePreferencesGroupImpl(preferences)
+    override val DatabaseSource: DatabaseSourcePreferencesGroup = DatabaseSourcePreferencesGroupImpl(preferences)
+    override val Interface: InterfacePreferencesGroup = InterfacePreferencesGroupImpl(preferences)
+    override val Theme: ComposeKitSettingsGroupTheme = ThemePreferencesGroupImpl(preferences)
+    override val Display: DisplayPreferencesGroup = DisplayPreferencesGroupImpl(preferences)
 }

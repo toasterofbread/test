@@ -67,7 +67,7 @@ class Application(
     }
 
     @Composable
-    override fun Content(contentPadding: PaddingValues) {
+    override fun Content(modifier: Modifier, contentPadding: PaddingValues) {
         LaunchedEffect(Unit) {
             openAutoOpenSource()
         }
@@ -76,7 +76,7 @@ class Application(
             LocalWorkerClient provides workerClient,
             LocalSettings provides settings
         ) {
-            RootContent(contentPadding)
+            RootContent(modifier, contentPadding)
         }
     }
 
@@ -120,8 +120,8 @@ class Application(
     }
 
     @Composable
-    private fun RootContent(contentPadding: PaddingValues) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    private fun RootContent(modifier: Modifier, contentPadding: PaddingValues) {
+        Box(modifier, contentAlignment = Alignment.Center) {
             val fullContentScreen: Boolean = navigator.currentScreen is FullContentScreen
 
             navigator.CurrentScreen(

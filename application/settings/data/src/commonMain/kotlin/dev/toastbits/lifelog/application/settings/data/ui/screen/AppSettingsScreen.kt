@@ -6,7 +6,7 @@ import dev.toastbits.lifelog.application.settings.domain.appsettings.AppSettings
 
 fun AppSettingsScreen(settings: AppSettings): PlatformSettingsScreen =
     PlatformSettingsScreen(
-        settings.prefs,
+        settings.preferences,
         settings.allGroups,
         initialStartPaneRatioSource =
             InitialPaneRatioSource.Remembered(
