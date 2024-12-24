@@ -6,18 +6,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import dev.toastbits.composekit.settingsitem.domain.SettingsItem
 import dev.toastbits.composekit.settingsitem.presentation.ui.component.item.mutablestate.MutableStateTextFieldSettingsItem
-import dev.toastbits.kogit.core.model.GitCredentials
 import dev.toastbits.kogit.core.provider.GitCredentialsProvider
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.accessor.InMemoryGitDatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.configuration.InMemoryGitDatabaseSourceConfiguration
-import dev.toastbits.lifelog.application.worker.WorkerClient
-import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguration
-import io.ktor.client.HttpClient
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.Res
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_git_description
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_git_name
@@ -27,6 +20,12 @@ import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resource
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_option_name_title
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_option_repository_url_description
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_option_repository_url_title
+import dev.toastbits.lifelog.application.worker.WorkerClient
+import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguration
+import io.ktor.client.HttpClient
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.stringResource
 
 object InMemoryGitDatabaseSourceType: DatabaseSourceType<InMemoryGitDatabaseSourceConfiguration> {
@@ -34,10 +33,6 @@ object InMemoryGitDatabaseSourceType: DatabaseSourceType<InMemoryGitDatabaseSour
 
     override fun createNewConfiguration(): InMemoryGitDatabaseSourceConfiguration =
         InMemoryGitDatabaseSourceConfiguration()
-
-    override suspend fun onConfigurationDeleted(configuration: InMemoryGitDatabaseSourceConfiguration) {
-
-    }
 
     override fun createAccessor(
         workerClient: WorkerClient,

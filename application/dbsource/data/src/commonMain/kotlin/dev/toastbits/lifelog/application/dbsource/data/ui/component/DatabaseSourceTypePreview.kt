@@ -40,7 +40,7 @@ fun DatabaseSourceTypePreview(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Icon(sourceType.getIcon(), sourceType.getName())
+        Icon(sourceType.getIcon(), null)
 
         Column(
             Modifier.fillMaxWidth().weight(1f),

@@ -21,10 +21,10 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyRow
 import dev.toastbits.composekit.components.utils.composable.wave.WaveLineArea
-import dev.toastbits.lifelog.application.dbsource.data.ui.component.DatabaseSourceTypePreview
-import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_source_list_add_source
+import dev.toastbits.lifelog.application.dbsource.data.ui.component.DatabaseSourceTypePreview
+import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -36,7 +36,7 @@ internal fun DatabaseSourceListActions(
     val shape: Shape = MaterialTheme.shapes.medium
 
     WaveLineArea(
-        modifier.height(100.dp).clip(shape),
+        modifier.height(110.dp).clip(shape),
         periodMillis = 5000
     ) {
         Column(
