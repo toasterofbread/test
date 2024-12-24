@@ -1,20 +1,13 @@
 package dev.toastbits.lifelog.application.settings.data.group
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Storage
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
-import dev.toastbits.composekit.navigation.screen.Screen
 import dev.toastbits.composekit.settings.ComposeKitSettingsGroupImpl
 import dev.toastbits.composekit.settings.PlatformSettings
 import dev.toastbits.composekit.settingsitem.domain.PlatformSettingsProperty
 import dev.toastbits.composekit.settingsitem.domain.SettingsItem
-import dev.toastbits.composekit.settingsitem.presentation.ui.component.item.ComposableSettingsItem
 import dev.toastbits.composekit.settingsitem.presentation.ui.component.item.DropdownSettingsItem
 import dev.toastbits.lifelog.application.settings.data.generated.resources.Res
 import dev.toastbits.lifelog.application.settings.data.generated.resources.pref_database_split_strategy_description
@@ -53,24 +46,6 @@ class DatabaseSettingsGroupImpl(preferences: PlatformSettings): ComposeKitSettin
         listOf(
             DropdownSettingsItem.ofEnumState(SPLIT_STRATEGY) {
                 it.toString()
-            },
-            ComposableSettingsItem {
-                val navigator = LocalNavigator.current
-                Button({
-                    navigator.pushScreen(
-                        object : Screen {
-                            @Composable
-                            override fun Content(
-                                modifier: Modifier,
-                                contentPadding: PaddingValues
-                            ) {
-                                Text("SCREEEN")
-                            }
-                        }
-                    )
-                }) {
-                    Text("Click me!")
-                }
             }
         )
 }
