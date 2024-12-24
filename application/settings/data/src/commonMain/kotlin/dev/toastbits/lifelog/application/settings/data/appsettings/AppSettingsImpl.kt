@@ -2,23 +2,23 @@ package dev.toastbits.lifelog.application.settings.data.appsettings
 
 import dev.toastbits.composekit.commonsettings.impl.group.ComposeKitSettingsGroupTheme
 import dev.toastbits.composekit.settings.PlatformSettings
-import dev.toastbits.lifelog.application.settings.data.group.DatabasePreferencesGroupImpl
-import dev.toastbits.lifelog.application.settings.data.group.DatabaseSourcePreferencesGroupImpl
-import dev.toastbits.lifelog.application.settings.data.group.DisplayPreferencesGroupImpl
-import dev.toastbits.lifelog.application.settings.data.group.InterfacePreferencesGroupImpl
+import dev.toastbits.lifelog.application.settings.data.group.DatabaseSettingsGroupImpl
+import dev.toastbits.lifelog.application.settings.data.group.DatabaseSourceSettingsGroupImpl
+import dev.toastbits.lifelog.application.settings.data.group.DisplaySettingsGroupImpl
+import dev.toastbits.lifelog.application.settings.data.group.InterfaceSettingsGroupImpl
 import dev.toastbits.lifelog.application.settings.data.group.ThemePreferencesGroupImpl
 import dev.toastbits.lifelog.application.settings.domain.appsettings.AppSettings
 import dev.toastbits.lifelog.application.settings.domain.group.DatabasePreferencesGroup
-import dev.toastbits.lifelog.application.settings.domain.group.DatabaseSourcePreferencesGroup
-import dev.toastbits.lifelog.application.settings.domain.group.DisplayPreferencesGroup
-import dev.toastbits.lifelog.application.settings.domain.group.InterfacePreferencesGroup
+import dev.toastbits.lifelog.application.settings.domain.group.DatabaseSourceSettingsGroup
+import dev.toastbits.lifelog.application.settings.domain.group.DisplaySettingsGroup
+import dev.toastbits.lifelog.application.settings.domain.group.InterfaceSettingsGroup
 
 class AppSettingsImpl(
     override val preferences: PlatformSettings
 ): AppSettings {
-    override val Database: DatabasePreferencesGroup = DatabasePreferencesGroupImpl(preferences)
-    override val DatabaseSource: DatabaseSourcePreferencesGroup = DatabaseSourcePreferencesGroupImpl(preferences)
-    override val Interface: InterfacePreferencesGroup = InterfacePreferencesGroupImpl(preferences)
+    override val Database: DatabasePreferencesGroup = DatabaseSettingsGroupImpl(preferences)
+    override val DatabaseSource: DatabaseSourceSettingsGroup = DatabaseSourceSettingsGroupImpl(preferences)
+    override val Interface: InterfaceSettingsGroup = InterfaceSettingsGroupImpl(preferences)
     override val Theme: ComposeKitSettingsGroupTheme = ThemePreferencesGroupImpl(preferences)
-    override val Display: DisplayPreferencesGroup = DisplayPreferencesGroupImpl(preferences)
+    override val Display: DisplaySettingsGroup = DisplaySettingsGroupImpl(preferences)
 }

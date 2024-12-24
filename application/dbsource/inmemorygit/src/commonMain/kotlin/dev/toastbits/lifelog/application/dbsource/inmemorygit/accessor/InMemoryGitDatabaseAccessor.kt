@@ -3,6 +3,7 @@ package dev.toastbits.lifelog.application.dbsource.inmemorygit.accessor
 import dev.toastbits.kogit.core.filestructure.FileStructure
 import dev.toastbits.kogit.core.filestructure.toSerialisable
 import dev.toastbits.kogit.core.model.GitCredentials
+import dev.toastbits.kogit.core.provider.GitCredentialsProvider
 import dev.toastbits.kogit.memory.handler.GitCommitGenerator.UserInfo
 import dev.toastbits.kogit.memory.handler.GitPusher
 import dev.toastbits.kogit.memory.model.GitRef
@@ -35,18 +36,17 @@ class InMemoryGitDatabaseAccessor(
     private val workerClient: WorkerClient,
     private val configuration: InMemoryGitDatabaseSourceConfiguration,
     private val databaseConfigurationProvider: suspend () -> LogDatabaseConfiguration,
-    private val gitCredentialsProvider: suspend () -> GitCredentials?,
+    private val gitCredentialsProvider: GitCredentialsProvider?,
     private val ioDispatcher: CoroutineDispatcher
 ): DatabaseAccessor {
     override suspend fun loadOnlineDatabase(onProgress: (LoadProgress) -> Unit): Result<LogDatabaseParseResult> = runCatching {
         val databaseConfiguration: LogDatabaseConfiguration = databaseConfigurationProvider()
-        val gitCredentials: GitCredentials? = gitCredentialsProvider()
 
         val command: WorkerCommandInMemoryGitClone =
             WorkerCommandInMemoryGitClone(
                 repositoryUrl = configuration.repositoryUrl,
                 branch = GitRef.Branch(configuration.branchName),
-                gitCredentials = gitCredentials
+                gitCredentials = getGitCredentials()
             )
 
         val fileStructureResult: WorkerCommandInMemoryGitClone.Response =
@@ -77,7 +77,6 @@ class InMemoryGitDatabaseAccessor(
         onProgress: (LoadProgress) -> Unit
     ): Result<SaveResult> = runCatching {
         val databaseConfiguration: LogDatabaseConfiguration = databaseConfigurationProvider()
-        val gitCredentials: GitCredentials? = gitCredentialsProvider()
 
         val alerts: MutableList<GenerateAlertData> = mutableListOf()
         val generator: LogDatabaseGenerateHelper = LogDatabaseGenerateHelper(databaseConfiguration)
@@ -91,7 +90,7 @@ class InMemoryGitDatabaseAccessor(
                 committer = committer,
                 repositoryUrl = configuration.repositoryUrl,
                 branch = GitRef.Branch(configuration.branchName),
-                gitCredentials = gitCredentials,
+                gitCredentials = getGitCredentials(),
                 fileStructure = fileStructure.toSerialisable {
                     onProgress(LoadProgress.Type.Generic.create(it.toLong(), null, Res.string.accessor_progress_serialising_file_structure))
                 }
@@ -113,4 +112,7 @@ class InMemoryGitDatabaseAccessor(
 
     override fun getFileLineUri(filePath: Path, lineIndex: UInt?): String? =
         GitRepositoryFileUrlProvider.getGitRepositoryFileUrl(configuration.repositoryUrl, configuration.branchName, filePath, lineIndex)
+
+    private suspend fun getGitCredentials(): GitCredentials? =
+        gitCredentialsProvider?.invoke(configuration.repositoryUrl)?.getOrThrow()
 }

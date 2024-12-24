@@ -6,8 +6,8 @@ import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccess
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.castType
 import dev.toastbits.lifelog.application.settings.data.compositionlocal.LocalSettings
+import dev.toastbits.lifelog.application.settings.data.group.createGitCredentialsProvider
 import dev.toastbits.lifelog.application.settings.domain.appsettings.AppSettings
-import dev.toastbits.lifelog.application.settings.domain.group.getGitCredentials
 import dev.toastbits.lifelog.application.settings.domain.group.getLogDatabaseConfiguration
 import dev.toastbits.lifelog.application.worker.WorkerClient
 import dev.toastbits.lifelog.application.worker.compositionlocal.LocalWorkerClient
@@ -30,7 +30,7 @@ fun rememberDatabaseAccessorProvider(sourceConfiguration: DatabaseSourceConfigur
             workerClient = workerClient,
             configuration = sourceConfiguration,
             databaseConfigurationProvider = settings.Database::getLogDatabaseConfiguration,
-            gitCredentialsProvider = settings.DatabaseSource::getGitCredentials,
+            gitCredentialsProvider = settings.DatabaseSource.createGitCredentialsProvider(),
             httpClient = HttpClient(),
             ioDispatcher = Dispatchers.Default,
             workDispatcher = Dispatchers.Default

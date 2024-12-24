@@ -3,7 +3,7 @@ package dev.toastbits.lifelog.application.dbsource.domain.type
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import dev.toastbits.composekit.settingsitem.domain.SettingsItem
-import dev.toastbits.kogit.core.model.GitCredentials
+import dev.toastbits.kogit.core.provider.GitCredentialsProvider
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.castType
@@ -22,7 +22,7 @@ interface DatabaseSourceType<C: DatabaseSourceConfiguration> {
         workerClient: WorkerClient,
         configuration: C,
         databaseConfigurationProvider: suspend () -> LogDatabaseConfiguration,
-        gitCredentialsProvider: suspend () -> GitCredentials?,
+        gitCredentialsProvider: GitCredentialsProvider?,
         httpClient: HttpClient,
         ioDispatcher: CoroutineDispatcher,
         workDispatcher: CoroutineDispatcher

@@ -4,12 +4,12 @@ import dev.toastbits.composekit.commonsettings.impl.group.impl.ComposeKitSetting
 import dev.toastbits.composekit.settings.PlatformSettings
 import dev.toastbits.lifelog.application.settings.data.generated.resources.Res
 import dev.toastbits.lifelog.application.settings.data.generated.resources.language_name
-import dev.toastbits.lifelog.application.settings.domain.group.InterfacePreferencesGroup
+import dev.toastbits.lifelog.application.settings.domain.group.InterfaceSettingsGroup
 
-class InterfacePreferencesGroupImpl(
+class InterfaceSettingsGroupImpl(
     preferences: PlatformSettings
 ): ComposeKitSettingsGroupInterfaceImpl(
     "INTERFACE",
     preferences,
     Res.string.language_name
-), InterfacePreferencesGroup
+), InterfaceSettingsGroup

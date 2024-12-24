@@ -10,6 +10,10 @@
     <string name="prefs_group_database_source_title">Database sources</string>
     <string name="prefs_group_database_source_description">TODO</string>
 
+    <string name="pref_database_source_git_binary_path_title">Git executable path</string>
+    <string name="pref_database_source_git_binary_path_description">Path to a Git binary to use for on-disk operations and retrieving credentials (leave blank to auto-detect)</string>
+    <string name="pref_database_source_use_system_git_credentials_title">Use system Git credentials</string>
+    <string name="pref_database_source_use_system_git_credentials_description">Attempt fetch credentials on the system using the Git binary (takes priority over manually entered credentials)</string>
     <string name="pref_database_source_git_username_title">Git username</string>
     <string name="pref_database_source_git_username_description">Username used to authenticate to Git database sources</string>
     <string name="pref_database_source_git_password_title">Git password/token</string>

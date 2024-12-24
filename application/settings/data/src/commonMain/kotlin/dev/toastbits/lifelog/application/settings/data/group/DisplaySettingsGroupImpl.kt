@@ -9,7 +9,7 @@ import dev.toastbits.composekit.settings.ComposeKitSettingsGroupImpl
 import dev.toastbits.composekit.settingsitem.domain.PlatformSettingsProperty
 import dev.toastbits.composekit.settingsitem.presentation.ui.component.item.DropdownSettingsItem
 import dev.toastbits.composekit.settingsitem.domain.SettingsItem
-import dev.toastbits.lifelog.application.settings.domain.group.DisplayPreferencesGroup
+import dev.toastbits.lifelog.application.settings.domain.group.DisplaySettingsGroup
 import dev.toastbits.lifelog.application.settings.domain.model.DisplayDateFormat
 import dev.toastbits.lifelog.application.settings.data.generated.resources.Res
 import dev.toastbits.lifelog.application.settings.data.generated.resources.pref_display_date_format_title
@@ -17,7 +17,7 @@ import dev.toastbits.lifelog.application.settings.data.generated.resources.prefs
 import dev.toastbits.lifelog.application.settings.data.generated.resources.prefs_group_display_title
 import org.jetbrains.compose.resources.stringResource
 
-class DisplayPreferencesGroupImpl(preferences: PlatformSettings): ComposeKitSettingsGroupImpl("DISPLAY", preferences), DisplayPreferencesGroup {
+class DisplaySettingsGroupImpl(preferences: PlatformSettings): ComposeKitSettingsGroupImpl("DISPLAY", preferences), DisplaySettingsGroup {
     @Composable
     override fun getTitle(): String = stringResource(Res.string.prefs_group_display_title)
 

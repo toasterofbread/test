@@ -16,6 +16,7 @@ kotlin {
                 implementation(projects.application.dbsource.domain)
                 implementation(projects.application.dbsource.inmemorygit)
 
+                implementation(libs.kogit.system)
                 implementation(libs.composekit.navigation)
                 implementation(libs.composekit.components)
                 implementation(libs.composekit.settingsitem)

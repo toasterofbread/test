@@ -4,9 +4,9 @@ import dev.toastbits.composekit.commonsettings.impl.ComposeKitSettings
 import dev.toastbits.composekit.commonsettings.impl.group.ComposeKitSettingsGroupTheme
 import dev.toastbits.composekit.settings.ComposeKitSettingsGroup
 import dev.toastbits.lifelog.application.settings.domain.group.DatabasePreferencesGroup
-import dev.toastbits.lifelog.application.settings.domain.group.DatabaseSourcePreferencesGroup
-import dev.toastbits.lifelog.application.settings.domain.group.DisplayPreferencesGroup
-import dev.toastbits.lifelog.application.settings.domain.group.InterfacePreferencesGroup
+import dev.toastbits.lifelog.application.settings.domain.group.DatabaseSourceSettingsGroup
+import dev.toastbits.lifelog.application.settings.domain.group.DisplaySettingsGroup
+import dev.toastbits.lifelog.application.settings.domain.group.InterfaceSettingsGroup
 
 @Suppress("PropertyName")
 interface AppSettings: ComposeKitSettings {
@@ -20,8 +20,8 @@ interface AppSettings: ComposeKitSettings {
         )
 
     val Database: DatabasePreferencesGroup
-    val DatabaseSource: DatabaseSourcePreferencesGroup
-    override val Interface: InterfacePreferencesGroup
+    val DatabaseSource: DatabaseSourceSettingsGroup
+    override val Interface: InterfaceSettingsGroup
     override val Theme: ComposeKitSettingsGroupTheme
-    val Display: DisplayPreferencesGroup
+    val Display: DisplaySettingsGroup
 }

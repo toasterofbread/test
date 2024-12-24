@@ -29,7 +29,7 @@ import dev.toastbits.lifelog.core.specification.impl.converter.LogFileConverterS
 import dev.toastbits.lifelog.core.specification.impl.extension.ExtensionRegistryImpl
 import org.jetbrains.compose.resources.stringResource
 
-class DatabasePreferencesGroupImpl(preferences: PlatformSettings): ComposeKitSettingsGroupImpl("DATABASE_SOURCE", preferences), DatabasePreferencesGroup {
+class DatabaseSettingsGroupImpl(preferences: PlatformSettings): ComposeKitSettingsGroupImpl("DATABASE_SOURCE", preferences), DatabasePreferencesGroup {
     @Composable
     override fun getTitle(): String = stringResource(Res.string.prefs_group_database_title)
 

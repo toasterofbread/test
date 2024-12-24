@@ -2,4 +2,4 @@ package dev.toastbits.lifelog.application.settings.domain.group
 
 import dev.toastbits.composekit.commonsettings.impl.group.ComposeKitSettingsGroupInterface
 
-interface InterfacePreferencesGroup: ComposeKitSettingsGroupInterface
+interface InterfaceSettingsGroup: ComposeKitSettingsGroupInterface

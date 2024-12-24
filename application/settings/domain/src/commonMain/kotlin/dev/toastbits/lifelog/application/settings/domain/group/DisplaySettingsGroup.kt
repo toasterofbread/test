@@ -5,6 +5,6 @@ import dev.toastbits.composekit.settingsitem.domain.PlatformSettingsProperty
 import dev.toastbits.lifelog.application.settings.domain.model.DisplayDateFormat
 
 @Suppress("PropertyName")
-interface DisplayPreferencesGroup: ComposeKitSettingsGroup {
+interface DisplaySettingsGroup: ComposeKitSettingsGroup {
     val DATE_FORMAT: PlatformSettingsProperty<DisplayDateFormat>
 }
