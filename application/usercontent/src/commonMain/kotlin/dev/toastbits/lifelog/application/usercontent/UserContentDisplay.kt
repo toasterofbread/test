@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -17,15 +19,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.components.LocalContext
 import dev.toastbits.composekit.context.PlatformContext
@@ -34,12 +44,12 @@ import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
 import dev.toastbits.composekit.theme.core.vibrantAccent
 import dev.toastbits.composekit.util.indexOfFirstOrNull
 import dev.toastbits.composekit.util.thenWith
+import dev.toastbits.lifelog.application.usercontent.generated.resources.Res
+import dev.toastbits.lifelog.application.usercontent.generated.resources.user_content_display_empty_indicator
 import dev.toastbits.lifelog.application.usercontent.model.ModsState
 import dev.toastbits.lifelog.application.usercontent.model.getState
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReference
-import dev.toastbits.lifelog.application.usercontent.generated.resources.Res
-import dev.toastbits.lifelog.application.usercontent.generated.resources.user_content_display_empty_indicator
 import org.jetbrains.compose.resources.stringResource
 
 private val LocalReference: ProvidableCompositionLocal<LogEntityReference?> =
@@ -59,8 +69,21 @@ fun UserContentDisplay(
             BlankUserContentIndicator(Modifier.fillMaxWidth())
         }
         else {
-            FlowRow {
-                for (part in content.parts) {
+            val density: Density = LocalDensity.current
+            var contentHeight: Dp by remember { mutableStateOf(0.dp) }
+
+            FlowRow(
+                Modifier
+                    // Workaround for FlowRow bug(?) in which its reported height is smaller than the actual content
+                    .height(contentHeight)
+                    .wrapContentHeight(Alignment.Top, unbounded = true)
+                    .onSizeChanged {
+                        with (density) {
+                            contentHeight = it.height.toDp()
+                        }
+                    }
+            ) {
+                for (part in (1..1).flatMap { content.parts }) {
                     UserContentPart(part, textStyle)
                 }
             }
