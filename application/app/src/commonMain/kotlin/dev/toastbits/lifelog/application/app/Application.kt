@@ -85,17 +85,6 @@ class Application(
 
     }
 
-    fun onKeyEvent(event: KeyEvent): Boolean {
-        if (event.type != KeyEventType.KeyUp) {
-            return false
-        }
-
-        return when (event.key) {
-            Key.Escape -> onWindowBackPressed(context)
-            else -> false
-        }
-    }
-
     private suspend fun openAutoOpenSource() {
         val autoOpenIndex: Int = settings.DatabaseSource.AUTO_OPEN_SOURCE_INDEX.get()
         if (autoOpenIndex < 0) {

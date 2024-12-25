@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -29,12 +28,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dev.toastbits.composekit.components.platform.composable.BackHandler
 import dev.toastbits.composekit.components.utils.composable.pane.model.InitialPaneRatioSource
 import dev.toastbits.composekit.components.utils.modifier.horizontal
 import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
 import dev.toastbits.composekit.navigation.navigator.Navigator
-import dev.toastbits.composekit.navigation.screen.ResponsiveTwoPaneScreen
+import dev.toastbits.composekit.navigation.screen.ResponsiveTwoPaneNavigatorScreen
 import dev.toastbits.composekit.navigation.screen.Screen
 import dev.toastbits.composekit.theme.core.ThemeValues
 import dev.toastbits.composekit.theme.core.onAccent
@@ -58,31 +56,31 @@ import org.jetbrains.compose.resources.stringResource
 class LogListScreen(
     initialLogDatabase: LogDatabase,
     private val logSaveScreenProvider: LogSaveScreenProvider
-): ResponsiveTwoPaneScreen<LogEventScreen<LogEvent>>(
-    initialStartPaneRatioSource =
+): ResponsiveTwoPaneNavigatorScreen(), FullContentScreen {
+    private data class EventScreen(
+        val eventReference: LogEventReference,
+        val screen: LogEventScreen<LogEvent>
+    ): Screen by screen
+
+    override val initialStartPaneRatioSource: InitialPaneRatioSource.Remembered =
         InitialPaneRatioSource.Remembered(
             "logview.screen.LogListScreen",
             InitialPaneRatioSource.Ratio(0.3f)
-        ),
-    alwaysShowEndPane = true
-), FullContentScreen {
-    data class EventScreen(
-        val eventReference: LogEventReference,
-        val screen: LogEventScreen<LogEvent>
-    )
+        )
+
+    override val alwaysShowEndPane: Boolean = true
 
     private var timelineState: LogTimelineState? = null
     private var logDatabase: LogDatabase by mutableStateOf(initialLogDatabase)
-    private var viewingEventScreen: EventScreen? by mutableStateOf(null)
     private var showSearchBar: Boolean by mutableStateOf(false)
+
+    private val viewingEventScreen: EventScreen?
+        get() = currentScreen as EventScreen?
 
     private val eventChanges: MutableMap<LogEventReference, LogEntityChanges<LogEvent>> = mutableStateMapOf()
 
     @Composable
-    override fun getCurrentData(): LogEventScreen<LogEvent>? = viewingEventScreen?.screen
-
-    @Composable
-    override fun PrimaryPane(data: LogEventScreen<LogEvent>?, contentPadding: PaddingValues, modifier: Modifier) {
+    override fun PrimaryPane(data: Screen?, contentPadding: PaddingValues, modifier: Modifier) {
         val currentTimelineState: LogTimelineState =
             remember {
                 LogTimelineState(
@@ -102,7 +100,7 @@ class LogListScreen(
             setShowSearchBar = { showSearchBar = it },
             modifier = modifier,
             onEventSelected = { eventReference ->
-                viewingEventScreen =
+                internalNavigator.replaceScreenUpTo(
                     EventScreen(
                         eventReference,
                         LogEventScreen(
@@ -111,7 +109,7 @@ class LogListScreen(
                             logDatabase = logDatabase,
                             initialChanges =
                                 eventChanges[eventReference]
-                                ?: LogEntityChanges.createEmpty(),
+                                    ?: LogEntityChanges.createEmpty(),
                             onChangesChanged = { event: LogEvent, newChanges: LogEntityChanges<LogEvent> ->
                                 if (newChanges.hasChanges(event)) {
                                     eventChanges[eventReference] = newChanges
@@ -122,6 +120,9 @@ class LogListScreen(
                             }
                         )
                     )
+                ) {
+                    it is EventScreen
+                }
             },
             extraFloatingContent = {
                 androidx.compose.animation.AnimatedVisibility(
@@ -171,21 +172,18 @@ class LogListScreen(
 
                 Row {
                     IconButton({
-                        val changes: Map<LogEventReference, LogEntityChanges<LogEvent>> = eventChanges.toMap()
-                        if (changes.isNotEmpty()) {
-                            navigator.pushScreen(
-                                LogListChangesScreen(
-                                    logDatabase,
-                                    changes,
-                                    discardChanges = { eventReference ->
-                                        eventChanges.remove(eventReference)
-                                        if (viewingEventScreen?.eventReference == eventReference) {
-                                            viewingEventScreen?.screen?.updateChanges(null)
-                                        }
+                        navigator.pushScreen(
+                            LogListChangesScreen(
+                                logDatabase,
+                                eventChanges,
+                                discardChanges = { eventReference ->
+                                    eventChanges.remove(eventReference)
+                                    if (viewingEventScreen?.eventReference == eventReference) {
+                                        viewingEventScreen?.screen?.updateChanges(null)
                                     }
-                                )
+                                }
                             )
-                        }
+                        )
                     }) {
                         Icon(Icons.Default.Visibility, stringResource(Res.string.log_view_screen_button_review_changes))
                     }
@@ -196,19 +194,6 @@ class LogListScreen(
                 }
             }
         }
-    }
-
-    @Composable
-    override fun SecondaryPane(data: LogEventScreen<LogEvent>?, contentPadding: PaddingValues, modifier: Modifier) {
-        if (data == null) {
-            return
-        }
-
-        BackHandler(!isDisplayingBothPanes) {
-            viewingEventScreen = null
-        }
-
-        data.Content(modifier.fillMaxSize(), contentPadding)
     }
 
     private fun applyChangesToDatabase(): LogDatabase? {
@@ -254,7 +239,7 @@ class LogListScreen(
         viewingEventScreen?.also {
             val newEvent: LogEvent? = logDatabase.getOrNull(it.eventReference)
             if (newEvent == null) {
-                viewingEventScreen = null
+                resetNavigator()
             }
             else {
                 it.screen.event = newEvent

@@ -14,7 +14,8 @@ import dev.toastbits.composekit.components.ui.component.GenericTopBar
 import dev.toastbits.composekit.components.utils.composable.pane.model.InitialPaneRatioSource
 import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
 import dev.toastbits.composekit.navigation.navigator.Navigator
-import dev.toastbits.composekit.navigation.screen.ResponsiveTwoPaneScreen
+import dev.toastbits.composekit.navigation.screen.ResponsiveTwoPaneNavigatorScreen
+import dev.toastbits.composekit.navigation.screen.Screen
 import dev.toastbits.composekit.util.composable.bottom
 import dev.toastbits.composekit.util.composable.copy
 import dev.toastbits.composekit.util.composable.top
@@ -27,46 +28,53 @@ import dev.toastbits.lifelog.application.logview.model.LogEntityChanges
 import dev.toastbits.lifelog.application.logview.model.LogEventReference
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import org.jetbrains.compose.resources.stringResource
 
 class LogListChangesScreen(
     private val logDatabase: LogDatabase,
-    eventChanges: Map<LogEventReference, LogEntityChanges<LogEvent>>,
+    private val eventChanges: Map<LogEventReference, LogEntityChanges<LogEvent>>,
     private val discardChanges: (LogEventReference) -> Unit
-): ResponsiveTwoPaneScreen<LogEventChangesScreen>(
-    initialStartPaneRatioSource =
+): ResponsiveTwoPaneNavigatorScreen(), FullContentScreen {
+    override val initialStartPaneRatioSource: InitialPaneRatioSource.Remembered =
         InitialPaneRatioSource.Remembered(
             "logview.screen.LogListSaveScreen",
             InitialPaneRatioSource.Ratio(0.3f)
-        ),
-    alwaysShowEndPane = true
-), FullContentScreen {
-    private var eventChanges: Map<LogEventReference, LogEntityChanges<LogEvent>> by mutableStateOf(eventChanges)
+        )
+
+    override val alwaysShowEndPane: Boolean = true
+
     private var timelineState: LogTimelineState? = null
-    private var viewingEventScreen: LogEventChangesScreen? by mutableStateOf(
-        eventChanges.entries.firstOrNull()?.let { (eventReference, eventChanges) ->
-            LogEventChangesScreen(
-                eventReference,
-                eventChanges,
-                logDatabase,
-                onDiscardChanges = ::discardEventChanges
-            )
-        }
-    )
     private var showSearchBar: Boolean by mutableStateOf(false)
+
+    private val viewingEventScreen: LogEventChangesScreen?
+        get() = currentScreen as LogEventChangesScreen?
 
     private fun discardEventChanges() {
         val reference: LogEventReference = viewingEventScreen?.eventReference ?: return
-        eventChanges = eventChanges.toMutableMap().apply { remove(reference) }
-        viewingEventScreen = null
+        resetNavigator()
         discardChanges(reference)
     }
 
-    @Composable
-    override fun getCurrentData(): LogEventChangesScreen? = viewingEventScreen
+    override fun CoroutineScope.beforeOpen(): Job? {
+        eventChanges.entries.firstOrNull()?.also { (eventReference, eventChanges) ->
+            internalNavigator.replaceScreenUpTo(
+                LogEventChangesScreen(
+                    eventReference,
+                    eventChanges,
+                    logDatabase,
+                    onDiscardChanges = ::discardEventChanges
+                )
+            ) {
+                it is LogEventChangesScreen
+            }
+        }
+        return null
+    }
 
     @Composable
-    override fun PrimaryPane(data: LogEventChangesScreen?, contentPadding: PaddingValues, modifier: Modifier) {
+    override fun PrimaryPane(data: Screen?, contentPadding: PaddingValues, modifier: Modifier) {
         val navigator: Navigator = LocalNavigator.current
         val currentTimelineState: LogTimelineState =
             remember {
@@ -102,13 +110,16 @@ class LogListChangesScreen(
                 showSearchBar = showSearchBar,
                 setShowSearchBar = { showSearchBar = it },
                 onEventSelected = { eventReference ->
-                    viewingEventScreen =
+                    internalNavigator.replaceScreenUpTo(
                         LogEventChangesScreen(
                             eventReference,
                             eventChanges[eventReference]!!,
                             logDatabase,
                             onDiscardChanges = ::discardEventChanges
                         )
+                    ) {
+                        it is LogEventChangesScreen
+                    }
                 },
                 filterEvents = { _, reference ->
                     eventChanges.contains(reference)
@@ -116,18 +127,5 @@ class LogListChangesScreen(
                 filterKey = eventChanges
             )
         }
-    }
-
-    @Composable
-    override fun SecondaryPane(
-        data: LogEventChangesScreen?,
-        contentPadding: PaddingValues,
-        modifier: Modifier
-    ) {
-        if (data == null) {
-            return
-        }
-
-        data.Content(modifier, contentPadding)
     }
 }

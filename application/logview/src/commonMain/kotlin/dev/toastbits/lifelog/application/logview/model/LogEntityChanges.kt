@@ -3,7 +3,7 @@ package dev.toastbits.lifelog.application.logview.model
 import dev.toastbits.lifelog.core.specification.model.entity.LogEntity
 import dev.toastbits.lifelog.core.specification.model.entity.property.LogEntityProperty
 
-class LogEntityChanges<T: LogEntity> private constructor(
+data class LogEntityChanges<T: LogEntity> private constructor(
     val changesList: List<Change<T, *>> = emptyList()
 ) {
     fun hasChanges(entity: T): Boolean =
