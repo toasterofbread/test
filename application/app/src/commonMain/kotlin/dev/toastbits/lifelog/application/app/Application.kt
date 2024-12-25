@@ -27,6 +27,7 @@ import dev.toastbits.composekit.navigation.screen.Screen
 import dev.toastbits.composekit.settings.PlatformSettings
 import dev.toastbits.composekit.util.composable.copy
 import dev.toastbits.composekit.util.composable.plus
+import dev.toastbits.composekit.util.platform.Platform
 import dev.toastbits.composekit.util.thenIf
 import dev.toastbits.lifelog.application.app.ui.PersistentBottomBar
 import dev.toastbits.lifelog.application.app.ui.PersistentTopBar
@@ -126,7 +127,7 @@ class Application(
 
             navigator.CurrentScreen(
                 Modifier.fillMaxHeight().thenIf(!fullContentScreen) { widthIn(max = 1000.dp) },
-                contentPadding + PaddingValues(20.dp)
+                contentPadding + getPlatformPadding()
             ) { modifier, paddingValues, content ->
                 Column(
                     modifier,
@@ -156,6 +157,13 @@ class Application(
         settings.Database.extensionRegistry.registerExtension(MediaWatchExtension())
         settings.Database.extensionRegistry.registerExtension(GDocsExtension())
     }
+
+    private fun getPlatformPadding(): PaddingValues =
+        when (Platform.current) {
+            Platform.ANDROID -> PaddingValues(horizontal = 20.dp)
+            Platform.DESKTOP,
+            Platform.WEB -> PaddingValues(20.dp)
+        }
 
     companion object {
         const val BASE_UI_SCALE: Float = 1.0f
