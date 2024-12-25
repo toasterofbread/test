@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,7 +36,7 @@ import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_database_source_auto_open
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_database_source_auto_open_toggle
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
-import dev.toastbits.lifelog.application.dbsource.domain.type.getLazyListConfigurationItems
+import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
 import dev.toastbits.lifelog.application.settings.data.compositionlocal.LocalSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -55,21 +56,20 @@ internal class DatabaseSourceConfigurationScreen<T: DatabaseSourceConfiguration>
         val coroutineScope: CoroutineScope = rememberCoroutineScope()
 
         val autoOpenIndex: Int by LocalSettings.current.DatabaseSource.AUTO_OPEN_SOURCE_INDEX.observe()
-        var currentConfiguration: T by remember { mutableStateOf(initialConfiguration) }
+        val currentConfigurationState: MutableState<T> = remember { mutableStateOf(initialConfiguration) }
         var saved: Boolean by remember { mutableStateOf(false) }
         var autoOpen: Boolean by remember { mutableStateOf(autoOpenIndex == index) }
 
-        val invalidReasonMessages: Map<Int, String> = currentConfiguration.getInvalidReasonMessages()
+        val invalidReasonMessages: Map<Int, String> = currentConfigurationState.value.getInvalidReasonMessages()
 
         Column(
             modifier.padding(contentPadding),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            val configurationType: DatabaseSourceType<T> = remember { initialConfiguration.getType() as DatabaseSourceType<T> }
             val configurationItems: List<SettingsItem> =
-                remember(currentConfiguration) {
-                    currentConfiguration.getLazyListConfigurationItems { newConfiguration ->
-                        currentConfiguration = newConfiguration
-                    }
+                remember(configurationType) {
+                    configurationType.getLazyListConfigurationItems(currentConfigurationState)
                 }
 
             ScrollBarLazyColumn(
@@ -129,7 +129,7 @@ internal class DatabaseSourceConfigurationScreen<T: DatabaseSourceConfiguration>
                             saved = true
 
                             coroutineScope.launch {
-                                onSaved(currentConfiguration, autoOpen)
+                                onSaved(currentConfigurationState.value, autoOpen)
                             }
                         },
                         enabled = invalidReasonMessages.isEmpty()

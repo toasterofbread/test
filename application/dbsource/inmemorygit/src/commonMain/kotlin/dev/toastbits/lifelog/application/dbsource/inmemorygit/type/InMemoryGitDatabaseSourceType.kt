@@ -3,9 +3,11 @@ package dev.toastbits.lifelog.application.dbsource.inmemorygit.type
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.vector.ImageVector
 import dev.toastbits.composekit.settingsitem.domain.SettingsItem
-import dev.toastbits.composekit.settingsitem.presentation.ui.component.item.mutablestate.MutableStateTextFieldSettingsItem
+import dev.toastbits.composekit.settingsitem.presentation.ui.component.item.TextFieldSettingsItem
+import dev.toastbits.composekit.util.state.map
 import dev.toastbits.kogit.core.provider.GitCredentialsProvider
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
@@ -61,27 +63,32 @@ object InMemoryGitDatabaseSourceType: DatabaseSourceType<InMemoryGitDatabaseSour
     override fun getIcon(): ImageVector = Icons.Default.Cloud
 
     override fun getLazyListConfigurationItems(
-        configuration: InMemoryGitDatabaseSourceConfiguration,
-        onChange: (InMemoryGitDatabaseSourceConfiguration) -> Unit
+        configurationState: MutableState<InMemoryGitDatabaseSourceConfiguration>
     ): List<SettingsItem> =
         listOf(
-            MutableStateTextFieldSettingsItem(
-                value = configuration.name,
-                onSet = { onChange(configuration.copy(name = it)) },
-                getPropertyName = { stringResource(Res.string.source_type_in_memory_option_name_title) },
-                getPropertyDescription = { stringResource(Res.string.source_type_in_memory_option_name_description) }
+            TextFieldSettingsItem.ofMutableState(
+                state = configurationState.map(
+                    from = { it.name },
+                    to = { configurationState.value.copy(name = it) }
+                ),
+                getTitle = { stringResource(Res.string.source_type_in_memory_option_name_title) },
+                getDescription = { stringResource(Res.string.source_type_in_memory_option_name_description) }
             ),
-            MutableStateTextFieldSettingsItem(
-                value = configuration.repositoryUrl,
-                onSet = { onChange(configuration.copy(repositoryUrl = it)) },
-                getPropertyName = { stringResource(Res.string.source_type_in_memory_option_repository_url_title) },
-                getPropertyDescription = { stringResource(Res.string.source_type_in_memory_option_repository_url_description) }
+            TextFieldSettingsItem.ofMutableState(
+                state = configurationState.map(
+                    from = { it.repositoryUrl },
+                    to = { configurationState.value.copy(repositoryUrl = it) }
+                ),
+                getTitle = { stringResource(Res.string.source_type_in_memory_option_repository_url_title) },
+                getDescription = { stringResource(Res.string.source_type_in_memory_option_repository_url_description) }
             ),
-            MutableStateTextFieldSettingsItem(
-                value = configuration.branchName,
-                onSet = { onChange(configuration.copy(branchName = it)) },
-                getPropertyName = { stringResource(Res.string.source_type_in_memory_option_branch_title) },
-                getPropertyDescription = { stringResource(Res.string.source_type_in_memory_option_branch_description) }
+            TextFieldSettingsItem.ofMutableState(
+                state = configurationState.map(
+                    from = { it.branchName },
+                    to = { configurationState.value.copy(branchName = it) }
+                ),
+                getTitle = { stringResource(Res.string.source_type_in_memory_option_branch_title) },
+                getDescription = { stringResource(Res.string.source_type_in_memory_option_branch_description) }
             )
         )
     }
