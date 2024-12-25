@@ -44,12 +44,16 @@ import dev.toastbits.lifelog.application.logview.generated.resources.Res
 import dev.toastbits.lifelog.application.logview.generated.resources.`log_view_screen_$x_changes_made_popup`
 import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_review_changes
 import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_save
+import dev.toastbits.lifelog.application.logview.manager.LogDatabaseChangesManager
 import dev.toastbits.lifelog.application.logview.model.LogEntityChanges
 import dev.toastbits.lifelog.application.logview.model.LogEventReference
 import dev.toastbits.lifelog.application.logview.model.get
 import dev.toastbits.lifelog.application.logview.model.getOrNull
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -77,7 +81,21 @@ class LogListScreen(
     private val viewingEventScreen: EventScreen?
         get() = currentScreen as EventScreen?
 
-    private val eventChanges: MutableMap<LogEventReference, LogEntityChanges<LogEvent>> = mutableStateMapOf()
+    private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob())
+    private val eventChanges: LogDatabaseChangesManager =
+        LogDatabaseChangesManager(
+            logDatabase,
+            coroutineScope,
+            mutableStateMapOf()
+        )
+
+    override fun onClosed(movingBackward: Boolean) {
+        eventChanges.applyAllQueuedChanges()
+    }
+
+    override fun release() {
+        coroutineScope.cancel()
+    }
 
     @Composable
     override fun PrimaryPane(data: Screen?, contentPadding: PaddingValues, modifier: Modifier) {
@@ -110,13 +128,8 @@ class LogListScreen(
                             initialChanges =
                                 eventChanges[eventReference]
                                     ?: LogEntityChanges.createEmpty(),
-                            onChangesChanged = { event: LogEvent, newChanges: LogEntityChanges<LogEvent> ->
-                                if (newChanges.hasChanges(event)) {
-                                    eventChanges[eventReference] = newChanges
-                                }
-                                else {
-                                    eventChanges.remove(eventReference)
-                                }
+                            onChangesChanged = {
+                                eventChanges.queueNewChanges(eventReference, it)
                             }
                         )
                     )
@@ -172,7 +185,8 @@ class LogListScreen(
 
                 Row {
                     IconButton({
-                        navigator.pushScreen(
+                        pushScreen(
+                            navigator,
                             LogListChangesScreen(
                                 logDatabase,
                                 eventChanges,
@@ -194,6 +208,11 @@ class LogListScreen(
                 }
             }
         }
+    }
+
+    private fun pushScreen(navigator: Navigator, screen: Screen) {
+        eventChanges.applyAllQueuedChanges()
+        navigator.pushScreen(screen)
     }
 
     private fun applyChangesToDatabase(): LogDatabase? {
@@ -229,7 +248,7 @@ class LogListScreen(
                 }
             )
 
-        navigator.pushScreen(saveScreen)
+        pushScreen(navigator, saveScreen)
     }
 
     private fun onDatabaseSaved(newDatabase: LogDatabase) {

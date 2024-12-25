@@ -22,7 +22,6 @@ import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,9 +35,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import dev.toastbits.composekit.components.platform.composable.BackHandler
 import dev.toastbits.composekit.components.platform.composable.ScrollBarColumn
 import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyRow
+import dev.toastbits.composekit.components.utils.composable.SubtleLoadingIndicator
 import dev.toastbits.composekit.components.utils.composable.wave.WaveBorder
 import dev.toastbits.composekit.navigation.screen.Screen
 import dev.toastbits.composekit.util.composable.bottom
@@ -47,22 +46,23 @@ import dev.toastbits.composekit.util.composable.top
 import dev.toastbits.lifelog.application.logview.component.event.LogEventMetadata
 import dev.toastbits.lifelog.application.logview.component.event.LogEventUserContent
 import dev.toastbits.lifelog.application.logview.component.propertychip.withProperties
+import dev.toastbits.lifelog.application.logview.manager.LogDatabaseChangesManager
 import dev.toastbits.lifelog.application.logview.model.LogEntityChanges
-import dev.toastbits.lifelog.application.logview.model.LogEventViewScreenState
-import dev.toastbits.lifelog.application.logview.model.awaitLoaded
-import dev.toastbits.lifelog.application.logview.model.getNext
+import dev.toastbits.lifelog.application.logview.model.LogEventViewContentState
 import dev.toastbits.lifelog.core.specification.converter.generateUserContent
+import dev.toastbits.lifelog.core.specification.converter.parseUserContent
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import dev.toastbits.lifelog.core.specification.model.entity.date.LogDate
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import dev.toastbits.lifelog.core.specification.model.entity.property.LogEntityProperty
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -73,36 +73,61 @@ class LogEventScreen<T: LogEvent>(
     private val date: LogDate,
     private val logDatabase: LogDatabase,
     initialChanges: LogEntityChanges<T>,
-    private val onChangesChanged: (T, LogEntityChanges<T>) -> Unit
+    private val onChangesChanged: (LogDatabaseChangesManager.QueuedChanges) -> Unit
 ): Screen {
-    private val coroutineScope: CoroutineScope = CoroutineScope(Job())
+    private val stateLoadCoroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     var event: T by mutableStateOf(event)
     private var changes: LogEntityChanges<T> by mutableStateOf(initialChanges)
-    private var state: LogEventViewScreenState by mutableStateOf(LogEventViewScreenState.Loaded.Preview(getCurrentContent()))
 
-    override fun onClosed() {
-        super.onClosed()
-        coroutineScope.cancel()
+    private var currentState: LogEventViewContentState by mutableStateOf(LogEventViewContentState.Preview(getCurrentContent()))
+
+    private fun updateState(state: LogEventViewContentState) {
+        currentState = state
+        onChangesChanged(
+            LogDatabaseChangesManager.QueuedChanges(CHANGES_UPDATE_DELAY) { changes ->
+                val content: UserContent =
+                    when (state) {
+                        is LogEventViewContentState.Edit ->
+                            logDatabase.converter.userContentParser.parseUserContent(
+                                state.content,
+                                logDatabase.converter.referenceParser,
+                                onAlert = { _, _ -> }
+                            )
+                        is LogEventViewContentState.Preview -> state.content
+                    }
+
+                return@QueuedChanges changes.copyWithProperty(LogEvent.PROPERTY_CONTENT, content)
+            }
+        )
+    }
+
+    private var stateLoadJob: Job? by mutableStateOf(null)
+    private val loading: Boolean get() =
+        stateLoadJob?.isActive == true
+
+    override fun release() {
+        stateLoadCoroutineScope.cancel()
     }
 
     fun updateChanges(changes: LogEntityChanges<T>?) {
+        val previousContent: UserContent = getCurrentContent()
         this.changes = changes ?: LogEntityChanges.createEmpty()
 
-        coroutineScope.coroutineContext.cancelChildren()
-        state =
-            when (state.type) {
-                LogEventViewScreenState.Type.EDIT ->
-                    LogEventViewScreenState.Loading.of(
-                        coroutineScope.async {
-                            LogEventViewScreenState.Loaded.Edit(
-                                logDatabase.converter.generateUserContent(getCurrentContent(), date)
-                            )
-                        }
-                    )
-                LogEventViewScreenState.Type.PREVIEW ->
-                    LogEventViewScreenState.Loaded.Preview(getCurrentContent())
+        val currentContent: UserContent = getCurrentContent()
+        if (previousContent == currentContent) {
+            return
+        }
+
+        stateLoadCoroutineScope.coroutineContext.cancelChildren()
+        updateState(
+            when (currentState) {
+                is LogEventViewContentState.Edit ->
+                    LogEventViewContentState.Edit(logDatabase.converter.generateUserContent(currentContent, date))
+                is LogEventViewContentState.Preview ->
+                    LogEventViewContentState.Preview(currentContent)
             }
+        )
     }
 
     private fun onChange(change: LogEntityChanges.Change<T, *>) {
@@ -110,12 +135,9 @@ class LogEventScreen<T: LogEvent>(
     }
 
     private fun getCurrentContent(): UserContent =
-        changes.firstWithPropertyOrNull(LogEvent.PROPERTY_CONTENT)?.newValue ?: event.content ?: UserContent.EMPTY
-
-    private fun openNextState() {
-        coroutineScope.coroutineContext.cancelChildren()
-        state = state.getNext(date, logDatabase.converter, coroutineScope)
-    }
+        changes.firstWithPropertyOrNull(LogEvent.PROPERTY_CONTENT)?.newValue
+            ?: event.content
+            ?: UserContent.EMPTY
 
     @Composable
     override fun Content(modifier: Modifier, contentPadding: PaddingValues) {
@@ -124,36 +146,6 @@ class LogEventScreen<T: LogEvent>(
         val density: Density = LocalDensity.current
 
         var bottomContentHeight: Dp by remember { mutableStateOf(0.dp) }
-
-        BackHandler(state.type == LogEventViewScreenState.Type.EDIT) {
-            openNextState()
-        }
-
-        LaunchedEffect(state) {
-            val state: LogEventViewScreenState = state
-            if (state.type == LogEventViewScreenState.Type.EDIT) {
-                delay(CHANGES_UPDATE_DELAY)
-            }
-
-            val loadedState: LogEventViewScreenState.Loaded = state.awaitLoaded()
-
-            val newContent: UserContent =
-                when (loadedState) {
-                    is LogEventViewScreenState.Loaded.Edit ->
-                        logDatabase.converter.userContentParser.parseUserContent(
-                            loadedState.content,
-                            logDatabase.converter.referenceParser,
-                            onAlert = { _, _ -> }
-                        )
-                    is LogEventViewScreenState.Loaded.Preview -> loadedState.content
-                }
-
-            changes =
-                changes.copyWithProperty(
-                    LogEvent.PROPERTY_CONTENT, newContent
-                )
-            onChangesChanged(event, changes)
-        }
 
         BoxWithConstraints(modifier) {
             CompositionLocalProvider(
@@ -190,7 +182,7 @@ class LogEventScreen<T: LogEvent>(
 
                     var contentPosition: Dp by remember { mutableStateOf(0.dp) }
                     LogEventUserContent(
-                        state,
+                        currentState.takeIf { !loading },
                         Modifier
                             .onGloballyPositioned {
                                 with (density) {
@@ -206,7 +198,7 @@ class LogEventScreen<T: LogEvent>(
                             )
 
                     ) {
-                        state = it
+                        updateState(it)
                     }
                 }
             }
@@ -226,7 +218,7 @@ class LogEventScreen<T: LogEvent>(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AnimatedVisibility(
-                    state.type == LogEventViewScreenState.Type.EDIT,
+                    currentState is LogEventViewContentState.Edit,
                     Modifier.fillMaxWidth().weight(1f),
                     enter = expandHorizontally(),
                     exit = shrinkHorizontally()
@@ -237,8 +229,36 @@ class LogEventScreen<T: LogEvent>(
                     )
                 }
 
-                StateCycleButton({ openNextState() })
+                EditToggleButton(
+                    onClick = {
+                        stateLoadJob?.also {
+                            it.cancel()
+                            stateLoadJob = null
+                            return@EditToggleButton
+                        }
+
+                        loadToggledState()
+                    }
+                )
             }
+        }
+    }
+
+    private fun loadToggledState() {
+        stateLoadJob = stateLoadCoroutineScope.launch {
+            val state: LogEventViewContentState = currentState
+            updateState(
+                when (state) {
+                    is LogEventViewContentState.Edit ->
+                        LogEventViewContentState.Preview(
+                            logDatabase.converter.parseUserContent(state.content)
+                        )
+                    is LogEventViewContentState.Preview ->
+                        LogEventViewContentState.Edit(
+                            logDatabase.converter.generateUserContent(state.content, date)
+                        )
+                }
+            )
         }
     }
 
@@ -260,7 +280,7 @@ class LogEventScreen<T: LogEvent>(
                             PropertyChip(
                                 property,
                                 onEdit =
-                                    if (state.type == LogEventViewScreenState.Type.EDIT) ::onChange
+                                    if (currentState is LogEventViewContentState.Edit) ::onChange
                                     else null,
                                 Modifier.fillMaxHeight()
                             )
@@ -272,12 +292,19 @@ class LogEventScreen<T: LogEvent>(
     }
 
     @Composable
-    private fun StateCycleButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    private fun EditToggleButton(
+        onClick: () -> Unit,
+        modifier: Modifier = Modifier
+    ) {
         FilledIconButton(onClick, modifier) {
-            Crossfade(state.type) {
+            Crossfade(
+                if (loading) null
+                else currentState is LogEventViewContentState.Edit
+            ) {
                 when (it) {
-                    LogEventViewScreenState.Type.EDIT -> Icon(Icons.Default.Visibility, null) // TODO
-                    LogEventViewScreenState.Type.PREVIEW -> Icon(Icons.Default.Edit, null) // TODO
+                    null -> SubtleLoadingIndicator()
+                    true -> Icon(Icons.Default.Visibility, null) // TODO
+                    false -> Icon(Icons.Default.Edit, null) // TODO
                 }
             }
         }
