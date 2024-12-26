@@ -12,19 +12,21 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.job
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlin.time.Duration
 
-class LogDatabaseChangesManager(
+internal class LogDatabaseChangesManager(
     private val database: LogDatabase,
     private val coroutineScope: CoroutineScope,
     private val eventChanges: MutableMap<LogEventReference, LogEntityChanges<LogEvent>> = mutableMapOf()
 ): Map<LogEventReference, LogEntityChanges<LogEvent>> by eventChanges {
     private val queuedChangeJobs: MutableMap<LogEventReference, Job> = mutableMapOf()
     private val lock: Mutex = Mutex()
+    private val queueLock: Mutex = Mutex()
+    private object ApplyImmediatelyException: CancellationException(null)
 
     fun remove(key: LogEventReference) = launchWithLock {
         eventChanges.remove(key)
@@ -38,12 +40,30 @@ class LogDatabaseChangesManager(
         }
     }
 
-    private object ApplyImmediatelyException: CancellationException(null)
-
-    fun applyAllQueuedChanges() = launchWithLock {
+    suspend fun applyAllQueuedChanges() {
         for (job in queuedChangeJobs.values) {
             job.cancel(ApplyImmediatelyException)
         }
+        queuedChangeJobs.values.joinAll()
+    }
+
+    suspend fun applyToDatabase(logDatabase: LogDatabase): LogDatabase? = queueLock.withLock {
+        applyAllQueuedChanges()
+
+        if (isEmpty()) {
+            return null
+        }
+
+        return logDatabase.copy(
+            days = logDatabase.days.toMutableMap().also { days ->
+                for ((ref, changes) in eventChanges) {
+                    val events: List<LogEvent> = days[ref.date]!!
+                    days[ref.date] = events.toMutableList().apply {
+                        set(ref.logIndex, changes.applyTo(get(ref.logIndex)))
+                    }
+                }
+            }
+        )
     }
 
     private fun launchWithLock(action: suspend () -> Unit) {
@@ -56,37 +76,41 @@ class LogDatabaseChangesManager(
 
     fun queueNewChanges(
         eventReference: LogEventReference,
-        queuedChanges: QueuedChanges
+        queuedChanges: LogDatabaseQueuedChanges
     ) {
         check(coroutineScope.isActive) {
             "Trying to queue a log change with a dead CoroutineScope"
         }
 
         coroutineScope.launch {
-            val currentChanges: LogEntityChanges<LogEvent>? =
-                lock.withLock {
-                    queuedChangeJobs[eventReference]?.cancel()
-                    queuedChangeJobs[eventReference] = coroutineContext.job
-                    return@withLock eventChanges[eventReference]
+            queueLock.withLock {
+                val currentChanges: LogEntityChanges<LogEvent>? =
+                    lock.withLock {
+                        queuedChangeJobs[eventReference]?.cancel()
+                        queuedChangeJobs[eventReference] = coroutineContext.job
+                        return@withLock eventChanges[eventReference]
+                    }
+
+                if (currentChanges != null) {
+                    try {
+                        delay(queuedChanges.delay)
+                    }
+                    catch (_: ApplyImmediatelyException) {}
                 }
 
-            try {
-                delay(queuedChanges.delay)
-            }
-            catch (_: ApplyImmediatelyException) {}
-
-            val newChanges: LogEntityChanges<LogEvent> =
-                try {
-                    queuedChanges.loadChanges(currentChanges ?: LogEntityChanges.createEmpty())
-                }
-                catch (_: ApplyImmediatelyException) {
-                    withContext(NonCancellable) {
+                val newChanges: LogEntityChanges<LogEvent> =
+                    try {
                         queuedChanges.loadChanges(currentChanges ?: LogEntityChanges.createEmpty())
                     }
-                }
+                    catch (_: ApplyImmediatelyException) {
+                        withContext(NonCancellable) {
+                            queuedChanges.loadChanges(currentChanges ?: LogEntityChanges.createEmpty())
+                        }
+                    }
 
-            lock.withLock {
-                applyChanges(newChanges, eventReference)
+                lock.withLock {
+                    applyChanges(newChanges, eventReference)
+                }
             }
         }
     }
@@ -102,9 +126,4 @@ class LogDatabaseChangesManager(
             eventChanges.remove(eventReference)
         }
     }
-
-    class QueuedChanges(
-        val delay: Duration,
-        val loadChanges: suspend (currentChanges: LogEntityChanges<LogEvent>) -> LogEntityChanges<LogEvent>
-    )
 }

@@ -14,7 +14,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -28,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.toastbits.composekit.components.utils.composable.LoadActionIconButton
 import dev.toastbits.composekit.components.utils.composable.pane.model.InitialPaneRatioSource
 import dev.toastbits.composekit.components.utils.modifier.horizontal
 import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
@@ -54,6 +54,7 @@ import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -90,7 +91,11 @@ class LogListScreen(
         )
 
     override fun onClosed(movingBackward: Boolean) {
-        eventChanges.applyAllQueuedChanges()
+        if (movingBackward) {
+            coroutineScope.launch {
+                eventChanges.applyAllQueuedChanges()
+            }
+        }
     }
 
     override fun release() {
@@ -184,25 +189,21 @@ class LogListScreen(
                 )
 
                 Row {
-                    IconButton({
-                        pushScreen(
-                            navigator,
-                            LogListChangesScreen(
-                                logDatabase,
-                                eventChanges,
-                                discardChanges = { eventReference ->
-                                    eventChanges.remove(eventReference)
-                                    if (viewingEventScreen?.eventReference == eventReference) {
-                                        viewingEventScreen?.screen?.updateChanges(null)
-                                    }
-                                }
-                            )
-                        )
+                    LoadActionIconButton({
+                        openChangesScreen(navigator)
                     }) {
                         Icon(Icons.Default.Visibility, stringResource(Res.string.log_view_screen_button_review_changes))
                     }
 
-                    IconButton({ saveChanges(navigator) }) {
+                    LoadActionIconButton({
+                        try {
+                            openSaveScreen(navigator)
+                        }
+                        catch (e: Throwable)  {
+                            e.printStackTrace()
+                            throw e
+                        }
+                    }) {
                         Icon(Icons.Default.Save, stringResource(Res.string.log_view_screen_button_save))
                     }
                 }
@@ -210,31 +211,27 @@ class LogListScreen(
         }
     }
 
-    private fun pushScreen(navigator: Navigator, screen: Screen) {
+    private suspend fun openChangesScreen(navigator: Navigator) {
         eventChanges.applyAllQueuedChanges()
-        navigator.pushScreen(screen)
-    }
 
-    private fun applyChangesToDatabase(): LogDatabase? {
-        if (eventChanges.isEmpty()) {
-            return null
-        }
-
-        return logDatabase.copy(
-            days = logDatabase.days.toMutableMap().also { days ->
-                for ((ref, changes) in eventChanges) {
-                    val events: List<LogEvent> = days[ref.date]!!
-                    days[ref.date] = events.toMutableList().apply {
-                        set(ref.logIndex, changes.applyTo(get(ref.logIndex)))
+        val changesScreen: Screen =
+            LogListChangesScreen(
+                logDatabase,
+                eventChanges,
+                discardChanges = { eventReference ->
+                    eventChanges.remove(eventReference)
+                    if (viewingEventScreen?.eventReference == eventReference) {
+                        viewingEventScreen?.screen?.updateChanges(null)
                     }
                 }
-            }
-        )
+            )
+
+        navigator.pushScreen(changesScreen)
     }
 
-    private fun saveChanges(navigator: Navigator) {
+    private suspend fun openSaveScreen(navigator: Navigator) {
         val newDatabase: LogDatabase =
-            applyChangesToDatabase() ?: return
+            eventChanges.applyToDatabase(logDatabase) ?: return
 
         val saveScreen: Screen =
             logSaveScreenProvider(
@@ -248,7 +245,7 @@ class LogListScreen(
                 }
             )
 
-        pushScreen(navigator, saveScreen)
+        navigator.pushScreen(saveScreen)
     }
 
     private fun onDatabaseSaved(newDatabase: LogDatabase) {

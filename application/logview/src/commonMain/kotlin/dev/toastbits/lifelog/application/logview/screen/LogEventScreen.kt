@@ -46,7 +46,7 @@ import dev.toastbits.composekit.util.composable.top
 import dev.toastbits.lifelog.application.logview.component.event.LogEventMetadata
 import dev.toastbits.lifelog.application.logview.component.event.LogEventUserContent
 import dev.toastbits.lifelog.application.logview.component.propertychip.withProperties
-import dev.toastbits.lifelog.application.logview.manager.LogDatabaseChangesManager
+import dev.toastbits.lifelog.application.logview.manager.LogDatabaseQueuedChanges
 import dev.toastbits.lifelog.application.logview.model.LogEntityChanges
 import dev.toastbits.lifelog.application.logview.model.LogEventViewContentState
 import dev.toastbits.lifelog.core.specification.converter.generateUserContent
@@ -73,7 +73,7 @@ class LogEventScreen<T: LogEvent>(
     private val date: LogDate,
     private val logDatabase: LogDatabase,
     initialChanges: LogEntityChanges<T>,
-    private val onChangesChanged: (LogDatabaseChangesManager.QueuedChanges) -> Unit
+    private val onChangesChanged: (LogDatabaseQueuedChanges) -> Unit
 ): Screen {
     private val stateLoadCoroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -85,7 +85,7 @@ class LogEventScreen<T: LogEvent>(
     private fun updateState(state: LogEventViewContentState) {
         currentState = state
         onChangesChanged(
-            LogDatabaseChangesManager.QueuedChanges(CHANGES_UPDATE_DELAY) { changes ->
+            LogDatabaseQueuedChanges(CHANGES_UPDATE_DELAY) { changes ->
                 val content: UserContent =
                     when (state) {
                         is LogEventViewContentState.Edit ->
@@ -97,7 +97,7 @@ class LogEventScreen<T: LogEvent>(
                         is LogEventViewContentState.Preview -> state.content
                     }
 
-                return@QueuedChanges changes.copyWithProperty(LogEvent.PROPERTY_CONTENT, content)
+                return@LogDatabaseQueuedChanges changes.copyWithProperty(LogEvent.PROPERTY_CONTENT, content)
             }
         )
     }
