@@ -8,7 +8,6 @@ import dev.toastbits.kogit.memory.handler.stage.GitHandlerStage
 import dev.toastbits.kogit.memory.helper.GitHelper
 import dev.toastbits.kogit.memory.model.GitObject
 import dev.toastbits.kogit.memory.model.GitRef
-import dev.toastbits.kogit.memory.model.MutableGitObjectRegistry
 import dev.toastbits.kogit.memory.model.readObject
 import dev.toastbits.lifelog.application.worker.cache.LocalGitObjectCache
 import dev.toastbits.lifelog.application.worker.mapper.WorkerExecutionContext
@@ -16,6 +15,7 @@ import dev.toastbits.lifelog.application.worker.model.WorkerCommandResult
 import dev.toastbits.lifelog.application.worker.model.toResult
 import dev.toastbits.lifelog.application.worker.model.toWorkerException
 import io.ktor.client.HttpClient
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -33,7 +33,7 @@ data class WorkerCommandInMemoryGitCommit(
         context: WorkerExecutionContext,
         onProgress: (WorkerCommandProgress) -> Unit
     ): WorkerCommandResult {
-        val cache: MutableGitObjectRegistry? =
+        val cache: LocalGitObjectCache? =
             LocalGitObjectCache.getInstance(repositoryUrl, context.platformContext)
                 .getOrElse {
                     onProgress(WorkerCommandProgress.FailedToCreateLocalGitObjectCache(it.toWorkerException()))
@@ -71,6 +71,22 @@ data class WorkerCommandInMemoryGitCommit(
             ).getOrElse {
                 return it.toResult()
             }
+
+        if (cache != null) {
+            val toCommit: Int = cache.countObjectsToCommit()
+            if (toCommit > 0) {
+                onProgress(
+                    Progress(
+                        GitHandlerStage.WritingObjectsToCache,
+                        null,
+                        toCommit.toLong()
+                    )
+                )
+                withContext(context.ioDispatcher) {
+                    cache.commit()
+                }
+            }
+        }
 
         return WorkerCommandResult.Success(Response(pushResult))
     }
