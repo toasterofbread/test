@@ -32,6 +32,11 @@ import dev.toastbits.composekit.components.utils.composable.PlatformClickableIco
 import dev.toastbits.composekit.theme.core.ThemeValues
 import dev.toastbits.composekit.theme.core.onAccent
 import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
+import dev.toastbits.lifelog.application.logview.generated.resources.Res
+import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_search
+import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_scroll_previous
+import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_scroll_next
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun LogTimelineNavigationBar(
@@ -56,7 +61,7 @@ internal fun LogTimelineNavigationBar(
             StyledButton(
                 onClick = showSearchBar
             ) {
-                Icon(Icons.Default.Search, null) // TODO
+                Icon(Icons.Default.Search, stringResource(Res.string.log_view_screen_button_search))
             }
         }
 
@@ -65,7 +70,7 @@ internal fun LogTimelineNavigationBar(
             onAltClick = { scrollDateBy(Int.MIN_VALUE) },
             enabled = canScrollUp
         ) {
-            Icon(Icons.Default.KeyboardArrowUp, null) // TODO
+            Icon(Icons.Default.KeyboardArrowUp, stringResource(Res.string.log_view_screen_button_scroll_previous))
         }
 
         StyledButton(
@@ -73,7 +78,7 @@ internal fun LogTimelineNavigationBar(
             onAltClick = { scrollDateBy(Int.MAX_VALUE) },
             enabled = canScrollDown
         ) {
-            Icon(Icons.Default.KeyboardArrowDown, null) // TODO
+            Icon(Icons.Default.KeyboardArrowDown, stringResource(Res.string.log_view_screen_button_scroll_next))
         }
     }
 }

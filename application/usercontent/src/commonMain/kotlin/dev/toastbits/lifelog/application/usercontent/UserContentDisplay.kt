@@ -59,7 +59,25 @@ private val LocalReference: ProvidableCompositionLocal<LogEntityReference?> =
 fun UserContentDisplay(
     content: UserContent,
     modifier: Modifier = Modifier,
-    textStyle: TextStyle = LocalTextStyle.current
+    textStyle: TextStyle = LocalTextStyle.current,
+    container: @Composable (@Composable () -> Unit) -> Unit = {
+        val density: Density = LocalDensity.current
+        var contentHeight: Dp by remember { mutableStateOf(0.dp) }
+
+        FlowRow(
+            Modifier
+                // Workaround for FlowRow bug(?) in which its reported height is smaller than the actual content
+                .height(contentHeight)
+                .wrapContentHeight(Alignment.Top, unbounded = true)
+                .onSizeChanged {
+                    with (density) {
+                        contentHeight = it.height.toDp()
+                    }
+                }
+        ) {
+            it()
+        }
+    }
 ) {
     SelectionContainer(modifier) {
         val isBlank: Boolean =
@@ -69,20 +87,7 @@ fun UserContentDisplay(
             BlankUserContentIndicator(Modifier.fillMaxWidth())
         }
         else {
-            val density: Density = LocalDensity.current
-            var contentHeight: Dp by remember { mutableStateOf(0.dp) }
-
-            FlowRow(
-                Modifier
-                    // Workaround for FlowRow bug(?) in which its reported height is smaller than the actual content
-                    .height(contentHeight)
-                    .wrapContentHeight(Alignment.Top, unbounded = true)
-                    .onSizeChanged {
-                        with (density) {
-                            contentHeight = it.height.toDp()
-                        }
-                    }
-            ) {
+            container {
                 for (part in (1..1).flatMap { content.parts }) {
                     UserContentPart(part, textStyle)
                 }

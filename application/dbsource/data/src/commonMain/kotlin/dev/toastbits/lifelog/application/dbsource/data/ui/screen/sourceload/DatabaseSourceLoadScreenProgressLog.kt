@@ -24,11 +24,20 @@ import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyColu
 import dev.toastbits.composekit.components.utils.composable.wave.WaveLineArea
 import dev.toastbits.composekit.theme.core.ThemeValues
 import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
-import dev.toastbits.lifelog.application.core.ui.LinkText
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
-import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_processor_button_go_to_file
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.`database_processor_alert_$message_$severity`
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.`database_processor_alert_$message_$severity_$location`
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_processor_alert_severity_error
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_processor_alert_severity_unknown
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_processor_alert_severity_warning
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
+import dev.toastbits.lifelog.application.usercontent.UserContentDisplay
+import dev.toastbits.lifelog.core.specification.converter.alert.LogParseAlert
+import dev.toastbits.lifelog.core.specification.impl.converter.usercontent.MarkdownUserContentParser
+import dev.toastbits.lifelog.core.specification.model.UserContent
+import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReference
+import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceParser
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration
 
@@ -122,28 +131,60 @@ private fun AlertLine(
         LocalTextStyle provides MaterialTheme.typography.labelLarge.copy(color = theme.error)
     ) {
         Row {
-            // TODO | Localise
-            Text(
+            val severityText: String =
                 when (alert.severity) {
-                    Alert.Severity.ERROR -> "Error"
-                    Alert.Severity.WARNING -> "Warning"
-                    Alert.Severity.UNKNOWN -> "Unknown"
+                    Alert.Severity.ERROR -> stringResource(Res.string.database_processor_alert_severity_error)
+                    Alert.Severity.WARNING -> stringResource(Res.string.database_processor_alert_severity_warning)
+                    Alert.Severity.UNKNOWN -> stringResource(Res.string.database_processor_alert_severity_unknown)
                 }
+
+            val locationText: String =
+                remember(alert) { alert.filePath.toString() + alert.lineIndex?.let { ":$it" }.orEmpty() }
+            val locationUri: String? =
+                remember(alert) { alert.getUri(databaseAccessor) }
+            
+            val baseText: String = (
+                if (alert.filePath != null)
+                    stringResource(Res.string.`database_processor_alert_$message_$severity_$location`)
+                        .replace("\$location", locationText.toMarkdownLink(locationUri))
+                else 
+                    stringResource(Res.string.`database_processor_alert_$message_$severity`)
             )
 
-            if (alert.filePath != null) {
-                Text(" at ")
-                LinkText(
-                    text = alert.filePath.toString() + alert.lineIndex?.let { ":$it" }.orEmpty(),
-                    url = remember(alert) { alert.getUri(databaseAccessor) },
-                    linkContentDescription = stringResource(Res.string.database_processor_button_go_to_file)
-                )
-            }
+            val userContent: UserContent =
+                remember(alert, baseText, severityText) {
+                    val text: String =
+                        baseText
+                            .replace("\$message", alert.message)
+                            .replace("\$severity", severityText)
 
-            Text(" | ${alert.message}")
+                    return@remember MarkdownUserContentParser.parseUserContent(
+                        text,
+                        object : LogEntityReferenceParser {
+                            override fun parseReference(
+                                text: String,
+                                onAlert: (LogParseAlert) -> Unit
+                            ): LogEntityReference =
+                                LogEntityReference.URL(text)
+                        },
+                        { _, _ -> }
+                    )
+                }
+
+            UserContentDisplay(
+                userContent
+            ) {
+                Row {
+                    it()
+                }
+            }
         }
     }
 }
+
+private fun String.toMarkdownLink(target: String?): String =
+    if (target == null) this
+    else "[$this]($target)"
 
 private fun Alert.getUri(databaseAccessor: DatabaseAccessor): String? =
     filePath?.let { databaseAccessor.getFileLineUri(it, lineIndex) }

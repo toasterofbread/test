@@ -14,6 +14,9 @@
     <string name="log_view_screen_button_review_changes">Review changes</string>
     <string name="log_view_screen_button_save">Save changes</string>
     <string name="log_view_screen_button_discard_event_changes">Discard changes for this event</string>
+    <string name="log_view_screen_button_search">Search logs</string>
+    <string name="log_view_screen_button_scroll_previous">Scroll to previous day</string>
+    <string name="log_view_screen_button_scroll_next">Scroll to next day</string>
     <string name="log_view_screen_title_review_changes">Review changes</string>
     <string name="log_view_screen_column_title_old">Current</string>
     <string name="log_view_screen_column_title_new">Updated</string>

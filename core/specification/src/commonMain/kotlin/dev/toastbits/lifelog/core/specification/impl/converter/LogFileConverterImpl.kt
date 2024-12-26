@@ -25,7 +25,7 @@ class LogFileConverterImpl(
     private val extensionRegistry: ExtensionRegistry = ExtensionRegistryImpl(),
 //    eventTypes: List<LogEventType> = DEFAULT_EVENT_TYPES,
 //    referenceTypes: List<LogEntityReferenceType> = DEFAULT_REFERENCE_TYPES,
-    override val userContentParser: UserContentParser = MarkdownUserContentParser(),
+    override val userContentParser: UserContentParser = MarkdownUserContentParser,
     override val userContentGenerator: UserContentGenerator = MarkdownUserContentGenerator()
 ): LogFileConverter {
     override fun parseLogFile(

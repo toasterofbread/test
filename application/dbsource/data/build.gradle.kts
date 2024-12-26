@@ -17,6 +17,7 @@ kotlin {
                 implementation(projects.application.settings.domain)
                 implementation(projects.application.settings.data)
                 implementation(projects.application.logview)
+                implementation(projects.application.usercontent)
                 implementation(projects.core.specification)
 
                 implementation(libs.kogit.core)

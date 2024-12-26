@@ -30,5 +30,9 @@
     <string name="database_processor_tooltip_errors_must_be_resolved">Errors must be resolved</string>
     <string name="database_processor_button_retry">Retry</string>
     <string name="database_processor_button_cancel">Cancel</string>
-    <string name="database_processor_button_go_to_file">Go to file</string>
+    <string name="database_processor_alert_severity_error">Error</string>
+    <string name="database_processor_alert_severity_warning">Warning</string>
+    <string name="database_processor_alert_severity_unknown">Unknown</string>
+    <string name="database_processor_alert_$message_$severity">$severity | $message</string>
+    <string name="database_processor_alert_$message_$severity_$location">$severity at $location | $message</string>
 </resources>

@@ -21,7 +21,7 @@ import org.intellij.markdown.parser.sequentialparsers.impl.InlineLinkParser
 import org.intellij.markdown.parser.sequentialparsers.impl.MathParser
 import org.intellij.markdown.parser.sequentialparsers.impl.ReferenceLinkParser
 
-class MarkdownUserContentParser: UserContentParser {
+object MarkdownUserContentParser: UserContentParser {
     override fun parseUserContent(
         text: String,
         referenceParser: LogEntityReferenceParser,
