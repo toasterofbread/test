@@ -38,7 +38,7 @@ import dev.toastbits.composekit.theme.core.ThemeValues
 import dev.toastbits.composekit.theme.core.onAccent
 import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
 import dev.toastbits.lifelog.application.core.FullContentScreen
-import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
+import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseSaver
 import dev.toastbits.lifelog.application.logview.component.timeline.DefaultLogTimelineColumn
 import dev.toastbits.lifelog.application.logview.component.timeline.model.LogTimelineState
 import dev.toastbits.lifelog.application.logview.generated.resources.Res
@@ -243,7 +243,7 @@ class LogListScreen(
                     navigator.navigateBackward()
                 },
                 onSaveFinished = { result ->
-                    if (result is DatabaseAccessor.SaveResult.Success) {
+                    if (result is DatabaseSaver.SaveResult.Success) {
                         onDatabaseSaved(result.newDatabase)
                     }
                 }

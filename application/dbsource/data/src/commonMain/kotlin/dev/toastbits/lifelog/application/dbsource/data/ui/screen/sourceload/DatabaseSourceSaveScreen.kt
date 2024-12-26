@@ -8,11 +8,9 @@ import dev.toastbits.lifelog.application.dbsource.data.generated.resources.`data
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_saver_proceed_tooltip_save_in_progress
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_saver_title
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step.LoadStep
-import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step.LoadStepCheckIfUpToDate
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step.LoadStepSaveOnline
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
-import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor.SaveResult
-import dev.toastbits.lifelog.application.dbsource.domain.accessor.OfflineDatabaseAccessor
+import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseSaver.SaveResult
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
@@ -40,15 +38,12 @@ internal class DatabaseSourceSaveScreen(
         get() = stringResource(Res.string.database_saver_title)
 
     override fun getInitialStep(databaseAccessor: DatabaseAccessor): LoadStep<SaveResult> =
-        if (databaseAccessor is OfflineDatabaseAccessor)
-            LoadStepCheckIfUpToDate(databaseAccessor)
-        else
-            LoadStepSaveOnline(
-                database,
-                message,
-                author,
-                committer
-            )
+        LoadStepSaveOnline(
+            database,
+            message,
+            author,
+            committer
+        )
 
     override fun canProceedWithResult(result: SaveResult): Boolean =
         result is SaveResult.Success

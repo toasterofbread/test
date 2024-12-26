@@ -7,10 +7,8 @@ import dev.toastbits.lifelog.application.dbsource.data.generated.resources.`data
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_loader_proceed_tooltip_load_in_progress
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_loader_title
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step.LoadStep
-import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step.LoadStepCheckIfUpToDate
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step.LoadStepLoadOnline
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
-import dev.toastbits.lifelog.application.dbsource.domain.accessor.OfflineDatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
 import dev.toastbits.lifelog.application.dbsource.domain.model.LogDatabaseParseResult
@@ -34,10 +32,7 @@ class DatabaseSourceLoadScreen(
         get() = stringResource(Res.string.database_loader_title)
 
     override fun getInitialStep(databaseAccessor: DatabaseAccessor): LoadStep<LogDatabaseParseResult> =
-        if (databaseAccessor is OfflineDatabaseAccessor)
-            LoadStepCheckIfUpToDate(databaseAccessor)
-        else
-            LoadStepLoadOnline
+        LoadStepLoadOnline
 
     override fun canProceedWithResult(result: LogDatabaseParseResult): Boolean =
         result.alerts.none { it.alert.severity == LogConvertAlert.Severity.ERROR }

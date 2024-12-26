@@ -18,7 +18,7 @@ import dev.toastbits.lifelog.application.dbsource.data.generated.resources.butto
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceconfiguration.DatabaseSourceConfigurationScreen
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.DatabaseSourceLoadScreen
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.DatabaseSourceSaveScreen
-import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
+import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseSaver
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
 import dev.toastbits.lifelog.application.logview.screen.LogListScreen
@@ -37,8 +37,8 @@ class LogSaveScreenProviderImpl(
     override fun invoke(
         database: LogDatabase,
         autoProceed: Boolean,
-        onProceeded: ((DatabaseAccessor.SaveResult) -> Unit)?,
-        onSaveFinished: (DatabaseAccessor.SaveResult) -> Unit
+        onProceeded: ((DatabaseSaver.SaveResult) -> Unit)?,
+        onSaveFinished: (DatabaseSaver.SaveResult) -> Unit
     ): Screen {
         // TODO
         val user: UserInfo =

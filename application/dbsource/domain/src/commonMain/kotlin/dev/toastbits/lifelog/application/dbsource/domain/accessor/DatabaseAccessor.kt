@@ -1,32 +1,16 @@
 package dev.toastbits.lifelog.application.dbsource.domain.accessor
 
-import androidx.compose.runtime.Composable
-import dev.toastbits.kogit.memory.handler.GitCommitGenerator.UserInfo
 import dev.toastbits.kogit.memory.model.GitObjectInfo
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor.LoadProgress
-import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
 import dev.toastbits.lifelog.application.dbsource.domain.model.LogDatabaseParseResult
-import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import okio.Path
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 
 interface DatabaseAccessor {
+    val saver: DatabaseSaver
+
     suspend fun loadOnlineDatabase(onProgress: (LoadProgress) -> Unit): Result<LogDatabaseParseResult>
-    suspend fun saveOnlineDatabase(
-        database: LogDatabase,
-        message: String,
-        author: UserInfo,
-        committer: UserInfo,
-        onProgress: (LoadProgress) -> Unit
-    ): Result<SaveResult>
-
-    sealed interface SaveResult {
-        val alerts: List<Alert>
-
-        data class Success(val newDatabase: LogDatabase, override val alerts: List<Alert>): SaveResult
-        data class Failure(override val alerts: List<Alert>): SaveResult
-    }
 
     fun getFileLineUri(filePath: Path, lineIndex: UInt?): String?
 
@@ -53,26 +37,18 @@ interface DatabaseAccessor {
     }
 }
 
-interface OfflineDatabaseAccessor: DatabaseAccessor {
-    val offlineLocationName: String
-        @Composable get
-
-    suspend fun checkIfUpToDate(): Result<Boolean>
-    suspend fun loadOfflineDatabase(): Result<LogDatabaseParseResult>
-}
-
-fun DatabaseAccessor.LoadProgress.Companion.message(resource: StringResource): DatabaseAccessor.LoadProgress =
-    object : DatabaseAccessor.LoadProgress {
+fun LoadProgress.Companion.message(resource: StringResource): LoadProgress =
+    object : LoadProgress {
         override val type: LoadProgress.Type = LoadProgress.Type.Generic
         override fun getMessageResource(): StringResource = resource
         override fun isUnique(): Boolean = true
     }
 
-fun DatabaseAccessor.LoadProgress.Companion.error(
+fun LoadProgress.Companion.error(
     resource: StringResource,
     getMessage: suspend (StringResource) -> String = { getString(it) }
-): DatabaseAccessor.LoadProgress =
-    object : DatabaseAccessor.LoadProgress {
+): LoadProgress =
+    object : LoadProgress {
         override val type: LoadProgress.Type = LoadProgress.Type.Generic
         override val isError: Boolean = true
         override fun getMessageResource(): StringResource = resource
