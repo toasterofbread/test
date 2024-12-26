@@ -58,7 +58,9 @@ abstract class DatabaseSourceProcessScreen<R>(
         val databaseAccessor: DatabaseAccessor = rememberDatabaseAccessor(sourceConfiguration)
 
         LaunchedEffect(Unit) {
-            coroutineScope.startLoad(databaseAccessor)
+            if (loadResult == null && loadJob == null) {
+                coroutineScope.startLoad(databaseAccessor)
+            }
         }
 
         DatabaseSourceProcessor(
@@ -108,6 +110,7 @@ abstract class DatabaseSourceProcessScreen<R>(
                 .onFailure { error ->
                     error.printStackTrace()
                 }
+            loadJob = null
         }
     }
 

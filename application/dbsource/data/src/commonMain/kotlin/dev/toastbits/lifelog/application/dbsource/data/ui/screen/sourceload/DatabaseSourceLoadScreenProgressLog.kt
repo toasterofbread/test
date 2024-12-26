@@ -67,9 +67,10 @@ internal fun DatabaseSourceLoadScreenProgressLog(
             } ?: Pair(emptyList(), emptyList())
         }
 
-    val loadExceptionStackTrace: List<String>? = remember(loadException) {
-        loadException?.stackTraceToString()?.split('\n')
-    }
+    val loadExceptionStackTrace: List<String>? =
+        remember(loadException) {
+            loadException?.stackTraceToString()?.split('\n')
+        }
 
     WaveLineArea(
         modifier,
@@ -88,7 +89,7 @@ internal fun DatabaseSourceLoadScreenProgressLog(
 
                 currentProgress?.also { progress ->
                     item {
-                        LoadProgressDisplay(progress, done = false)
+                        LoadProgressDisplay(progress, done = loadException != null)
                     }
                 }
 
