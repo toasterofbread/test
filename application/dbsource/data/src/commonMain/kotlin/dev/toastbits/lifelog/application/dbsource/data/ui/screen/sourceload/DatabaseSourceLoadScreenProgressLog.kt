@@ -41,7 +41,7 @@ internal fun DatabaseSourceLoadScreenProgressLog(
     currentProgress: DatabaseAccessor.LoadProgress?,
     loadException: Throwable?,
     modifier: Modifier = Modifier
-) {
+): Boolean {
     val theme: ThemeValues = LocalComposeKitTheme.current
     val scrollState: LazyListState = rememberLazyListState()
 
@@ -107,6 +107,8 @@ internal fun DatabaseSourceLoadScreenProgressLog(
             }
         }
     }
+
+    return errors.isNotEmpty() || loadException != null
 }
 
 @Composable

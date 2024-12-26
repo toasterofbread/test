@@ -4,7 +4,7 @@ import app.cash.sqldelight.async.coroutines.awaitAsList
 import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import dev.toastbits.composekit.context.PlatformContext
 import dev.toastbits.kogit.memory.model.GitObject
-import dev.toastbits.kogit.memory.model.GitObjectRegistry
+import dev.toastbits.kogit.memory.model.GitObjectInfo
 import dev.toastbits.kogit.memory.model.MutableGitObjectRegistry
 import dev.toastbits.lifelog.application.worker.GitDatabase
 import kotlinx.coroutines.sync.Mutex
@@ -49,7 +49,7 @@ class LocalGitObjectCache private constructor(
         objects.contains(hash)
             || database.objectQueries.getType(repositoryIdentifier, hash).awaitAsOneOrNull() != null
 
-    override suspend fun getAvailableObjects(types: List<GitObject.Type>?): Sequence<GitObjectRegistry.GitObjectInfo> = mutex.withLock {
+    override suspend fun getAvailableObjects(types: List<GitObject.Type>?): Sequence<GitObjectInfo> = mutex.withLock {
         (
             database.objectQueries
                 .list(repositoryIdentifier, (types ?: GitObject.Type.entries).map { it.ordinal.toLong() })
@@ -59,9 +59,9 @@ class LocalGitObjectCache private constructor(
                     if (objects.containsKey(obj.hash)) {
                         return@mapNotNull null
                     }
-                    return@mapNotNull GitObjectRegistry.GitObjectInfo(obj.hash, obj.type.toGitObjectType())
+                    return@mapNotNull GitObjectInfo(obj.hash, obj.type.toGitObjectType())
                 }
-            + objects.asSequence().map { GitObjectRegistry.GitObjectInfo(it.key, it.value.type) }
+            + objects.asSequence().map { GitObjectInfo(it.key, it.value.type) }
         )
     }
 

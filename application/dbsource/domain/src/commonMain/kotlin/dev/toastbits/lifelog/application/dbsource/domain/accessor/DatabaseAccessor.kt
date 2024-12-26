@@ -2,7 +2,7 @@ package dev.toastbits.lifelog.application.dbsource.domain.accessor
 
 import androidx.compose.runtime.Composable
 import dev.toastbits.kogit.memory.handler.GitCommitGenerator.UserInfo
-import dev.toastbits.kogit.memory.model.GitObjectRegistry
+import dev.toastbits.kogit.memory.model.GitObjectInfo
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor.LoadProgress
 import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
 import dev.toastbits.lifelog.application.dbsource.domain.model.LogDatabaseParseResult
@@ -46,7 +46,7 @@ interface DatabaseAccessor {
         sealed interface Type {
             data object Generic: Type
             data object Network: Type
-            data class Object(val currentObject: GitObjectRegistry.GitObjectInfo): Type
+            data class Object(val currentObject: GitObjectInfo): Type
         }
 
         companion object

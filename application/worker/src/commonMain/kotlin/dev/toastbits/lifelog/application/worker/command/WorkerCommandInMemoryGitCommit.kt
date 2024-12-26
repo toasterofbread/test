@@ -8,7 +8,7 @@ import dev.toastbits.kogit.memory.handler.stage.GitHandlerStage
 import dev.toastbits.kogit.memory.helper.GitHelper
 import dev.toastbits.kogit.memory.model.GitObject
 import dev.toastbits.kogit.memory.model.GitRef
-import dev.toastbits.kogit.memory.model.readObject
+import dev.toastbits.kogit.memory.util.readObject
 import dev.toastbits.lifelog.application.worker.cache.LocalGitObjectCache
 import dev.toastbits.lifelog.application.worker.mapper.WorkerExecutionContext
 import dev.toastbits.lifelog.application.worker.model.WorkerCommandResult

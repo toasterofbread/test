@@ -7,18 +7,20 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.Screen
+import dev.toastbits.composekit.util.platform.launchSingle
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step.LoadStep
 import dev.toastbits.lifelog.application.dbsource.data.ui.util.rememberDatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.launch
 import kotlin.time.Duration
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
@@ -29,17 +31,10 @@ abstract class DatabaseSourceProcessScreen<R>(
     private val autoProceed: Boolean = false,
     private val showProceedAndCancel: Boolean = true
 ): Screen {
-    private var started: Boolean = false
-    private var currentStep: LoadStep<R>? = null
     private var loadJob: Job? = null
-    private var loadException: Throwable? by mutableStateOf(null)
     private val finishedStepsProgress: MutableList<DatabaseAccessor.LoadProgress> = mutableStateListOf()
     private var currentProgress: DatabaseAccessor.LoadProgress? by mutableStateOf(null)
-    private val loadStartTime: TimeMark = TimeSource.Monotonic.markNow()
-    private var loadResult: Pair<R, Duration>? by mutableStateOf(null)
-
-    private val isRunning: Boolean
-        get() = !started || currentStep != null
+    private var loadResult: Result<Pair<R, Duration>>? by mutableStateOf(null)
 
     internal abstract fun getInitialStep(databaseAccessor: DatabaseAccessor): LoadStep<R>
 
@@ -48,37 +43,37 @@ abstract class DatabaseSourceProcessScreen<R>(
 
     protected open fun hasUserProceedAction(): Boolean = false
     protected open fun onUserProceeded(result: R) {}
+
+    protected open fun hasRetryAction(): Boolean = false
+    protected open suspend fun onRetry() {}
+
     protected open fun onProcessFinished(result: R) {}
 
     override val canNavigateBackwardFrom: Boolean
-        get() = !isRunning
+        get() = loadResult != null
 
     @Composable
     override fun Content(modifier: Modifier, contentPadding: PaddingValues) {
+        val coroutineScope: CoroutineScope = rememberCoroutineScope()
         val databaseAccessor: DatabaseAccessor = rememberDatabaseAccessor(sourceConfiguration)
 
         LaunchedEffect(Unit) {
-            loadJob = launch {
-                try {
-                    continueLoad(databaseAccessor)
-                }
-                catch (e: Throwable) {
-                    loadException = e
-                    currentStep = null
-                }
-            }
+            coroutineScope.startLoad(databaseAccessor)
         }
 
         DatabaseSourceProcessor(
             sourceConfiguration = sourceConfiguration,
             databaseAccessor = databaseAccessor,
             textProvider = textProvider,
-            loadException = loadException,
+            loadException = loadResult?.exceptionOrNull(),
             finishedStepsProgress = finishedStepsProgress,
             currentProgress = currentProgress,
-            loadResult = loadResult,
+            loadResult = loadResult?.getOrNull(),
             getAlerts = ::getResultAlerts,
             modifier = modifier.padding(contentPadding),
+            onRetry = {
+                coroutineScope.startLoad(databaseAccessor)
+            },
             onUserProceeded = ::onUserProceeded.takeIf { hasUserProceedAction() },
             autoProceed = autoProceed,
             canProceedWith = ::canProceedWithResult,
@@ -92,14 +87,35 @@ abstract class DatabaseSourceProcessScreen<R>(
         navigator.navigateBackward()
     }
 
-    private suspend fun continueLoad(databaseAccessor: DatabaseAccessor) {
-        if (!started) {
-            currentStep = getInitialStep(databaseAccessor)
-            started = true
+    private fun CoroutineScope.startLoad(databaseAccessor: DatabaseAccessor) {
+        loadJob = launchSingle {
+            loadResult = null
+            finishedStepsProgress.clear()
+            currentProgress = null
+            loadResult =
+                continueLoad(
+                    step = getInitialStep(databaseAccessor),
+                    databaseAccessor = databaseAccessor,
+                    startTime = TimeSource.Monotonic.markNow()
+                )
+                .onSuccess { (result) ->
+                    onProcessFinished(result)
+
+                    if (autoProceed && canProceedWithResult(result)) {
+                        onUserProceeded(result)
+                    }
+                }
+                .onFailure { error ->
+                    error.printStackTrace()
+                }
         }
+    }
 
-        val step: LoadStep<R> = currentStep ?: return
-
+    private suspend fun continueLoad(
+        step: LoadStep<R>,
+        databaseAccessor: DatabaseAccessor,
+        startTime: TimeMark
+    ): Result<Pair<R, Duration>> = runCatching {
         val result: LoadStep.ExecuteResult<R> =
             step.execute(databaseAccessor) { progress ->
                 if (progress.isError) {
@@ -121,24 +137,13 @@ abstract class DatabaseSourceProcessScreen<R>(
 
         when (result) {
             is LoadStep.ExecuteResult.Done -> {
-                currentStep = null
-                loadResult = result.result to loadStartTime.elapsedNow()
-
-                onProcessFinished(result.result)
-
-                if (autoProceed && canProceedWithResult(result.result)) {
-                    onUserProceeded(result.result)
-                }
+                return@runCatching result.result to startTime.elapsedNow()
             }
             is LoadStep.ExecuteResult.ExceptionThrown -> {
-                currentStep = null
-                result.exception.printStackTrace()
-                loadException = result.exception
+                throw result.exception
             }
-
             is LoadStep.ExecuteResult.NextStep -> {
-                currentStep = result.nextStep
-                continueLoad(databaseAccessor)
+                return continueLoad(result.nextStep, databaseAccessor, startTime)
             }
         }
     }

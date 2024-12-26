@@ -28,6 +28,7 @@
     <string name="database_loader_button_proceed">Proceed</string>
 
     <string name="database_processor_tooltip_errors_must_be_resolved">Errors must be resolved</string>
+    <string name="database_processor_button_retry">Retry</string>
     <string name="database_processor_button_cancel">Cancel</string>
     <string name="database_processor_button_go_to_file">Go to file</string>
 </resources>
