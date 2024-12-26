@@ -2,6 +2,11 @@ package dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload
 
 import androidx.compose.runtime.Composable
 import dev.toastbits.kogit.memory.handler.GitCommitGenerator.UserInfo
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_saver_button_proceed
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.`database_saver_finished_$duration_s_$warnings_$errors`
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_saver_proceed_tooltip_save_in_progress
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_saver_title
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step.LoadStep
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step.LoadStepCheckIfUpToDate
 import dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload.step.LoadStepSaveOnline
@@ -11,9 +16,9 @@ import dev.toastbits.lifelog.application.dbsource.domain.accessor.OfflineDatabas
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
-import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
-import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_saver_title
+import korlibs.math.roundDecimalPlaces
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Duration
 
 internal class DatabaseSourceSaveScreen(
     private val database: LogDatabase,
@@ -26,7 +31,9 @@ internal class DatabaseSourceSaveScreen(
     autoProceed: Boolean = false
 ): DatabaseSourceProcessScreen<SaveResult>(
     sourceConfiguration = sourceConfiguration,
-    autoProceed = autoProceed
+    autoProceed = autoProceed,
+    textProvider = DatabaseSourceSaveScreenTextProvider,
+    showProceedAndCancel = false
 ) {
     override val title: String
         @Composable
@@ -44,7 +51,7 @@ internal class DatabaseSourceSaveScreen(
             )
 
     override fun canProceedWithResult(result: SaveResult): Boolean =
-        result.isSuccess
+        result is SaveResult.Success
 
     override fun getResultAlerts(result: SaveResult): List<Alert> =
         result.alerts
@@ -59,3 +66,26 @@ internal class DatabaseSourceSaveScreen(
         onSaveFinished(result)
     }
 }
+
+
+private data object DatabaseSourceSaveScreenTextProvider: DatabaseSourceProcessScreenTextProvider {
+    @Composable
+    override fun getFinishedText(
+        warnings: List<Alert>,
+        errors: List<Alert>,
+        duration: Duration
+    ): String =
+        stringResource(Res.string.`database_saver_finished_$duration_s_$warnings_$errors`)
+            .replace("\$duration_s", (duration.inWholeMilliseconds / 1000f).roundDecimalPlaces(2).toString())
+            .replace("\$warnings", warnings.size.toString())
+            .replace("\$errors", errors.size.toString())
+
+    @Composable
+    override fun getProcessingTooltip(): String =
+        stringResource(Res.string.database_saver_proceed_tooltip_save_in_progress)
+
+    @Composable
+    override fun getProceedButton(): String =
+        stringResource(Res.string.database_saver_button_proceed)
+}
+

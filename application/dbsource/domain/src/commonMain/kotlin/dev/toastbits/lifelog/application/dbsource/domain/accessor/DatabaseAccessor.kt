@@ -21,10 +21,12 @@ interface DatabaseAccessor {
         onProgress: (LoadProgress) -> Unit
     ): Result<SaveResult>
 
-    data class SaveResult(
-        val isSuccess: Boolean,
+    sealed interface SaveResult {
         val alerts: List<Alert>
-    )
+
+        data class Success(val newDatabase: LogDatabase, override val alerts: List<Alert>): SaveResult
+        data class Failure(override val alerts: List<Alert>): SaveResult
+    }
 
     fun getFileLineUri(filePath: Path, lineIndex: UInt?): String?
 

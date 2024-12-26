@@ -38,6 +38,7 @@ import dev.toastbits.composekit.theme.core.ThemeValues
 import dev.toastbits.composekit.theme.core.onAccent
 import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
 import dev.toastbits.lifelog.application.core.FullContentScreen
+import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import dev.toastbits.lifelog.application.logview.component.timeline.DefaultLogTimelineColumn
 import dev.toastbits.lifelog.application.logview.component.timeline.model.LogTimelineState
 import dev.toastbits.lifelog.application.logview.generated.resources.Res
@@ -84,11 +85,13 @@ class LogListScreen(
 
     private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob())
     private val eventChanges: LogDatabaseChangesManager =
-        LogDatabaseChangesManager(
-            logDatabase,
+        object : LogDatabaseChangesManager(
             coroutineScope,
             mutableStateMapOf()
-        )
+        ) {
+            override fun getLogEvent(eventReference: LogEventReference): LogEvent =
+                logDatabase[eventReference]
+        }
 
     override fun onClosed(movingBackward: Boolean) {
         if (movingBackward) {
@@ -181,6 +184,8 @@ class LogListScreen(
                 horizontalArrangement = Arrangement.End,
                 itemVerticalAlignment = Alignment.CenterVertically
             ) {
+                println(eventChanges.toMap())
+
                 Text(
                     pluralStringResource(Res.plurals.`log_view_screen_$x_changes_made_popup`, changeCount)
                         .replace("\$x", changeCount.toString()),
@@ -230,17 +235,16 @@ class LogListScreen(
     }
 
     private suspend fun openSaveScreen(navigator: Navigator) {
-        val newDatabase: LogDatabase =
-            eventChanges.applyToDatabase(logDatabase) ?: return
-
         val saveScreen: Screen =
             logSaveScreenProvider(
-                database = newDatabase,
+                database = eventChanges.applyToDatabase(logDatabase) ?: return,
                 autoProceed = false,
-                onProceeded = null,
+                onProceeded = {
+                    navigator.navigateBackward()
+                },
                 onSaveFinished = { result ->
-                    if (result.isSuccess) {
-                        onDatabaseSaved(newDatabase)
+                    if (result is DatabaseAccessor.SaveResult.Success) {
+                        onDatabaseSaved(result.newDatabase)
                     }
                 }
             )

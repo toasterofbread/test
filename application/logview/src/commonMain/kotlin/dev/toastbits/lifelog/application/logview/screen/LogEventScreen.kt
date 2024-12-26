@@ -43,6 +43,7 @@ import dev.toastbits.composekit.navigation.screen.Screen
 import dev.toastbits.composekit.util.composable.bottom
 import dev.toastbits.composekit.util.composable.plus
 import dev.toastbits.composekit.util.composable.top
+import dev.toastbits.composekit.util.platform.launchSingle
 import dev.toastbits.lifelog.application.logview.component.event.LogEventMetadata
 import dev.toastbits.lifelog.application.logview.component.event.LogEventUserContent
 import dev.toastbits.lifelog.application.logview.component.propertychip.withProperties
@@ -62,7 +63,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.ensureActive
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -77,7 +78,7 @@ class LogEventScreen<T: LogEvent>(
 ): Screen {
     private val stateLoadCoroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    var event: T by mutableStateOf(event)
+    internal var event: T by mutableStateOf(event)
     private var changes: LogEntityChanges<T> by mutableStateOf(initialChanges)
 
     private var currentState: LogEventViewContentState by mutableStateOf(LogEventViewContentState.Preview(getCurrentContent()))
@@ -104,7 +105,7 @@ class LogEventScreen<T: LogEvent>(
 
     private var stateLoadJob: Job? by mutableStateOf(null)
     private val loading: Boolean get() =
-        stateLoadJob?.isActive == true
+        stateLoadJob != null
 
     override fun release() {
         stateLoadCoroutineScope.cancel()
@@ -231,8 +232,8 @@ class LogEventScreen<T: LogEvent>(
 
                 EditToggleButton(
                     onClick = {
-                        stateLoadJob?.also {
-                            it.cancel()
+                        stateLoadJob?.also { job ->
+                            job.cancel()
                             stateLoadJob = null
                             return@EditToggleButton
                         }
@@ -245,7 +246,7 @@ class LogEventScreen<T: LogEvent>(
     }
 
     private fun loadToggledState() {
-        stateLoadJob = stateLoadCoroutineScope.launch {
+        stateLoadJob = stateLoadCoroutineScope.launchSingle {
             val state: LogEventViewContentState = currentState
             updateState(
                 when (state) {
@@ -259,6 +260,8 @@ class LogEventScreen<T: LogEvent>(
                         )
                 }
             )
+            ensureActive()
+            stateLoadJob = null
         }
     }
 

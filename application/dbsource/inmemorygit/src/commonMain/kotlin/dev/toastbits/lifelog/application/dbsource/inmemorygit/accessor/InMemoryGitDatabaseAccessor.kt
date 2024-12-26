@@ -1,5 +1,6 @@
 package dev.toastbits.lifelog.application.dbsource.inmemorygit.accessor
 
+import dev.toastbits.composekit.util.runSuspendCatching
 import dev.toastbits.kogit.core.filestructure.FileStructure
 import dev.toastbits.kogit.core.filestructure.toSerialisable
 import dev.toastbits.kogit.core.model.GitCredentials
@@ -39,7 +40,7 @@ class InMemoryGitDatabaseAccessor(
     private val gitCredentialsProvider: GitCredentialsProvider?,
     private val ioDispatcher: CoroutineDispatcher
 ): DatabaseAccessor {
-    override suspend fun loadOnlineDatabase(onProgress: (LoadProgress) -> Unit): Result<LogDatabaseParseResult> = runCatching {
+    override suspend fun loadOnlineDatabase(onProgress: (LoadProgress) -> Unit): Result<LogDatabaseParseResult> = runSuspendCatching {
         val databaseConfiguration: LogDatabaseConfiguration = databaseConfigurationProvider()
 
         val command: WorkerCommandInMemoryGitClone =
@@ -66,7 +67,7 @@ class InMemoryGitDatabaseAccessor(
         val alerts: MutableList<ParseAlertData> = mutableListOf()
         val database: LogDatabase = parser.parseFileStructure(fileStructure, fileStructureResult.headCommitRef, alerts::add)
 
-        return@runCatching LogDatabaseParseResult(database, alerts)
+        return@runSuspendCatching LogDatabaseParseResult(database, alerts)
     }
 
     override suspend fun saveOnlineDatabase(
@@ -75,7 +76,7 @@ class InMemoryGitDatabaseAccessor(
         author: UserInfo,
         committer: UserInfo,
         onProgress: (LoadProgress) -> Unit
-    ): Result<SaveResult> = runCatching {
+    ): Result<SaveResult> = runSuspendCatching {
         val databaseConfiguration: LogDatabaseConfiguration = databaseConfigurationProvider()
 
         val alerts: MutableList<GenerateAlertData> = mutableListOf()
@@ -84,7 +85,7 @@ class InMemoryGitDatabaseAccessor(
 
         val command: WorkerCommandInMemoryGitCommit =
             WorkerCommandInMemoryGitCommit(
-                headCommitRef = database.gitCommitRef!!,
+                headCommitRef = database.gitCommitHash!!,
                 message = message,
                 author = author,
                 committer = committer,
@@ -107,7 +108,7 @@ class InMemoryGitDatabaseAccessor(
                 }
             ).getOrThrow().getOrThrow().pushResponse
 
-        return@runCatching pushResult.toSaveResult()
+        return@runSuspendCatching pushResult.toSaveResult(database)
     }
 
     override fun getFileLineUri(filePath: Path, lineIndex: UInt?): String? =

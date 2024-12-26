@@ -21,6 +21,7 @@ kotlin {
                 implementation(libs.composekit.settings)
                 implementation(libs.composekit.settingsitem)
                 implementation(libs.composekit.util)
+                implementation(libs.composekit.utilKt)
                 implementation(libs.ktor.core)
                 implementation(libs.kotlinx.serialization.json)
             }

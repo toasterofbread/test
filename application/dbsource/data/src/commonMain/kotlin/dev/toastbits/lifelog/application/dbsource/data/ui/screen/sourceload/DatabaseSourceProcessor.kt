@@ -1,6 +1,9 @@
 package dev.toastbits.lifelog.application.dbsource.data.ui.screen.sourceload
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,19 +23,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import dev.toastbits.composekit.components.utils.composable.LoadActionButton
 import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
 import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.theme.core.ThemeValues
 import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_processor_tooltip_errors_must_be_resolved
 import dev.toastbits.lifelog.application.dbsource.data.ui.component.DatabaseSourceConfigurationPreview
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
-import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
-import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_database_loader_cancel
-import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_database_loader_proceed
-import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_loader_proceed_tooltip_errors_must_be_resolved
-import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_loader_proceed_tooltip_load_in_progress
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration
 
@@ -40,6 +41,7 @@ import kotlin.time.Duration
 internal fun <R> DatabaseSourceProcessor(
     sourceConfiguration: DatabaseSourceConfiguration,
     databaseAccessor: DatabaseAccessor,
+    textProvider: DatabaseSourceProcessScreenTextProvider,
     loadException: Throwable?,
     finishedStepsProgress: MutableList<DatabaseAccessor.LoadProgress>,
     currentProgress: DatabaseAccessor.LoadProgress?,
@@ -48,7 +50,9 @@ internal fun <R> DatabaseSourceProcessor(
     modifier: Modifier = Modifier,
     onUserProceeded: ((R) -> Unit)?,
     autoProceed: Boolean = false,
-    canProceedWith: (R) -> Boolean = { true }
+    canProceedWith: (R) -> Boolean = { true },
+    showProceedAndCancel: Boolean = true,
+    cancel: suspend (Navigator) -> Unit
 ) {
     val navigator: Navigator = LocalNavigator.current
     val theme: ThemeValues = LocalComposeKitTheme.current
@@ -59,6 +63,7 @@ internal fun <R> DatabaseSourceProcessor(
         DatabaseSourceLoadScreenProgressLog(
             result = loadResult?.let { (result, duration) -> getAlerts(result) to duration },
             databaseAccessor = databaseAccessor,
+            textProvider = textProvider,
             finishedStepsProgress = finishedStepsProgress,
             currentProgress = currentProgress,
             loadException = loadException,
@@ -76,18 +81,24 @@ internal fun <R> DatabaseSourceProcessor(
                     loadResult?.first?.let { canProceedWith(it) } ?: false
                 }
 
-            Button({ navigator.navigateBackward() }) {
-                val proceedTextOpacity: Float by animateFloatAsState(if (onUserProceeded == null && allowProceed) 1f else 0f)
+            AnimatedVisibility(
+                !allowProceed || showProceedAndCancel,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                LoadActionButton({ cancel(navigator) }) {
+                    val proceedTextOpacity: Float by animateFloatAsState(if (onUserProceeded == null && allowProceed) 1f else 0f)
 
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        stringResource(Res.string.button_database_loader_cancel),
-                        Modifier.graphicsLayer { alpha = 1f - proceedTextOpacity }
-                    )
-                    Text(
-                        stringResource(Res.string.button_database_loader_proceed),
-                        Modifier.graphicsLayer { alpha = proceedTextOpacity }
-                    )
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            textProvider.getCancelButton(),
+                            Modifier.graphicsLayer { alpha = 1f - proceedTextOpacity }
+                        )
+                        Text(
+                            textProvider.getProceedButton(),
+                            Modifier.graphicsLayer { alpha = proceedTextOpacity }
+                        )
+                    }
                 }
             }
 
@@ -102,10 +113,10 @@ internal fun <R> DatabaseSourceProcessor(
                         containerColor = theme.error
                     ) {
                         if (loadResult == null) {
-                            Text(stringResource(Res.string.database_loader_proceed_tooltip_load_in_progress))
+                            Text(textProvider.getProcessingTooltip())
                         }
                         else {
-                            Text(stringResource(Res.string.database_loader_proceed_tooltip_errors_must_be_resolved))
+                            Text(stringResource(Res.string.database_processor_tooltip_errors_must_be_resolved))
                         }
                     }
                 },
@@ -124,7 +135,7 @@ internal fun <R> DatabaseSourceProcessor(
                     },
                     enabled = allowProceed
                 ) {
-                    Text(stringResource(Res.string.button_database_loader_proceed))
+                    Text(textProvider.getProceedButton())
                 }
             }
         }

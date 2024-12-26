@@ -63,7 +63,7 @@ class DatabaseFilesParserImpl(
             days = scope.days,
             data = scope.data,
             converter = converter,
-            gitCommitRef = gitCommitRef
+            gitCommitHash = gitCommitRef
         )
     }
 

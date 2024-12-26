@@ -25,11 +25,10 @@ import dev.toastbits.composekit.components.utils.composable.wave.WaveLineArea
 import dev.toastbits.composekit.theme.core.ThemeValues
 import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
 import dev.toastbits.lifelog.application.core.ui.LinkText
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
+import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_processor_button_go_to_file
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
-import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
-import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_database_loader_go_to_file
-import dev.toastbits.lifelog.application.dbsource.data.generated.resources.`database_loader_finished_$duration_$warnings_$errors`
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration
 
@@ -37,6 +36,7 @@ import kotlin.time.Duration
 internal fun DatabaseSourceLoadScreenProgressLog(
     result: Pair<List<Alert>, Duration>?,
     databaseAccessor: DatabaseAccessor,
+    textProvider: DatabaseSourceProcessScreenTextProvider,
     finishedStepsProgress: List<DatabaseAccessor.LoadProgress>,
     currentProgress: DatabaseAccessor.LoadProgress?,
     loadException: Throwable?,
@@ -99,10 +99,7 @@ internal fun DatabaseSourceLoadScreenProgressLog(
 
                     item {
                         Text(
-                            stringResource(Res.string.`database_loader_finished_$duration_$warnings_$errors`)
-                                .replace("\$duration", duration.toString())
-                                .replace("\$warnings", warnings.size.toString())
-                                .replace("\$errors", errors.size.toString()),
+                            textProvider.getFinishedText(warnings, errors, duration),
                             Modifier.padding(top = 15.dp)
                         )
                     }
@@ -137,7 +134,7 @@ private fun AlertLine(
                 LinkText(
                     text = alert.filePath.toString() + alert.lineIndex?.let { ":$it" }.orEmpty(),
                     url = remember(alert) { alert.getUri(databaseAccessor) },
-                    linkContentDescription = stringResource(Res.string.button_database_loader_go_to_file)
+                    linkContentDescription = stringResource(Res.string.database_processor_button_go_to_file)
                 )
             }
 

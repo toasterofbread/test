@@ -2,7 +2,6 @@ package dev.toastbits.lifelog.application.logview.manager
 
 import dev.toastbits.lifelog.application.logview.model.LogEntityChanges
 import dev.toastbits.lifelog.application.logview.model.LogEventReference
-import dev.toastbits.lifelog.application.logview.model.get
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import kotlinx.coroutines.CancellationException
@@ -17,9 +16,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.set
 
-internal class LogDatabaseChangesManager(
-    private val database: LogDatabase,
+internal abstract class LogDatabaseChangesManager(
     private val coroutineScope: CoroutineScope,
     private val eventChanges: MutableMap<LogEventReference, LogEntityChanges<LogEvent>> = mutableMapOf()
 ): Map<LogEventReference, LogEntityChanges<LogEvent>> by eventChanges {
@@ -28,16 +29,18 @@ internal class LogDatabaseChangesManager(
     private val queueLock: Mutex = Mutex()
     private object ApplyImmediatelyException: CancellationException(null)
 
+    protected abstract fun getLogEvent(eventReference: LogEventReference): LogEvent
+
     fun remove(key: LogEventReference) = launchWithLock {
         eventChanges.remove(key)
         queuedChangeJobs[key]?.cancel()
     }
 
     fun clear() = launchWithLock {
-        eventChanges.clear()
         for (job in queuedChangeJobs.values) {
             job.cancel()
         }
+        eventChanges.clear()
     }
 
     suspend fun applyAllQueuedChanges() {
@@ -64,14 +67,6 @@ internal class LogDatabaseChangesManager(
                 }
             }
         )
-    }
-
-    private fun launchWithLock(action: suspend () -> Unit) {
-        coroutineScope.launch {
-            lock.withLock {
-                action()
-            }
-        }
     }
 
     fun queueNewChanges(
@@ -119,11 +114,19 @@ internal class LogDatabaseChangesManager(
         changes: LogEntityChanges<LogEvent>,
         eventReference: LogEventReference,
     ) {
-        if (changes.hasChanges(database[eventReference])) {
+        if (changes.hasChanges(getLogEvent(eventReference))) {
             eventChanges[eventReference] = changes
         }
         else {
             eventChanges.remove(eventReference)
+        }
+    }
+
+    private fun launchWithLock(action: suspend () -> Unit) {
+        coroutineScope.launch {
+            lock.withLock {
+                action()
+            }
         }
     }
 }

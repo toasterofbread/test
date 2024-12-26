@@ -115,7 +115,7 @@ class GitLogDatabaseSaverTest: FileSystemTest {
                     reference to LogDataFile.Lines(listOf("test"))
                 ),
                 converter = logFileConverter,
-                gitCommitRef = null
+                gitCommitHash = null
             )
 
         saver.saveDatabaseRemotely(database, "Test ${configuration.strings.preferredDateFormat.format(date)}") { assertThat(it).isNull() }

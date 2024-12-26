@@ -18,14 +18,16 @@
     <string name="database_source_is_set_to_auto_open">Opens at startup</string>
 
     <string name="database_saver_title">Saving database</string>
+    <string name="database_saver_finished_$duration_s_$warnings_$errors">Database saved in $duration_ss with $warnings warnings(s) and $errors error(s)</string>
+    <string name="database_saver_proceed_tooltip_save_in_progress">Save is in progress</string>
+    <string name="database_saver_button_proceed">Done</string>
 
     <string name="database_loader_title">Loading database</string>
-    <string name="database_loader_finished_$duration_$warnings_$errors">Database loaded in $duration with $warnings warnings(s) and $errors error(s)</string>
-
+    <string name="database_loader_finished_$duration_s_$warnings_$errors">Database loaded in $duration_ss with $warnings warnings(s) and $errors error(s)</string>
     <string name="database_loader_proceed_tooltip_load_in_progress">Load is in progress</string>
-    <string name="database_loader_proceed_tooltip_errors_must_be_resolved">Errors must be resolved</string>
+    <string name="database_loader_button_proceed">Proceed</string>
 
-    <string name="button_database_loader_proceed">Proceed</string>
-    <string name="button_database_loader_cancel">Cancel</string>
-    <string name="button_database_loader_go_to_file">Go to file</string>
+    <string name="database_processor_tooltip_errors_must_be_resolved">Errors must be resolved</string>
+    <string name="database_processor_button_cancel">Cancel</string>
+    <string name="database_processor_button_go_to_file">Go to file</string>
 </resources>
