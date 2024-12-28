@@ -8,11 +8,15 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
@@ -28,11 +32,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.components.utils.composable.LoadActionButton
+import dev.toastbits.composekit.components.utils.composable.RowOrColumn
 import dev.toastbits.composekit.components.utils.composable.animatedvisibility.NullableValueAnimatedVisibility
 import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
 import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.theme.core.ThemeValues
 import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
+import dev.toastbits.composekit.util.thenIf
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_processor_button_retry
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_processor_tooltip_errors_must_be_resolved
@@ -43,6 +49,10 @@ import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration
 
+private val MIN_COLUMN_HEIGHT: Dp = 400.dp
+private val LOG_MIN_WIDTH: Dp = 400.dp
+private val SOURCE_MIN_WIDTH: Dp = 250.dp
+
 @Composable
 internal fun <R> DatabaseSourceProcessor(
     sourceConfiguration: DatabaseSourceConfiguration,
@@ -52,7 +62,7 @@ internal fun <R> DatabaseSourceProcessor(
     finishedStepsProgress: MutableList<DatabaseAccessor.LoadProgress>,
     currentProgress: DatabaseAccessor.LoadProgress?,
     loadResult: Pair<R, Duration>?,
-    getAlerts: (R) -> List<Alert>,
+    alerts: List<Alert>,
     modifier: Modifier = Modifier,
     onUserProceeded: ((R) -> Unit)?,
     autoProceed: Boolean = false,
@@ -65,26 +75,56 @@ internal fun <R> DatabaseSourceProcessor(
     val theme: ThemeValues = LocalComposeKitTheme.current
 
     Column(modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        DatabaseSourceConfigurationPreview(sourceConfiguration)
+        val (warnings: List<Alert>, errors: List<Alert>) =
+            remember(alerts) {
+                alerts.filter { it.severity == Alert.Severity.WARNING } to alerts.filter { it.severity == Alert.Severity.ERROR }
+            }
 
-        val hasErrors: Boolean =
-            DatabaseSourceLoadScreenProgressLog(
-                result = loadResult?.let { (result, duration) -> getAlerts(result) to duration },
-                databaseAccessor = databaseAccessor,
-                textProvider = textProvider,
-                finishedStepsProgress = finishedStepsProgress,
-                currentProgress = currentProgress,
-                loadException = loadException,
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .weight(1f)
-            )
+        BoxWithConstraints(Modifier.fillMaxSize().weight(1f)) {
+            val displayAsRow: Boolean = maxHeight < MIN_COLUMN_HEIGHT
+            RowOrColumn(
+                row = displayAsRow,
+                modifier = Modifier.matchParentSize(),
+                alignment = -1,
+                arrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                AnimatedVisibility(
+                    !displayAsRow || (maxWidth - SOURCE_MIN_WIDTH) >= LOG_MIN_WIDTH,
+                    enter = expandHorizontally(),
+                    exit = shrinkHorizontally()
+                ) {
+                    DatabaseSourceConfigurationPreview(
+                        sourceConfiguration,
+                        Modifier
+                            .thenIf(displayAsRow) {
+                                fillMaxHeight()
+                                .width(SOURCE_MIN_WIDTH)
+                            }
+                    )
+                }
 
-        Row(
+                DatabaseSourceLoadScreenProgressLog(
+                    alerts = alerts,
+                    finishDuration = loadResult?.second,
+                    warnings = warnings,
+                    errors = errors,
+                    databaseAccessor = databaseAccessor,
+                    textProvider = textProvider,
+                    finishedStepsProgress = finishedStepsProgress,
+                    currentProgress = currentProgress,
+                    loadException = loadException,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .weight(1f)
+                )
+            }
+        }
+
+        FlowRow(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End
         ) {
-            val spacing: Dp = 10.dp
+            val buttonPadding: PaddingValues = PaddingValues(horizontal = 5.dp)
             val allowProceed: Boolean =
                 remember(loadResult) {
                     loadResult?.first?.let { canProceedWith(it) } ?: false
@@ -95,24 +135,29 @@ internal fun <R> DatabaseSourceProcessor(
                 enter = fadeIn() + expandHorizontally(),
                 exit = fadeOut() + shrinkHorizontally()
             ) {
-                LoadActionButton({ cancel(navigator) }) {
+                LoadActionButton(
+                    { cancel(navigator) },
+                    modifier = Modifier.padding(buttonPadding)
+                ) {
                     val proceedTextOpacity: Float by animateFloatAsState(if (onUserProceeded == null && allowProceed) 1f else 0f)
 
                     Box(contentAlignment = Alignment.Center) {
                         Text(
                             textProvider.getCancelButton(),
-                            Modifier.graphicsLayer { alpha = 1f - proceedTextOpacity }
+                            Modifier.graphicsLayer { alpha = 1f - proceedTextOpacity },
+                            softWrap = false
                         )
                         Text(
                             textProvider.getProceedButton(),
-                            Modifier.graphicsLayer { alpha = proceedTextOpacity }
+                            Modifier.graphicsLayer { alpha = proceedTextOpacity },
+                            softWrap = false
                         )
                     }
                 }
             }
 
             NullableValueAnimatedVisibility(
-                onRetry.takeIf { loadException != null || hasErrors },
+                onRetry.takeIf { loadException != null || errors.isNotEmpty() },
                 enter = fadeIn() + expandHorizontally(),
                 exit = fadeOut() + shrinkHorizontally()
             ) { retry ->
@@ -122,14 +167,14 @@ internal fun <R> DatabaseSourceProcessor(
 
                 LoadActionButton(
                     retry,
-                    Modifier.padding(start = spacing)
+                    modifier = Modifier.padding(buttonPadding)
                 ) {
                     Text(stringResource(Res.string.database_processor_button_retry))
                 }
             }
 
             if (autoProceed || onUserProceeded == null) {
-                return@Row
+                return@FlowRow
             }
 
             TooltipBox(
@@ -159,10 +204,13 @@ internal fun <R> DatabaseSourceProcessor(
                             onUserProceeded(it)
                         }
                     },
-                    Modifier.padding(start = spacing),
+                    modifier = Modifier.padding(buttonPadding),
                     enabled = allowProceed
                 ) {
-                    Text(textProvider.getProceedButton())
+                    Text(
+                        textProvider.getProceedButton(),
+                        softWrap = false
+                    )
                 }
             }
         }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.FlowRowOverflow
 import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,10 +36,10 @@ import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.theme.core.ThemeValues
 import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
 import dev.toastbits.composekit.util.thenWith
-import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
-import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_source_is_set_to_auto_open
+import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
+import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -63,7 +64,8 @@ fun DatabaseSourceConfigurationPreview(
             .border(2.dp, theme.accent, shape)
             .padding(15.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End),
-        itemVerticalAlignment = Alignment.CenterVertically
+        itemVerticalAlignment = Alignment.CenterVertically,
+        overflow = FlowRowOverflow.Visible
     ) {
         Row(
             Modifier

@@ -7,6 +7,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -63,6 +64,8 @@ abstract class DatabaseSourceProcessScreen<R>(
             }
         }
 
+        val result: Pair<R, Duration>? = loadResult?.getOrNull()
+
         DatabaseSourceProcessor(
             sourceConfiguration = sourceConfiguration,
             databaseAccessor = databaseAccessor,
@@ -70,8 +73,8 @@ abstract class DatabaseSourceProcessScreen<R>(
             loadException = loadResult?.exceptionOrNull(),
             finishedStepsProgress = finishedStepsProgress,
             currentProgress = currentProgress,
-            loadResult = loadResult?.getOrNull(),
-            getAlerts = ::getResultAlerts,
+            loadResult = result,
+            alerts = remember(result) { result?.first?.let { getResultAlerts(it) }.orEmpty() },
             modifier = modifier.padding(contentPadding),
             onRetry = {
                 coroutineScope.startLoad(databaseAccessor)

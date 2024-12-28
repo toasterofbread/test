@@ -43,29 +43,25 @@ import kotlin.time.Duration
 
 @Composable
 internal fun DatabaseSourceLoadScreenProgressLog(
-    result: Pair<List<Alert>, Duration>?,
+    alerts: List<Alert>,
+    finishDuration: Duration?,
+    warnings: List<Alert>,
+    errors: List<Alert>,
     databaseAccessor: DatabaseAccessor,
     textProvider: DatabaseSourceProcessScreenTextProvider,
     finishedStepsProgress: List<DatabaseAccessor.LoadProgress>,
     currentProgress: DatabaseAccessor.LoadProgress?,
     loadException: Throwable?,
     modifier: Modifier = Modifier
-): Boolean {
+) {
     val theme: ThemeValues = LocalComposeKitTheme.current
     val scrollState: LazyListState = rememberLazyListState()
 
-    LaunchedEffect(result) {
-        if (result != null) {
+    LaunchedEffect(finishDuration) {
+        if (finishDuration != null) {
             scrollState.scrollToItem(Int.MAX_VALUE)
         }
     }
-
-    val (warnings: List<Alert>, errors: List<Alert>) =
-        remember(result?.first) {
-            result?.first?.let { alerts ->
-                alerts.filter { it.severity == Alert.Severity.WARNING } to alerts.filter { it.severity == Alert.Severity.ERROR }
-            } ?: Pair(emptyList(), emptyList())
-        }
 
     val loadExceptionStackTrace: List<String>? =
         remember(loadException) {
@@ -102,14 +98,14 @@ internal fun DatabaseSourceLoadScreenProgressLog(
                     }
                 }
 
-                result?.also { (alerts, duration) ->
-                    items(alerts) { alert ->
-                        AlertLine(alert, databaseAccessor)
-                    }
+                items(alerts) { alert ->
+                    AlertLine(alert, databaseAccessor)
+                }
 
+                if (finishDuration != null) {
                     item {
                         Text(
-                            textProvider.getFinishedText(warnings, errors, duration),
+                            textProvider.getFinishedText(warnings, errors, finishDuration),
                             Modifier.padding(top = 15.dp)
                         )
                     }
@@ -117,8 +113,6 @@ internal fun DatabaseSourceLoadScreenProgressLog(
             }
         }
     }
-
-    return errors.isNotEmpty() || loadException != null
 }
 
 @Composable
