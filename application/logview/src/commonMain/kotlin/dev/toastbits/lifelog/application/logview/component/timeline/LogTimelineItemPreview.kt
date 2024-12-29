@@ -24,6 +24,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -32,9 +33,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import dev.toastbits.composekit.components.utils.modifier.background
@@ -48,6 +48,7 @@ import dev.toastbits.lifelog.application.logview.component.timeline.item.EventTi
 import dev.toastbits.lifelog.application.logview.component.timeline.item.TimelineItem
 import dev.toastbits.lifelog.application.logview.model.LogEventReference
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 internal val ICON_COLUMN_WIDTH: Dp = 40.dp
 internal const val START_COLUMN_FILL_RATIO: Float = 0.4f
@@ -65,7 +66,6 @@ internal fun LogTimelineItemPreview(
     selectedState: State<Boolean> = mutableStateOf(false),
     onEventSelected: ((LogEventReference) -> Unit)? = null
 ) {
-    val density: Density = LocalDensity.current
     val theme: ThemeValues = LocalComposeKitTheme.current
     val shape: Shape = RoundedCornerShape(10.dp)
 
@@ -113,8 +113,9 @@ internal fun LogTimelineItemPreview(
             .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        var mainContentHeight: Dp by remember { mutableStateOf(0.dp) }
-        var iconContentHeight: Dp by remember { mutableStateOf(0.dp) }
+        var mainContentHeight: Int by remember { mutableIntStateOf(0) }
+        var iconContentHeight: Int by remember { mutableIntStateOf(0) }
+        var contentIsSingleLine: Boolean by remember { mutableStateOf(false) }
 
         Row(
             Modifier.fillMaxWidth(START_COLUMN_FILL_RATIO),
@@ -139,16 +140,18 @@ internal fun LogTimelineItemPreview(
                 item.IconContent(
                     Modifier
                         .onSizeChanged {
-                            with(density) {
-                                iconContentHeight = it.height.toDp()
-                            }
+                            iconContentHeight = it.height
                         }
                         .zIndex(1f)
                         .thenIf(!item.hasWideIcon) {
-                            offset(
-                                x = (-10).dp, // ?
-                                y = (iconContentHeight - mainContentHeight) / 2f
-                            )
+                            offset {
+                                IntOffset(
+                                    x = (-10).dp.roundToPx(), // ?
+                                    y =
+                                        if (contentIsSingleLine) 0
+                                        else ((iconContentHeight - mainContentHeight) / 2f).roundToInt()
+                                )
+                            }
                         }
                 )
             }
@@ -163,8 +166,11 @@ internal fun LogTimelineItemPreview(
                     .fillMaxWidth()
                     .padding(start = 10.dp)
                     .onSizeChanged {
-                        mainContentHeight = with(density) { it.height.toDp() }
-                    }
+                        mainContentHeight = it.height
+                    },
+                onIsSingleLineChanged = {
+                    contentIsSingleLine = it
+                }
             )
         }
     }

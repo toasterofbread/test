@@ -168,9 +168,9 @@ private fun AlertLine(
 
             UserContentDisplay(
                 userContent
-            ) {
-                Row {
-                    it()
+            ) { modifier, content ->
+                Row(modifier) {
+                    content()
                 }
             }
         }

@@ -16,7 +16,7 @@ data class DateTimelineItem(
     val index: Int
 ): TimelineItem {
     @Composable
-    override fun MainContent(modifier: Modifier) {
+    override fun MainContent(modifier: Modifier, onIsSingleLineChanged: ((Boolean) -> Unit)?) {
         val settings: AppSettings = LocalSettings.current
         val dateFormat: DisplayDateFormat by settings.Display.DATE_FORMAT.observe()
 
@@ -25,7 +25,15 @@ data class DateTimelineItem(
                 dateFormat.getLocalDateFormat().format(date.date)
             }
 
-        Text(dateString, modifier)
+        Text(
+            dateString,
+            modifier,
+            onTextLayout =
+                if (onIsSingleLineChanged == null) null
+                else {{
+                    onIsSingleLineChanged(it.lineCount <= 1)
+                }}
+        )
     }
 
     @Composable

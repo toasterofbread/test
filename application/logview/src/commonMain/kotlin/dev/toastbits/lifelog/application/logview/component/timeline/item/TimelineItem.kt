@@ -16,7 +16,7 @@ import kotlinx.coroutines.withContext
 
 internal sealed interface TimelineItem {
     @Composable
-    fun MainContent(modifier: Modifier)
+    fun MainContent(modifier: Modifier, onIsSingleLineChanged: ((Boolean) -> Unit)? = null)
 
     @Composable
     fun MetadataItems(itemModifier: Modifier)

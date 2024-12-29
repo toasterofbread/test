@@ -17,18 +17,24 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -50,54 +56,119 @@ import dev.toastbits.lifelog.application.usercontent.model.ModsState
 import dev.toastbits.lifelog.application.usercontent.model.getState
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReference
+import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.stringResource
 
 private val LocalReference: ProvidableCompositionLocal<LogEntityReference?> =
     compositionLocalOf { null }
+
+data class UserContentDisplayResult(
+    val singleLine: Boolean
+)
 
 @Composable
 fun UserContentDisplay(
     content: UserContent,
     modifier: Modifier = Modifier,
     textStyle: TextStyle = LocalTextStyle.current,
-    container: @Composable (@Composable () -> Unit) -> Unit = {
-        val density: Density = LocalDensity.current
-        var contentHeight: Dp by remember { mutableStateOf(0.dp) }
-
-        FlowRow(
-            Modifier
-                // Workaround for FlowRow bug(?) in which its reported height is smaller than the actual content
-                .height(contentHeight)
-                .wrapContentHeight(Alignment.Top, unbounded = true)
-                .onSizeChanged {
-                    with (density) {
-                        contentHeight = it.height.toDp()
-                    }
-                }
-        ) {
-            it()
-        }
+    onDisplayResult: ((UserContentDisplayResult) -> Unit)? = null,
+    container: @Composable (Modifier, @Composable () -> Unit) -> Unit = { modifier, content ->
+        UserContentDisplayContainer(modifier, content)
     }
 ) {
+    var containerPosition: Float by remember { mutableStateOf(0f) }
+    val partPositions: MutableMap<Int, Float> = remember { mutableStateMapOf() }
+    val singleLineTextParts: MutableMap<Int, Boolean> = remember { mutableStateMapOf() }
+
+    LaunchedEffect(onDisplayResult) {
+        if (onDisplayResult == null) {
+            return@LaunchedEffect
+        }
+
+        snapshotFlow {
+            UserContentDisplayResult(
+                singleLine =
+                    singleLineTextParts.values.all { it }
+                        && partPositions.values.all { it == containerPosition }
+            )
+        }.collectLatest(onDisplayResult)
+    }
+
     SelectionContainer(modifier) {
         val isBlank: Boolean =
             remember(content) { content.isBlank() }
 
         if (isBlank) {
             BlankUserContentIndicator(Modifier.fillMaxWidth())
+            return@SelectionContainer
         }
-        else {
-            container {
-                for (part in (1..1).flatMap { content.parts }) {
-                    UserContentPart(part, textStyle)
-                }
+
+        container(
+            Modifier.onGloballyPositioned {
+                containerPosition = it.positionInRoot().y
+            }
+        ) {
+            for ((index, part) in content.parts.withIndex()) {
+                val scope: UserContentDisplayScope =
+                    remember(index, onDisplayResult) {
+                        if (onDisplayResult == null) {
+                            return@remember object : UserContentDisplayScope {}
+                        }
+
+                        object : UserContentDisplayScope {
+                            override val itemModifier: Modifier =
+                                Modifier.onGloballyPositioned {
+                                    partPositions[index] = it.positionInRoot().y
+                                }
+
+                            override val onTextLayout: (TextLayoutResult) -> Unit = { textLayoutResult ->
+                                singleLineTextParts[index] = textLayoutResult.lineCount <= 1
+                            }
+                        }
+                    }
+
+                scope.UserContentPart(
+                    part,
+                    textStyle
+                )
             }
         }
     }
 }
 
 @Composable
-fun UserContentPart(part: UserContent.Part, textStyle: TextStyle) {
+private fun UserContentDisplayContainer(
+    modifier: Modifier,
+    content: @Composable () -> Unit,
+) {
+    val density: Density = LocalDensity.current
+    var contentHeight: Dp by remember { mutableStateOf(0.dp) }
+
+    FlowRow(
+        modifier
+            // Workaround for FlowRow bug(?) in which its reported height is smaller than the actual content
+            .height(contentHeight)
+            .wrapContentHeight(Alignment.Top, unbounded = true)
+            .onSizeChanged {
+                with(density) {
+                    contentHeight = it.height.toDp()
+                }
+            }
+    ) {
+        content()
+    }
+}
+
+private interface UserContentDisplayScope {
+    val itemModifier: Modifier get() = Modifier
+    val onTextLayout: ((textLayoutResult: TextLayoutResult) -> Unit)? get() = null
+}
+
+@Composable
+private fun UserContentDisplayScope.UserContentPart(
+    part: UserContent.Part,
+    textStyle: TextStyle
+) {
     WithMods(part.mods, textStyle) {
         when (part) {
             is UserContent.Part.Composite -> {
@@ -106,7 +177,11 @@ fun UserContentPart(part: UserContent.Part, textStyle: TextStyle) {
                 }
             }
             is UserContent.Part.Image -> {
-                Text("Image<${part.location}> // TODO")
+                Text(
+                    "Image<${part.location}> // TODO",
+                    itemModifier,
+                    onTextLayout = onTextLayout
+                )
 //                val painter: Painter = rememberImagePainter(part.location)
 //                Image(painter, contentDescription = null)
             }
@@ -121,14 +196,14 @@ fun UserContentPart(part: UserContent.Part, textStyle: TextStyle) {
 private fun BlankUserContentIndicator(modifier: Modifier = Modifier) {
     Text(
         stringResource(Res.string.user_content_display_empty_indicator),
-        modifier.padding(top = 15.dp),
+        modifier,
         color = LocalComposeKitTheme.current.vibrantAccent,
         textAlign = TextAlign.Center
     )
 }
 
 @Composable
-private fun SinglePart(part: UserContent.Part.Single) {
+private fun UserContentDisplayScope.SinglePart(part: UserContent.Part.Single) {
     val reference: LogEntityReference? = LocalReference.current
     val context: PlatformContext = LocalContext.current
     val textParts: List<String> = part.text.split(' ')
@@ -144,7 +219,7 @@ private fun SinglePart(part: UserContent.Part.Single) {
                 ?: 0
 
         for (i in 0 until leadingNewlines) {
-            Spacer(Modifier.fillMaxWidth())
+            Spacer(itemModifier.fillMaxWidth())
         }
 
         val subparts: List<String> =
@@ -154,7 +229,7 @@ private fun SinglePart(part: UserContent.Part.Single) {
             Text(
                 if (subpartIndex + 1 == subparts.size && textIndex + 1 != textParts.size) "$subpart "
                 else subpart,
-                Modifier
+                itemModifier
                     .thenWith(reference) { ref ->
                         clickable(
                             remember { MutableInteractionSource() },
@@ -175,16 +250,17 @@ private fun SinglePart(part: UserContent.Part.Single) {
                             }
                         }
                             .pointerHoverIcon(PointerIcon.Hand, true)
-                    }
+                    },
+                onTextLayout = onTextLayout
             )
 
             if (subpartIndex + 1 != subparts.size) {
-                Spacer(Modifier.fillMaxWidth())
+                Spacer(itemModifier.fillMaxWidth())
             }
         }
 
         for (i in 0 until trailingNewlines) {
-            Spacer(Modifier.fillMaxWidth())
+            Spacer(itemModifier.fillMaxWidth())
         }
     }
 }

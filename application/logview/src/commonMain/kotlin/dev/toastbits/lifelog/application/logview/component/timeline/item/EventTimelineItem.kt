@@ -43,9 +43,9 @@ data class EventTimelineItem(
         get() = logDatabase[eventReference]
 
     @Composable
-    override fun MainContent(modifier: Modifier) {
+    override fun MainContent(modifier: Modifier, onIsSingleLineChanged: ((Boolean) -> Unit)?) {
         val title: LogDisplayText by event::getPreview.rememberLocalisedDisplayText()
-        title.Display(modifier)
+        title.Display(modifier, onIsSingleLineChanged = onIsSingleLineChanged)
     }
 
     @Composable
