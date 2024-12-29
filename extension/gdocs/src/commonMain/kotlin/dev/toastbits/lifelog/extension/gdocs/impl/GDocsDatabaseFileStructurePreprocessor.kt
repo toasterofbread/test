@@ -49,7 +49,6 @@ class GDocsDatabaseFileStructurePreprocessor(
 
         val newStructure: MutableFileStructure = MutableFileStructure()
 
-
         fileStructure.walkFiles { file, path ->
             var newFile: FileStructure.Node.File = file
 
@@ -64,36 +63,43 @@ class GDocsDatabaseFileStructurePreprocessor(
                     }
                 }
 
-            if (path.segments.size == fileStructureProvider.getLogFilePathSize() && path.name == strings.logFileName && path.segments.firstOrNull() == strings.logsDirectoryName) {
-                val ref: LogEntityReference.InLog? =
-                    fileStructureProvider.getPathLogFile(path.segments.drop(1)) {
-                        onAlert(ParseAlertData(it, null, path))
-                    }
+            if (
+                path.segments.size != fileStructureProvider.getLogFilePathSize()
+                || path.name != strings.logFileName
+                || path.segments.firstOrNull() != strings.logsDirectoryName
+            ) {
+                newStructure.createFile(path, newFile)
+                return@walkFiles
+            }
 
-                val newFileLength: Int =
-                    preprocessLogFile(
-                        lines = file.readLines(),
-                        newStructure = newStructure,
+            val ref: LogEntityReference.InLog? =
+                fileStructureProvider.getPathLogFile(path.segments.drop(1)) {
+                    onAlert(ParseAlertData(it, null, path))
+                }
+
+            val newFileLength: Int =
+                preprocessLogFile(
+                    lines = file.readLines(),
+                    newStructure = newStructure,
+                    fileStructureProvider = fileStructureProvider,
+                    createDateLineParser = ::createDateLineParser,
+                    mediaReferenceType = mediaReferenceType,
+                    ref = ref
+                ) { alert, line ->
+                    onAlert(ParseAlertData(alert, line?.toUInt(), path))
+                }
+
+            newFile = object : FileStructure.Node.File.FileLines {
+                override suspend fun readLines(): Sequence<String> =
+                    processLogFile(
+                        lines = file.readLines().take(newFileLength).map(::formatFileContent),
                         fileStructureProvider = fileStructureProvider,
-                        createDateLineParser = ::createDateLineParser,
                         mediaReferenceType = mediaReferenceType,
+                        createDateLineParser = ::createDateLineParser,
                         ref = ref
                     ) { alert, line ->
-                        onAlert(ParseAlertData(alert, line?.toUInt(), path))
+                        onAlert(ParseAlertData(alert, line.toUInt(), path))
                     }
-
-                newFile = object : FileStructure.Node.File.FileLines {
-                    override suspend fun readLines(): Sequence<String> =
-                        processLogFile(
-                            lines = file.readLines().take(newFileLength),
-                            fileStructureProvider = fileStructureProvider,
-                            mediaReferenceType = mediaReferenceType,
-                            createDateLineParser = ::createDateLineParser,
-                            ref = ref
-                        ) { alert, line ->
-                            onAlert(ParseAlertData(alert, line.toUInt(), path))
-                        }
-                }
             }
 
             newStructure.createFile(path, newFile)
@@ -101,6 +107,9 @@ class GDocsDatabaseFileStructurePreprocessor(
 
         return newStructure
     }
+
+    private fun formatFileContent(line: String): String =
+        line.replace('’', '\'')
 
     private fun preprocessLogFile(
         lines: Sequence<String>,
