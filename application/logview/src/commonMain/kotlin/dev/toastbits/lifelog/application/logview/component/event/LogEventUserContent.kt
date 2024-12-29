@@ -24,13 +24,15 @@ import dev.toastbits.lifelog.application.usercontent.UserContentDisplay
 internal fun LogEventUserContent(
     state: LogEventViewContentState?,
     modifier: Modifier = Modifier,
+    key1: Any? = Unit,
     updateState: (LogEventViewContentState) -> Unit
 ) {
     NullCrossfade(
         state,
         modifier
             .fillMaxWidth()
-            .height(IntrinsicSize.Min)
+            .height(IntrinsicSize.Min),
+        key1 = key1
     ) { currentState ->
         when (currentState) {
             null ->

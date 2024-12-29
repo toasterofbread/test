@@ -197,8 +197,8 @@ class LogEventScreen<T: LogEvent>(
                                         - contentPosition
                                         - scrollBarContentPadding.top
                                         - scrollBarContentPadding.bottom
-                            )
-
+                            ),
+                        key1 = this@LogEventScreen
                     ) {
                         updateState(it)
                     }
@@ -273,14 +273,21 @@ class LogEventScreen<T: LogEvent>(
         excludedProperties: List<LogEntityProperty<in T, *>> = emptyList()
     ) {
         event.withProperties(logDatabase.configuration) {
+            val showProperties: List<LogEntityProperty<T, *>> =
+                remember(properties) {
+                    properties.filter { property ->
+                        property.shouldShow(event) && !excludedProperties.contains(property)
+                    }
+                }
+
+            if (showProperties.isEmpty()) {
+                return@withProperties
+            }
+
             ScrollBarLazyRow(modifier) {
                 item {
                     Row(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
-                        for (property in properties) {
-                            if (!property.shouldShow(event) || excludedProperties.contains(property)) {
-                                continue
-                            }
-
+                        for (property in showProperties) {
                             PropertyChip(
                                 property,
                                 onEdit =
