@@ -10,7 +10,7 @@ interface LogFileConverterStrings {
 
     val contentIndentation: String
     val datePrefix: String
-    val commentPrefix: String
+    val commentPrefixes: List<String>
     val ambiguousDatePrefix: String
 
     val blockCommentStart: String
@@ -30,6 +30,7 @@ interface LogFileConverterStrings {
         const val ILLEGAL_PATH_CHARS: String = "/"
     }
 }
+
 
 fun LogFileConverterStrings.validate() {
     metadataDirectoryName.checkPath("metadataDirectoryName")

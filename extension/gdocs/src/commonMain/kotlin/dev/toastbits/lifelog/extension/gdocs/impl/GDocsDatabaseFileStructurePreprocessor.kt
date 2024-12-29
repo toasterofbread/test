@@ -12,7 +12,9 @@ import dev.toastbits.lifelog.core.specification.converter.alert.LogParseAlert
 import dev.toastbits.lifelog.core.specification.converter.alert.SpecificationLogParseAlert
 import dev.toastbits.lifelog.core.specification.extension.ExtensionRegistry
 import dev.toastbits.lifelog.core.specification.impl.converter.DateLineParser
+import dev.toastbits.lifelog.core.specification.impl.converter.usercontent.UserContentParser
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReference
+import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceParser
 import dev.toastbits.lifelog.extension.gdocs.GDocsExtension
 import dev.toastbits.lifelog.extension.gdocs.GDocsExtensionStrings
 import dev.toastbits.lifelog.extension.gdocs.MediaExtension
@@ -29,6 +31,8 @@ class GDocsDatabaseFileStructurePreprocessor(
     override suspend fun processDatabaseFileStructure(
         fileStructure: FileStructure,
         fileStructureProvider: DatabaseFileStructureProvider,
+        userContentParser: UserContentParser,
+        referenceParser: LogEntityReferenceParser,
         strings: LogFileConverterStrings,
         extensionRegistry: ExtensionRegistry,
         onAlert: (ParseAlertData) -> Unit
@@ -45,8 +49,20 @@ class GDocsDatabaseFileStructurePreprocessor(
 
         val newStructure: MutableFileStructure = MutableFileStructure()
 
+
         fileStructure.walkFiles { file, path ->
             var newFile: FileStructure.Node.File = file
+
+            fun createDateLineParser(getCurrentLine: () -> Int): DateLineParser =
+                object : DateLineParser(
+                    strings = strings,
+                    userContentParser = userContentParser,
+                    referenceParser = referenceParser
+                ) {
+                    override fun onAlert(alert: LogParseAlert) {
+                        onAlert(ParseAlertData(alert, getCurrentLine().toUInt(), path))
+                    }
+                }
 
             if (path.segments.size == fileStructureProvider.getLogFilePathSize() && path.name == strings.logFileName && path.segments.firstOrNull() == strings.logsDirectoryName) {
                 val ref: LogEntityReference.InLog? =
@@ -55,18 +71,25 @@ class GDocsDatabaseFileStructurePreprocessor(
                     }
 
                 val newFileLength: Int =
-                    preprocessLogFile(file.readLines(), newStructure, fileStructureProvider, mediaReferenceType, strings, ref) { alert, line ->
+                    preprocessLogFile(
+                        lines = file.readLines(),
+                        newStructure = newStructure,
+                        fileStructureProvider = fileStructureProvider,
+                        createDateLineParser = ::createDateLineParser,
+                        mediaReferenceType = mediaReferenceType,
+                        ref = ref
+                    ) { alert, line ->
                         onAlert(ParseAlertData(alert, line?.toUInt(), path))
                     }
 
                 newFile = object : FileStructure.Node.File.FileLines {
                     override suspend fun readLines(): Sequence<String> =
                         processLogFile(
-                            file.readLines().take(newFileLength),
-                            fileStructureProvider,
-                            mediaReferenceType,
-                            strings,
-                            ref
+                            lines = file.readLines().take(newFileLength),
+                            fileStructureProvider = fileStructureProvider,
+                            mediaReferenceType = mediaReferenceType,
+                            createDateLineParser = ::createDateLineParser,
+                            ref = ref
                         ) { alert, line ->
                             onAlert(ParseAlertData(alert, line.toUInt(), path))
                         }
@@ -83,8 +106,8 @@ class GDocsDatabaseFileStructurePreprocessor(
         lines: Sequence<String>,
         newStructure: MutableFileStructure,
         fileStructureProvider: DatabaseFileStructureProvider,
+        createDateLineParser: (() -> Int) -> DateLineParser,
         mediaReferenceType: MediaReferenceType?,
-        strings: LogFileConverterStrings,
         ref: LogEntityReference.InLog?,
         onAlert: (LogParseAlert, Int?) -> Unit
     ): Int {
@@ -95,12 +118,7 @@ class GDocsDatabaseFileStructurePreprocessor(
         var currentLine: Int = -1
         var currentDate: LocalDate? = ref?.logDate
 
-        val dateLineParser: DateLineParser =
-            object : DateLineParser(strings) {
-                override fun onAlert(alert: LogParseAlert) {
-                    onAlert(alert, currentLine)
-                }
-            }
+        val dateLineParser: DateLineParser = createDateLineParser { currentLine }
 
         for ((index, line) in lines.withIndex()) {
             currentLine = index
@@ -181,19 +199,14 @@ class GDocsDatabaseFileStructurePreprocessor(
         lines: Sequence<String>,
         fileStructureProvider: DatabaseFileStructureProvider,
         mediaReferenceType: MediaReferenceType?,
-        strings: LogFileConverterStrings,
+        createDateLineParser: (() -> Int) -> DateLineParser,
         ref: LogEntityReference.InLog?,
         onAlert: (LogParseAlert, Int) -> Unit
     ): Sequence<String> = sequence {
         var currentDate: LocalDate? = ref?.logDate
         var currentLine: Int = 0
 
-        val dateLineParser: DateLineParser =
-            object : DateLineParser(strings) {
-                override fun onAlert(alert: LogParseAlert) {
-                    onAlert(alert, currentLine)
-                }
-            }
+        val dateLineParser: DateLineParser = createDateLineParser { currentLine }
 
         for (_line in lines) {
             currentLine++

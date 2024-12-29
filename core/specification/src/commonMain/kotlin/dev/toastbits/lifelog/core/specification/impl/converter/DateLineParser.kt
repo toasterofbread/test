@@ -4,11 +4,15 @@ import dev.toastbits.lifelog.core.specification.converter.LogFileConverterString
 import dev.toastbits.lifelog.core.specification.converter.alert.LogParseAlert
 import dev.toastbits.lifelog.core.specification.converter.alert.SpecificationLogParseAlert
 import dev.toastbits.lifelog.core.specification.converter.parseOrNull
+import dev.toastbits.lifelog.core.specification.impl.converter.usercontent.UserContentParser
 import dev.toastbits.lifelog.core.specification.model.UserContent
+import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceParser
 import kotlinx.datetime.LocalDate
 
 abstract class DateLineParser(
-    private val strings: LogFileConverterStrings
+    private val strings: LogFileConverterStrings,
+    private val userContentParser: UserContentParser,
+    private val referenceParser: LogEntityReferenceParser
 ) {
     data class DateLineData(val date: LocalDate?, val ambiguous: Boolean, val inlineComment: UserContent?)
 
@@ -19,7 +23,7 @@ abstract class DateLineParser(
             return null
         }
 
-        var (dateText, inlineComment) = line.drop(strings.datePrefix.length).extractComment()
+        var (dateText: String, inlineComment: UserContent?) = line.drop(strings.datePrefix.length).extractComment()
         var ambiguous: Boolean = false
 
         if (dateText.lowercase().startsWith(strings.ambiguousDatePrefix.lowercase())) {
@@ -41,11 +45,25 @@ abstract class DateLineParser(
         return null
     }
 
-    open fun String.extractComment(): Pair<String, UserContent?> {
-        val commentStart: Int = indexOf(strings.commentPrefix)
-        if (commentStart == -1) {
+    private fun parseUserContent(text: String): UserContent =
+        userContentParser.parseUserContent(
+            text,
+            referenceParser,
+            onAlert = { alert, _ -> onAlert(alert) }
+        ).normalised()
+
+    private fun String.extractComment(): Pair<String, UserContent?> {
+        val (commentPrefix: String, commentStart: Int?) =
+            strings.commentPrefixes
+                .firstNotNullOfOrNull { commentPrefix ->
+                    commentPrefix to (indexOf(commentPrefix).takeIf { it != -1 } ?: return@firstNotNullOfOrNull null)
+                } ?: Pair("", null)
+
+        if (commentStart == null) {
             return this.trim() to null
         }
-        return substring(0, commentStart).trim() to null
+
+        val comment: String = drop(commentStart + commentPrefix.length).trim()
+        return substring(0, commentStart).trim() to parseUserContent(comment)
     }
 }

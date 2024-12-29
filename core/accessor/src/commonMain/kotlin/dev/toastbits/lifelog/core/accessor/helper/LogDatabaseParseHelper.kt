@@ -22,7 +22,7 @@ class LogDatabaseParseHelper(
     private val converterImpl: LogFileConverter =
         LogFileConverterImpl(fileStructureProvider, { LogEntityReferenceGeneratorImpl(fileStructureProvider) }, configuration.strings, configuration.extensionRegistry)
     private val parser: DatabaseFilesParser =
-        DatabaseFilesParserImpl(converterImpl, configuration, fileStructureProvider, ioDispatcher)
+        DatabaseFilesParserImpl(converterImpl, configuration, fileStructureProvider, converterImpl.userContentParser, converterImpl.referenceParser, ioDispatcher)
 
     suspend fun parseFileStructure(
         fileStructure: FileStructure,

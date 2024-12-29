@@ -17,7 +17,7 @@ data class LogFileConverterStringsImpl(
 
     override val contentIndentation: String = "  ",
     override val datePrefix: String = "----- ",
-    override val commentPrefix: String = "// ",
+    override val commentPrefixes: List<String> = listOf("// ", "//"),
     override val ambiguousDatePrefix: String = "Since ",
 
     override val blockCommentStart: String = "/*",

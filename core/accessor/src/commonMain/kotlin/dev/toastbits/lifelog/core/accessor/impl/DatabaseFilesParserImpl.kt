@@ -13,10 +13,12 @@ import dev.toastbits.lifelog.core.specification.database.LogDataFile
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguration
 import dev.toastbits.lifelog.core.specification.extension.SpecificationExtension
+import dev.toastbits.lifelog.core.specification.impl.converter.usercontent.UserContentParser
 import dev.toastbits.lifelog.core.specification.impl.model.entity.date.LogDateImpl
 import dev.toastbits.lifelog.core.specification.model.entity.date.LogDate
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReference
+import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceParser
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReferenceType
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -26,6 +28,8 @@ class DatabaseFilesParserImpl(
     private val converter: LogFileConverter,
     private val configuration: LogDatabaseConfiguration,
     private val fileStructureProvider: DatabaseFileStructureProvider,
+    private val userContentParser: UserContentParser,
+    private val referenceParser: LogEntityReferenceParser,
     private val ioDispatcher: CoroutineDispatcher
 ): DatabaseFilesParser {
     override suspend fun parseDatabaseFileStructure(
@@ -75,7 +79,15 @@ class DatabaseFilesParserImpl(
             }
 
             for (preprocessor in extension.extraPreprocessors) {
-                structure = preprocessor.processDatabaseFileStructure(structure, fileStructureProvider, configuration.strings, configuration.extensionRegistry, onAlert)
+                structure = preprocessor.processDatabaseFileStructure(
+                    fileStructure = structure,
+                    fileStructureProvider = fileStructureProvider,
+                    userContentParser = userContentParser,
+                    referenceParser = referenceParser,
+                    strings = configuration.strings,
+                    extensionRegistry = configuration.extensionRegistry,
+                    onAlert = onAlert
+                )
             }
         }
         return structure

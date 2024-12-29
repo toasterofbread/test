@@ -37,13 +37,13 @@ internal class LogFileGenerator(
         check(!content.contains('\n'))
 
         entity?.aboveComment?.also { aboveComment ->
-            lines.add(strings.commentPrefix + aboveComment.toText())
+            lines.add(strings.commentPrefixes.first() + aboveComment.toText())
             currentLineIndex++
         }
 
         val lineContent: String =
             entity?.inlineComment?.let { inlineComment ->
-                content + ' ' + strings.commentPrefix + inlineComment.toText()
+                content + ' ' + strings.commentPrefixes.first() + inlineComment.toText()
             } ?: content
 
         lines.add(lineContent)
@@ -107,7 +107,7 @@ internal class LogFileGenerator(
         if (commentTextLines.size <= 1) {
             addLine(
                 buildString {
-                    append(strings.commentPrefix)
+                    append(strings.commentPrefixes.first())
                     if (commentTextLines.isNotEmpty()) {
                         append(commentTextLines.single())
                     }

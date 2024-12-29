@@ -11,6 +11,8 @@ interface LogDatabaseConfiguration {
     val splitStrategy: LogFileSplitStrategy
     val strings: LogFileConverterStrings
 
+    val defaultEvent: LogEvent
+
     companion object {
         val BUILT_IN_EVENT_TYPES: List<LogEventType> =
             listOf(

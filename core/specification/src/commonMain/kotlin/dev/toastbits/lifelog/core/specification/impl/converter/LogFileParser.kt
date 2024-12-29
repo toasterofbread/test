@@ -26,15 +26,9 @@ internal class LogFileParser(
     private val initialDate: LogDate? = null
 ) {
     private val dateLineParser: DateLineParser =
-        object : DateLineParser(strings) {
+        object : DateLineParser(strings, userContentParser, referenceParser) {
             override fun onAlert(alert: LogParseAlert) {
                 this@LogFileParser.onAlert(alert)
-            }
-
-            override fun String.extractComment(): Pair<String, UserContent?> {
-                with (this@LogFileParser) {
-                    return extractComment()
-                }
             }
         }
 
@@ -67,16 +61,6 @@ internal class LogFileParser(
 
     private fun onAlert(error: LogParseAlert, line: Int = currentLineIndex) {
         alerts.add(ParseAlertData(error, line.toUInt(), filePath))
-    }
-
-    private fun String.extractComment(): Pair<String, UserContent?> {
-        val commentStart: Int = indexOf(strings.commentPrefix)
-        if (commentStart == -1) {
-            return this.trim() to null
-        }
-
-        val comment: String = drop(commentStart + strings.commentPrefix.length).trim()
-        return substring(0, commentStart).trim() to parseUserContent(comment)
     }
 
     private fun getDayEvents(allowOutsideDay: Boolean = false): MutableList<LogEvent> {
@@ -147,8 +131,9 @@ internal class LogFileParser(
             return
         }
 
-        if (line.startsWith(strings.commentPrefix)) {
-            val commentText: String = line.drop(strings.commentPrefix.length).trimStart()
+        val lineCommentPrefix: String? = strings.commentPrefixes.firstOrNull { line.startsWith(it) }
+        if (lineCommentPrefix != null) {
+            val commentText: String = line.drop(lineCommentPrefix.length).trimStart()
             onCommentLine(parseUserContent(commentText))
             return
         }
@@ -175,19 +160,9 @@ internal class LogFileParser(
                     continue
                 }
 
-                var eventLine: String = line.drop(prefix.length).trimStart()
-                val comment: UserContent?
+                val eventLine: String = line.drop(prefix.length).trimStart()
+                onEventLine(eventType, index, eventLine)
 
-                val commentStart: Int = eventLine.indexOf(strings.commentPrefix)
-                if (commentStart != -1) {
-                    comment = parseUserContent(eventLine.substring(commentStart + strings.commentPrefix.length).trimStart())
-                    eventLine = eventLine.substring(0, commentStart).trimEnd()
-                }
-                else {
-                    comment = null
-                }
-
-                onEventLine(eventType, index, eventLine, comment)
                 return
             }
         }
@@ -238,15 +213,34 @@ internal class LogFileParser(
         getDayEvents()
     }
 
-    private fun onEventLine(eventType: LogEventType, eventPrefixIndex: Int, line: String, inlineComment: UserContent?) {
+    private fun onEventLine(eventType: LogEventType, eventPrefixIndex: Int, fullLine: String) {
+        var line: String = fullLine
+
         val body: String
         val metadata: String?
+        val inlineComment: UserContent?
         val contentLines: MutableList<String> = mutableListOf()
 
         val aboveComment: UserContent? = getLastTopLevelCommentIfAdjacent()
 
         val metadataStart: Int = line.indexOf(strings.eventMetadataStart)
         val contentStart: Int = line.indexOf(strings.eventContentStart)
+
+        val (commentPrefix: String, commentStart: Int?) =
+            strings.commentPrefixes
+                .firstNotNullOfOrNull { commentPrefix ->
+                    commentPrefix to (
+                        line.indexOf(commentPrefix, contentStart + 1).takeIf { it != -1 } ?: return@firstNotNullOfOrNull null
+                    )
+                } ?: Pair("", null)
+
+        if (commentStart != null) {
+            inlineComment = parseUserContent(line.substring(commentStart + commentPrefix.length).trimStart())
+            line = line.substring(0, commentStart)
+        }
+        else {
+            inlineComment = null
+        }
 
         if (metadataStart != -1 && (metadataStart < contentStart || contentStart == -1)) {
             val metadataEnd: Int = line.indexOf(strings.eventMetadataEnd, metadataStart)
