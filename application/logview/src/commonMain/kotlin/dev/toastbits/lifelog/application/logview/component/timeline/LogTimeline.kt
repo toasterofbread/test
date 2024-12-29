@@ -37,6 +37,7 @@ import dev.toastbits.lifelog.application.logview.component.timeline.item.DateTim
 import dev.toastbits.lifelog.application.logview.component.timeline.item.EventTimelineItem
 import dev.toastbits.lifelog.application.logview.component.timeline.item.TimelineItem
 import dev.toastbits.lifelog.application.logview.component.timeline.item.rememberTimelineItems
+import dev.toastbits.lifelog.application.logview.component.timeline.model.LogTimelineScrollTarget
 import dev.toastbits.lifelog.application.logview.component.timeline.model.LogTimelineState
 import dev.toastbits.lifelog.application.logview.model.LogEventReference
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
@@ -61,7 +62,7 @@ internal fun LogTimeline(
     isEventSelected: (LogEventReference) -> Boolean,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
-    scrollTargetDateIndex: Int? = null,
+    scrollTarget: LogTimelineScrollTarget? = null,
     onCurrentDateIndexChanged: ((Int) -> Unit)? = null,
     onEventSelected: ((LogEventReference) -> Unit)? = null,
     filterEvents: ((LogEvent, LogEventReference) -> Boolean)? = null,
@@ -104,25 +105,13 @@ internal fun LogTimeline(
         }
     }
 
-    LaunchedEffect(scrollTargetDateIndex) {
-        if (scrollTargetDateIndex == null) {
-            return@LaunchedEffect
-        }
+    LaunchedEffect(scrollTarget) {
+        val scrollIndex: Int =
+            scrollTarget?.getTargetScrollIndex(timelineItems)
+                ?: return@LaunchedEffect
 
         val dateIndex: Int =
-            if (scrollTargetDateIndex == Int.MAX_VALUE)
-                (timelineItems.lastOrNull { it is DateTimelineItem } as DateTimelineItem?)?.index ?: return@LaunchedEffect
-            else if (scrollTargetDateIndex == Int.MIN_VALUE) 0
-            else scrollTargetDateIndex
-
-        val scrollIndex: Int =
-            timelineItems.indexOfFirst { item ->
-                (item as? DateTimelineItem)?.index == dateIndex
-            }
-
-        if (scrollIndex == -1) {
-            return@LaunchedEffect
-        }
+            (0..scrollIndex).count { timelineItems.getOrNull(it) is DateTimelineItem } - 1
 
         onCurrentDateIndexChanged?.invoke(dateIndex)
 
@@ -150,7 +139,7 @@ internal fun LogTimeline(
             scrollBarSpacing = SCROLLBAR_SPACING,
             scrollBarThickness = SCROLLBAR_THICKNESS
         ) {
-            for (item in timelineItems) {
+            for ((index, item) in timelineItems.withIndex()) {
                 timelineItem(item, state, onEventSelected, isEventSelected)
             }
         }
@@ -193,17 +182,19 @@ private fun LazyListScope.timelineItem(
     state: LogTimelineState,
     onEventSelected: ((LogEventReference) -> Unit)?,
     isEventSelected: (LogEventReference) -> Boolean,
+    modifier: Modifier = Modifier
 ) {
     when (item) {
         is DateTimelineItem ->
             stickyHeaderContentPaddingAware(state.columnState, key = item.index) {
                 LogTimelineItemPreview(
                     item = item,
-                    onEventSelected = onEventSelected
+                    onEventSelected = onEventSelected,
+                    modifier = modifier
                 )
             }
 
-        is EventTimelineItem ->
+        is EventTimelineItem -> {
             item(key = item.eventReference.hashCode().toString()) {
                 val isSelected: State<Boolean> =
                     remember(item.eventReference) {
@@ -215,10 +206,11 @@ private fun LazyListScope.timelineItem(
                 LogTimelineItemPreview(
                     item = item,
                     selectedState = isSelected,
-                    modifier = Modifier.padding(bottom = ITEM_SPACING),
+                    modifier = modifier.padding(bottom = ITEM_SPACING),
                     onEventSelected = onEventSelected
                 )
             }
+        }
     }
 }
 

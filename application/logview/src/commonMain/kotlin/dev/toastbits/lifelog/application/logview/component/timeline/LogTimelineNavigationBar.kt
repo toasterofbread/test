@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
@@ -28,14 +29,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import dev.toastbits.composekit.components.utils.composable.PlatformClickableIconButton
+import dev.toastbits.composekit.components.utils.composable.LoadActionIconButton
 import dev.toastbits.composekit.theme.core.ThemeValues
 import dev.toastbits.composekit.theme.core.onAccent
 import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
 import dev.toastbits.lifelog.application.logview.generated.resources.Res
-import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_search
-import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_scroll_previous
+import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_add_event
 import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_scroll_next
+import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_scroll_previous
+import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_search
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -43,42 +45,55 @@ internal fun LogTimelineNavigationBar(
     canScrollUp: Boolean,
     canScrollDown: Boolean,
     searching: Boolean,
-    scrollDateBy: (Int) -> Unit,
-    showSearchBar: () -> Unit,
+    onAddEvent: (suspend () -> Unit)?,
+    scrollDateBy: ((Int) -> Unit)?,
+    showSearchBar: (() -> Unit)?,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier,
         horizontalArrangement = Arrangement.spacedBy(15.dp)
     ) {
-        Spacer(Modifier.fillMaxWidth().weight(1f))
-
-        AnimatedVisibility(
-            !searching,
-            enter = slideInVertically() + fadeIn(),
-            exit = slideOutVertically() + fadeOut()
-        ) {
+        if (onAddEvent != null) {
             StyledButton(
-                onClick = showSearchBar
+                onClick = onAddEvent
             ) {
-                Icon(Icons.Default.Search, stringResource(Res.string.log_view_screen_button_search))
+                Icon(Icons.Default.Add, stringResource(Res.string.log_view_screen_button_add_event))
             }
         }
 
-        StyledButton(
-            onClick = { scrollDateBy(-1) },
-            onAltClick = { scrollDateBy(Int.MIN_VALUE) },
-            enabled = canScrollUp
-        ) {
-            Icon(Icons.Default.KeyboardArrowUp, stringResource(Res.string.log_view_screen_button_scroll_previous))
+        Spacer(Modifier.fillMaxWidth().weight(1f))
+
+        if (showSearchBar != null) {
+            AnimatedVisibility(
+                !searching,
+                enter = slideInVertically() + fadeIn(),
+                exit = slideOutVertically() + fadeOut()
+            ) {
+                StyledButton(
+                    onClick = showSearchBar
+                ) {
+                    Icon(Icons.Default.Search, stringResource(Res.string.log_view_screen_button_search))
+                }
+            }
         }
 
-        StyledButton(
-            onClick = { scrollDateBy(1) },
-            onAltClick = { scrollDateBy(Int.MAX_VALUE) },
-            enabled = canScrollDown
-        ) {
-            Icon(Icons.Default.KeyboardArrowDown, stringResource(Res.string.log_view_screen_button_scroll_next))
+        if (scrollDateBy != null) {
+            StyledButton(
+                onClick = { scrollDateBy(-1) },
+                onAltClick = { scrollDateBy(Int.MIN_VALUE) },
+                enabled = canScrollUp
+            ) {
+                Icon(Icons.Default.KeyboardArrowUp, stringResource(Res.string.log_view_screen_button_scroll_previous))
+            }
+
+            StyledButton(
+                onClick = { scrollDateBy(1) },
+                onAltClick = { scrollDateBy(Int.MAX_VALUE) },
+                enabled = canScrollDown
+            ) {
+                Icon(Icons.Default.KeyboardArrowDown, stringResource(Res.string.log_view_screen_button_scroll_next))
+            }
         }
     }
 }
@@ -87,8 +102,8 @@ internal fun LogTimelineNavigationBar(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun StyledButton(
-    onClick: () -> Unit,
-    onAltClick: (() -> Unit)? = null,
+    onClick: suspend () -> Unit,
+    onAltClick: (suspend () -> Unit)? = null,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     filled: Boolean = false,
@@ -97,16 +112,23 @@ private fun StyledButton(
     val theme: ThemeValues = LocalComposeKitTheme.current
     val accent: Color by animateColorAsState(if (enabled) theme.accent else theme.accent.copy(alpha = 0.5f))
 
-    PlatformClickableIconButton(
-        onClick = onClick,
-        onAltClick = onAltClick,
-        modifier =
-        modifier
-            .run {
-                if (filled) background(accent, CircleShape)
-                else border(2.dp, accent, CircleShape)
+    LoadActionIconButton(
+        performLoad = {
+            if (it) {
+                onAltClick?.invoke()
             }
-            .size(IconButtonDefaults.smallContainerSize()),
+            else {
+                onClick()
+            }
+        },
+        hasAltLoadAction = onAltClick != null,
+        modifier =
+            modifier
+                .run {
+                    if (filled) background(accent, CircleShape)
+                    else border(2.dp, accent, CircleShape)
+                }
+                .size(IconButtonDefaults.smallContainerSize()),
         enabled = enabled
     ) {
         CompositionLocalProvider(

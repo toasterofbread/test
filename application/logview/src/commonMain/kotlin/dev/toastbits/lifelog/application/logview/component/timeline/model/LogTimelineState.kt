@@ -16,5 +16,5 @@ internal class LogTimelineState(
             from?.columnState?.firstVisibleItemScrollOffset ?: 0
         )
     var waveOffset: Float by mutableFloatStateOf(from?.waveOffset ?: 0f)
-    var filterText: String? by mutableStateOf(from?.filterText ?: "やがて")
+    var filterText: String? by mutableStateOf(from?.filterText)
 }

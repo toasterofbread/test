@@ -24,6 +24,11 @@ import dev.toastbits.composekit.theme.core.ThemeValues
 import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
 import dev.toastbits.composekit.theme.core.vibrantAccent
 import dev.toastbits.lifelog.application.logview.component.propertychip.PropertyChip
+import dev.toastbits.lifelog.application.logview.generated.resources.Res
+import dev.toastbits.lifelog.application.logview.generated.resources.`log_view_screen_$x_content_changes_made`
+import dev.toastbits.lifelog.application.logview.generated.resources.`log_view_screen_$x_property_changes_made`
+import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_column_title_new
+import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_column_title_old
 import dev.toastbits.lifelog.application.logview.model.LogEntityChanges
 import dev.toastbits.lifelog.application.logview.model.LogEventReference
 import dev.toastbits.lifelog.core.specification.converter.generateUserContent
@@ -35,11 +40,6 @@ import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import io.github.petertrr.diffutils.diff
 import io.github.petertrr.diffutils.text.DiffRow
 import io.github.petertrr.diffutils.text.DiffRowGenerator
-import dev.toastbits.lifelog.application.logview.generated.resources.Res
-import dev.toastbits.lifelog.application.logview.generated.resources.`log_view_screen_$x_content_changes_made`
-import dev.toastbits.lifelog.application.logview.generated.resources.`log_view_screen_$x_property_changes_made`
-import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_column_title_new
-import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_column_title_old
 import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
@@ -47,7 +47,8 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun <T: LogEvent> LogEventChangesDiff(
-    event: T,
+    event: T?,
+    defaultEvent: T,
     eventReference: LogEventReference,
     changes: LogEntityChanges<T>,
     logDatabase: LogDatabase,
@@ -123,7 +124,7 @@ fun <T: LogEvent> LogEventChangesDiff(
                     PropertyChangeText(
                         stage.change,
                         isOld = isStart,
-                        entity = event,
+                        entity = event ?: defaultEvent,
                         configuration = logDatabase.configuration,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -203,7 +204,7 @@ private sealed interface DiffStage<T: LogEntity> {
 private fun <T : LogEvent> buildDiffStages(
     changes: LogEntityChanges<T>,
     logDatabase: LogDatabase,
-    event: T,
+    event: T?,
     eventReference: LogEventReference,
 ): List<DiffStage<T>> =
     buildList {
@@ -224,7 +225,7 @@ private fun <T : LogEvent> buildDiffStages(
                 ?: return@buildList
 
         val a: String =
-            logDatabase.converter.generateUserContent(event.content ?: UserContent.EMPTY, eventReference.date)
+            logDatabase.converter.generateUserContent(event?.content ?: UserContent.EMPTY, eventReference.date)
         val b: String =
             logDatabase.converter.generateUserContent(newContent, eventReference.date)
 

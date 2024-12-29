@@ -4,13 +4,14 @@ import dev.toastbits.lifelog.core.specification.model.entity.LogEntity
 import dev.toastbits.lifelog.core.specification.model.entity.property.LogEntityProperty
 
 data class LogEntityChanges<T: LogEntity> private constructor(
+    val defaultEntity: T,
     val changesList: List<Change<T, *>> = emptyList()
 ) {
-    fun hasChanges(entity: T): Boolean =
-        changesList.any { it.changesEntity(entity) }
+    fun hasChanges(entity: T?): Boolean =
+        entity == null || changesList.any { it.changesEntity(entity) }
 
-    fun applyTo(entity: T): T {
-        var currentEntity: T = entity
+    fun applyTo(entity: T?): T {
+        var currentEntity: T = entity ?: defaultEntity
         for (change in changesList) {
             currentEntity = change.applyTo(currentEntity)
         }
@@ -22,7 +23,7 @@ data class LogEntityChanges<T: LogEntity> private constructor(
         copyWithChange(Change(property as LogEntityProperty<T, V>, newValue))
 
     fun <V> copyWithChange(change: Change<T, V>): LogEntityChanges<T> =
-        LogEntityChanges(
+        copy(
             changesList = changesList.filterNot { it.property == change.property } + change
         )
 
@@ -45,6 +46,7 @@ data class LogEntityChanges<T: LogEntity> private constructor(
         "LogEntityChanges($changesList)"
 
     companion object {
-        fun <T: LogEntity> createEmpty(): LogEntityChanges<T> = LogEntityChanges()
+        fun <T: LogEntity> createEmpty(defaultEntity: T): LogEntityChanges<T> =
+            LogEntityChanges(defaultEntity)
     }
 }

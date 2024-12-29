@@ -6,6 +6,8 @@ import dev.toastbits.lifelog.core.specification.converter.LogFileConverterString
 import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguration
 import dev.toastbits.lifelog.core.specification.database.LogFileSplitStrategy
 import dev.toastbits.lifelog.core.specification.extension.ExtensionRegistry
+import dev.toastbits.lifelog.core.specification.impl.model.entity.event.LogCommentEventImpl
+import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 
 @Suppress("PropertyName")
 interface DatabasePreferencesGroup: ComposeKitSettingsGroup {
@@ -18,6 +20,7 @@ interface DatabasePreferencesGroup: ComposeKitSettingsGroup {
 suspend fun DatabasePreferencesGroup.getLogDatabaseConfiguration(): LogDatabaseConfiguration {
     val splitStrategy: LogFileSplitStrategy = SPLIT_STRATEGY.get()
     return LogDatabaseConfigurationImpl(
+        defaultEvent = LogCommentEventImpl(null),
         extensionRegistry = extensionRegistry,
         splitStrategy = splitStrategy,
         strings = logFileConverterStrings
@@ -25,6 +28,7 @@ suspend fun DatabasePreferencesGroup.getLogDatabaseConfiguration(): LogDatabaseC
 }
 
 private data class LogDatabaseConfigurationImpl(
+    override val defaultEvent: LogEvent,
     override val extensionRegistry: ExtensionRegistry,
     override val splitStrategy: LogFileSplitStrategy,
     override val strings: LogFileConverterStrings

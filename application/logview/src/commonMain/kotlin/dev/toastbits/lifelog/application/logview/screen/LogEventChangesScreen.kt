@@ -36,7 +36,7 @@ import dev.toastbits.lifelog.application.logview.generated.resources.log_view_sc
 import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_title_review_changes
 import dev.toastbits.lifelog.application.logview.model.LogEntityChanges
 import dev.toastbits.lifelog.application.logview.model.LogEventReference
-import dev.toastbits.lifelog.application.logview.model.get
+import dev.toastbits.lifelog.application.logview.model.getOrNull
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import org.jetbrains.compose.resources.stringResource
@@ -44,7 +44,7 @@ import org.jetbrains.compose.resources.stringResource
 class LogEventChangesScreen(
     val eventReference: LogEventReference,
     private val eventChanges: LogEntityChanges<LogEvent>,
-    private val logDatabase: LogDatabase,
+    private val savedLogDatabase: LogDatabase,
     private val onDiscardChanges: (() -> Unit)?
 ): Screen {
     @Composable
@@ -52,7 +52,7 @@ class LogEventChangesScreen(
         val theme: ThemeValues = LocalComposeKitTheme.current
         val density: Density = LocalDensity.current
         val navigator: Navigator = LocalNavigator.current
-        val event: LogEvent = logDatabase[eventReference]
+        val event: LogEvent? = savedLogDatabase.getOrNull(eventReference)
 
         Column(
             modifier.padding(contentPadding.copy(bottom = 0.dp)),
@@ -69,11 +69,12 @@ class LogEventChangesScreen(
                 var discardButtonHeight: Dp by remember { mutableStateOf(0.dp) }
 
                 LogEventChangesDiff(
-                    event,
-                    eventReference,
-                    eventChanges,
-                    logDatabase,
-                    Modifier.fillMaxSize(),
+                    event = event,
+                    defaultEvent = savedLogDatabase.configuration.defaultEvent,
+                    eventReference = eventReference,
+                    changes = eventChanges,
+                    logDatabase = savedLogDatabase,
+                    modifier = Modifier.fillMaxSize(),
                     contentPadding =
                         PaddingValues(
                             bottom =

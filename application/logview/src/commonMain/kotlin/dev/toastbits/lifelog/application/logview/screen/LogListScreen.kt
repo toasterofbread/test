@@ -19,6 +19,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +38,7 @@ import dev.toastbits.composekit.navigation.screen.Screen
 import dev.toastbits.composekit.theme.core.ThemeValues
 import dev.toastbits.composekit.theme.core.onAccent
 import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
+import dev.toastbits.composekit.util.platform.launchSingle
 import dev.toastbits.lifelog.application.core.FullContentScreen
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseSaver
 import dev.toastbits.lifelog.application.logview.component.timeline.DefaultLogTimelineColumn
@@ -46,18 +48,23 @@ import dev.toastbits.lifelog.application.logview.generated.resources.`log_view_s
 import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_review_changes
 import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_save
 import dev.toastbits.lifelog.application.logview.manager.LogDatabaseChangesManager
+import dev.toastbits.lifelog.application.logview.manager.LogDatabaseQueuedChanges
 import dev.toastbits.lifelog.application.logview.model.LogEntityChanges
 import dev.toastbits.lifelog.application.logview.model.LogEventReference
 import dev.toastbits.lifelog.application.logview.model.get
 import dev.toastbits.lifelog.application.logview.model.getOrNull
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
+import dev.toastbits.lifelog.core.specification.model.entity.date.LogDate
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Duration
 
 class LogListScreen(
     initialLogDatabase: LogDatabase,
@@ -77,32 +84,48 @@ class LogListScreen(
     override val alwaysShowEndPane: Boolean = true
 
     private var timelineState: LogTimelineState? = null
-    private var logDatabase: LogDatabase by mutableStateOf(initialLogDatabase)
     private var showSearchBar: Boolean by mutableStateOf(false)
+    private var scrollToItem: LogEventReference? by mutableStateOf(null)
+
+    private var currentLogDatabase: LogDatabase by mutableStateOf(initialLogDatabase)
+    private var savedLogDatabase: LogDatabase = currentLogDatabase
 
     private val viewingEventScreen: EventScreen?
         get() = currentScreen as EventScreen?
 
-    private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob())
+    private val eventChangesCoroutineScope: CoroutineScope = CoroutineScope(SupervisorJob())
+    private val updateCoroutineScope: CoroutineScope = CoroutineScope(SupervisorJob())
     private val eventChanges: LogDatabaseChangesManager =
         object : LogDatabaseChangesManager(
-            coroutineScope,
+            currentLogDatabase.configuration.defaultEvent,
+            eventChangesCoroutineScope,
             mutableStateMapOf()
         ) {
-            override fun getLogEvent(eventReference: LogEventReference): LogEvent =
-                logDatabase[eventReference]
+            override fun getOriginalLogEvent(eventReference: LogEventReference): LogEvent? =
+                savedLogDatabase.getOrNull(eventReference)
+
+            override fun onChangeRemoved() {
+                updateDatabase()
+            }
         }
 
     override fun onClosed(movingBackward: Boolean) {
         if (movingBackward) {
-            coroutineScope.launch {
+            eventChangesCoroutineScope.launch {
                 eventChanges.applyAllQueuedChanges()
             }
         }
     }
 
+    override fun CoroutineScope.beforeOpen(): Job = launch {
+        currentLogDatabase = eventChanges.applyToDatabase(savedLogDatabase)
+        viewingEventScreen?.eventReference?.also { eventReference ->
+            openEvent(eventReference, inPlace = true)
+        }
+    }
+
     override fun release() {
-        coroutineScope.cancel()
+        eventChangesCoroutineScope.cancel()
     }
 
     @Composable
@@ -118,33 +141,17 @@ class LogListScreen(
         DefaultLogTimelineColumn(
             contentPadding = contentPadding,
             timelineState = currentTimelineState,
-            logDatabase = logDatabase,
+            logDatabase = currentLogDatabase,
+            onAddEvent = {
+                addNewLogEvent()
+            },
             isEventSelected = {
                 viewingEventScreen?.eventReference == it
             },
             showSearchBar = showSearchBar,
             setShowSearchBar = { showSearchBar = it },
             modifier = modifier,
-            onEventSelected = { eventReference ->
-                internalNavigator.replaceScreenUpTo(
-                    EventScreen(
-                        eventReference,
-                        LogEventScreen(
-                            event = logDatabase[eventReference],
-                            date = eventReference.date,
-                            logDatabase = logDatabase,
-                            initialChanges =
-                                eventChanges[eventReference]
-                                    ?: LogEntityChanges.createEmpty(),
-                            onChangesChanged = {
-                                eventChanges.queueNewChanges(eventReference, it)
-                            }
-                        )
-                    )
-                ) {
-                    it is EventScreen
-                }
-            },
+            onEventSelected = ::openEvent,
             extraFloatingContent = {
                 androidx.compose.animation.AnimatedVisibility(
                     eventChanges.isNotEmpty(),
@@ -157,8 +164,52 @@ class LogListScreen(
                             .padding(contentPadding.horizontal)
                     )
                 }
-            }
+            },
+            scrollToItem = remember { derivedStateOf { scrollToItem } }
         )
+    }
+
+    private fun openEvent(eventReference: LogEventReference, inPlace: Boolean = false) {
+        internalNavigator.replaceScreenUpTo(
+            EventScreen(
+                eventReference,
+                LogEventScreen(
+                    event = currentLogDatabase[eventReference],
+                    defaultEvent = currentLogDatabase.configuration.defaultEvent,
+                    date = eventReference.date,
+                    logDatabase = currentLogDatabase,
+                    initialChanges =
+                        eventChanges[eventReference]
+                            ?: LogEntityChanges.createEmpty(currentLogDatabase.configuration.defaultEvent),
+                    onChangesChanged = {
+                        eventChanges.queueNewChanges(eventReference, it)
+                    }
+                )
+            ),
+            inPlace = inPlace
+        ) {
+            it is EventScreen
+        }
+    }
+
+    private suspend fun addNewLogEvent(date: LogDate = currentLogDatabase.days.keys.maxBy { it.date }) {
+        val existingEvents: Int = currentLogDatabase.days[date]?.size ?: 0
+        val eventReference: LogEventReference = LogEventReference(date, existingEvents)
+
+        eventChanges.applyNewChanges(
+            eventReference,
+            LogEntityChanges.createEmpty(currentLogDatabase.configuration.defaultEvent)
+        )
+
+        currentLogDatabase = eventChanges.applyToDatabase(savedLogDatabase)
+        openEvent(eventReference)
+        scrollToItem = eventReference
+    }
+
+    private fun updateDatabase() {
+        updateCoroutineScope.launchSingle() {
+            currentLogDatabase = eventChanges.applyToDatabase(savedLogDatabase)
+        }
     }
 
     @Composable
@@ -184,8 +235,6 @@ class LogListScreen(
                 horizontalArrangement = Arrangement.End,
                 itemVerticalAlignment = Alignment.CenterVertically
             ) {
-                println(eventChanges.toMap())
-
                 Text(
                     pluralStringResource(Res.plurals.`log_view_screen_$x_changes_made_popup`, changeCount)
                         .replace("\$x", changeCount.toString()),
@@ -217,16 +266,22 @@ class LogListScreen(
     }
 
     private suspend fun openChangesScreen(navigator: Navigator) {
-        eventChanges.applyAllQueuedChanges()
+        currentLogDatabase = eventChanges.applyToDatabase(currentLogDatabase)
 
         val changesScreen: Screen =
             LogListChangesScreen(
-                logDatabase,
-                eventChanges,
+                savedLogDatabase = savedLogDatabase,
+                currentLogDatabase = currentLogDatabase,
+                eventChanges = eventChanges,
                 discardChanges = { eventReference ->
                     eventChanges.remove(eventReference)
                     if (viewingEventScreen?.eventReference == eventReference) {
-                        viewingEventScreen?.screen?.updateChanges(null)
+                        if (savedLogDatabase.getOrNull(eventReference) == null) {
+                            internalNavigator.removeScreens(1)
+                        }
+                        else {
+                            viewingEventScreen?.screen?.updateChanges(null)
+                        }
                     }
                 }
             )
@@ -237,7 +292,7 @@ class LogListScreen(
     private suspend fun openSaveScreen(navigator: Navigator) {
         val saveScreen: Screen =
             logSaveScreenProvider(
-                database = eventChanges.applyToDatabase(logDatabase) ?: return,
+                database = eventChanges.applyToDatabase(currentLogDatabase),
                 autoProceed = false,
                 onProceeded = {
                     navigator.navigateBackward()
@@ -253,11 +308,12 @@ class LogListScreen(
     }
 
     private fun onDatabaseSaved(newDatabase: LogDatabase) {
-        logDatabase = newDatabase
+        currentLogDatabase = newDatabase
+        savedLogDatabase = newDatabase
         eventChanges.clear()
 
         viewingEventScreen?.also {
-            val newEvent: LogEvent? = logDatabase.getOrNull(it.eventReference)
+            val newEvent: LogEvent? = currentLogDatabase.getOrNull(it.eventReference)
             if (newEvent == null) {
                 resetNavigator()
             }

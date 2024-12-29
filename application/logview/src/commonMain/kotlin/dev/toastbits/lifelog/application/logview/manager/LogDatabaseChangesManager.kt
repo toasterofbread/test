@@ -19,8 +19,11 @@ import kotlinx.coroutines.withContext
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
+import kotlin.coroutines.AbstractCoroutineContextElement
+import kotlin.coroutines.CoroutineContext
 
 internal abstract class LogDatabaseChangesManager(
+    private val defaultEvent: LogEvent,
     private val coroutineScope: CoroutineScope,
     private val eventChanges: MutableMap<LogEventReference, LogEntityChanges<LogEvent>> = mutableMapOf()
 ): Map<LogEventReference, LogEntityChanges<LogEvent>> by eventChanges {
@@ -29,11 +32,43 @@ internal abstract class LogDatabaseChangesManager(
     private val queueLock: Mutex = Mutex()
     private object ApplyImmediatelyException: CancellationException(null)
 
-    protected abstract fun getLogEvent(eventReference: LogEventReference): LogEvent
+    protected abstract fun getOriginalLogEvent(eventReference: LogEventReference): LogEvent?
+    protected abstract fun onChangeRemoved()
 
     fun remove(key: LogEventReference) = launchWithLock {
-        eventChanges.remove(key)
         queuedChangeJobs[key]?.cancel()
+        eventChanges.remove(key)
+
+        if (getOriginalLogEvent(key) == null) {
+            eventChanges.shiftDateEventsDown(key)
+            queuedChangeJobs.shiftDateEventsDown(key) { job, newReference ->
+                (job as CoroutineScope).coroutineContext[EventReferenceElement.Key]!!.reference = newReference
+            }
+        }
+
+        onChangeRemoved()
+    }
+
+    private inline fun <V> MutableMap<LogEventReference, V>.shiftDateEventsDown(
+        from: LogEventReference,
+        migrateValue: (V, LogEventReference) -> Unit = { _, _ -> }
+    ) {
+        val iterator: MutableIterator<MutableMap.MutableEntry<LogEventReference, V>> = iterator()
+        val removed: MutableMap<LogEventReference, V> = mutableMapOf()
+
+        while (iterator.hasNext()) {
+            val (ref, value) = iterator.next()
+            if (ref.date == from.date && ref.logIndex > from.logIndex) {
+                iterator.remove()
+                removed[ref] = value
+            }
+        }
+
+        for ((ref, value) in removed) {
+            val newRef: LogEventReference = ref.copy(logIndex = ref.logIndex - 1)
+            migrateValue(value, newRef)
+            set(newRef, value)
+        }
     }
 
     fun clear() = launchWithLock {
@@ -41,32 +76,49 @@ internal abstract class LogDatabaseChangesManager(
             job.cancel()
         }
         eventChanges.clear()
+        onChangeRemoved()
     }
 
     suspend fun applyAllQueuedChanges() {
-        for (job in queuedChangeJobs.values) {
+        val jobs: Collection<Job> =
+            lock.withLock {
+                queuedChangeJobs.values
+            }
+        for (job in jobs) {
             job.cancel(ApplyImmediatelyException)
         }
-        queuedChangeJobs.values.joinAll()
+        jobs.joinAll()
     }
 
-    suspend fun applyToDatabase(logDatabase: LogDatabase): LogDatabase? = queueLock.withLock {
+    suspend fun applyToDatabase(logDatabase: LogDatabase): LogDatabase {
         applyAllQueuedChanges()
-
-        if (isEmpty()) {
-            return null
-        }
-
-        return logDatabase.copy(
-            days = logDatabase.days.toMutableMap().also { days ->
-                for ((ref, changes) in eventChanges) {
-                    val events: List<LogEvent> = days[ref.date]!!
-                    days[ref.date] = events.toMutableList().apply {
-                        set(ref.logIndex, changes.applyTo(get(ref.logIndex)))
+        queueLock.withLock {
+            return logDatabase.copy(
+                days = logDatabase.days.toMutableMap().also { days ->
+                    for ((ref, changes) in eventChanges.entries.sortedBy { it.key }) {
+                        val events: List<LogEvent> = days[ref.date].orEmpty()
+                        days[ref.date] = events.toMutableList().apply {
+                            val newEvent: LogEvent = changes.applyTo(getOrNull(ref.logIndex))
+                            if (ref.logIndex < size) {
+                                set(ref.logIndex, newEvent)
+                            }
+                            else {
+                                add(newEvent)
+                            }
+                        }
                     }
                 }
-            }
-        )
+            )
+        }
+    }
+
+    suspend fun applyNewChanges(
+        eventReference: LogEventReference,
+        changes: LogEntityChanges<LogEvent>
+    ) {
+        lock.withLock {
+            applyChanges(changes, eventReference)
+        }
     }
 
     fun queueNewChanges(
@@ -77,7 +129,7 @@ internal abstract class LogDatabaseChangesManager(
             "Trying to queue a log change with a dead CoroutineScope"
         }
 
-        coroutineScope.launch {
+        coroutineScope.launch(EventReferenceElement(eventReference)) {
             queueLock.withLock {
                 val currentChanges: LogEntityChanges<LogEvent>? =
                     lock.withLock {
@@ -95,26 +147,32 @@ internal abstract class LogDatabaseChangesManager(
 
                 val newChanges: LogEntityChanges<LogEvent> =
                     try {
-                        queuedChanges.loadChanges(currentChanges ?: LogEntityChanges.createEmpty())
+                        queuedChanges.loadChanges(currentChanges ?: LogEntityChanges.createEmpty(defaultEvent))
                     }
                     catch (_: ApplyImmediatelyException) {
                         withContext(NonCancellable) {
-                            queuedChanges.loadChanges(currentChanges ?: LogEntityChanges.createEmpty())
+                            queuedChanges.loadChanges(currentChanges ?: LogEntityChanges.createEmpty(defaultEvent))
                         }
                     }
 
                 lock.withLock {
-                    applyChanges(newChanges, eventReference)
+                    applyChanges(newChanges, coroutineContext[EventReferenceElement.Key]!!.reference)
                 }
             }
         }
+    }
+
+    private data class EventReferenceElement(
+        var reference: LogEventReference
+    ): AbstractCoroutineContextElement(Key) {
+        companion object Key: CoroutineContext.Key<EventReferenceElement>
     }
 
     private fun applyChanges(
         changes: LogEntityChanges<LogEvent>,
         eventReference: LogEventReference,
     ) {
-        if (changes.hasChanges(getLogEvent(eventReference))) {
+        if (changes.hasChanges(getOriginalLogEvent(eventReference))) {
             eventChanges[eventReference] = changes
         }
         else {

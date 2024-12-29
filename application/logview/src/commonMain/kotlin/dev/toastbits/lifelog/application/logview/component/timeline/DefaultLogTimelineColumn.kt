@@ -12,10 +12,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
@@ -26,10 +29,12 @@ import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.components.platform.composable.BackHandler
 import dev.toastbits.composekit.components.utils.modifier.horizontal
 import dev.toastbits.composekit.util.composable.copy
+import dev.toastbits.lifelog.application.logview.component.timeline.model.LogTimelineScrollTarget
 import dev.toastbits.lifelog.application.logview.component.timeline.model.LogTimelineState
 import dev.toastbits.lifelog.application.logview.model.LogEventReference
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 internal fun DefaultLogTimelineColumn(
@@ -38,21 +43,34 @@ internal fun DefaultLogTimelineColumn(
     logDatabase: LogDatabase,
     isEventSelected: (LogEventReference) -> Boolean,
     showSearchBar: Boolean,
+    onAddEvent: (suspend () -> Unit)?,
     setShowSearchBar: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     onEventSelected: ((LogEventReference) -> Unit)? = null,
     extraFloatingContent: @Composable () -> Unit = {},
     filterEvents: ((LogEvent, LogEventReference) -> Boolean)? = null,
-    filterKey: Any? = Unit
+    filterKey: Any? = Unit,
+    scrollToItem: State<LogEventReference?>? = null
 ) {
     val density: Density = LocalDensity.current
 
     var currentDateIndex: Int? by remember { mutableStateOf(null) }
-    var scrollTargetDateIndex: Int? by remember { mutableStateOf(null) }
+    var scrollTarget: LogTimelineScrollTarget? by remember { mutableStateOf(null) }
     var shouldFocusSearchBar: Boolean by remember { mutableStateOf(false) }
 
     BackHandler(showSearchBar) {
         setShowSearchBar(false)
+    }
+
+    LaunchedEffect(scrollToItem) {
+        snapshotFlow { scrollToItem?.value }
+            .collectLatest { item ->
+                if (item == null) {
+                    return@collectLatest
+                }
+
+                scrollTarget = LogTimelineScrollTarget.LogEvent(item)
+            }
     }
 
     Column(
@@ -72,10 +90,10 @@ internal fun DefaultLogTimelineColumn(
                 isEventSelected = isEventSelected,
                 modifier = Modifier.matchParentSize(),
                 contentPadding = contentPadding.copy(bottom = bottomContentHeight),
-                scrollTargetDateIndex = scrollTargetDateIndex,
+                scrollTarget = scrollTarget,
                 onCurrentDateIndexChanged = {
                     currentDateIndex = it
-                    scrollTargetDateIndex = null
+                    scrollTarget = null
                 },
                 onEventSelected = onEventSelected,
                 filterEvents = filterEvents,
@@ -115,16 +133,17 @@ internal fun DefaultLogTimelineColumn(
         }
 
         LogTimelineNavigationBar(
+            onAddEvent = onAddEvent,
             canScrollUp = timelineState.columnState.canScrollBackward,
             canScrollDown = timelineState.columnState.canScrollForward,
             searching = showSearchBar,
             scrollDateBy = { by ->
                 val current: Int = currentDateIndex ?: return@LogTimelineNavigationBar
                 if (by == Int.MAX_VALUE || by == Int.MIN_VALUE) {
-                    scrollTargetDateIndex = by
+                    scrollTarget = LogTimelineScrollTarget.DateIndex(by)
                 }
                 else {
-                    scrollTargetDateIndex = current + by
+                    scrollTarget = LogTimelineScrollTarget.DateIndex(current + by)
                 }
             },
             showSearchBar = {

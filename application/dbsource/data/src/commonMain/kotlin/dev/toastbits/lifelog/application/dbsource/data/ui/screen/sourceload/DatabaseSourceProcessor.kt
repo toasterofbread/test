@@ -166,7 +166,7 @@ internal fun <R> DatabaseSourceProcessor(
                 }
 
                 LoadActionButton(
-                    retry,
+                    { retry() },
                     modifier = Modifier.padding(buttonPadding)
                 ) {
                     Text(stringResource(Res.string.database_processor_button_retry))

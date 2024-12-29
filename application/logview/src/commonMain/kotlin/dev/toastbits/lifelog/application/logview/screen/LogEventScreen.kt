@@ -71,6 +71,7 @@ private val CHANGES_UPDATE_DELAY: Duration = 500.milliseconds
 
 class LogEventScreen<T: LogEvent>(
     event: T,
+    private val defaultEvent: T,
     private val date: LogDate,
     private val logDatabase: LogDatabase,
     initialChanges: LogEntityChanges<T>,
@@ -113,7 +114,7 @@ class LogEventScreen<T: LogEvent>(
 
     fun updateChanges(changes: LogEntityChanges<T>?) {
         val previousContent: UserContent = getCurrentContent()
-        this.changes = changes ?: LogEntityChanges.createEmpty()
+        this.changes = changes ?: LogEntityChanges.createEmpty(defaultEvent)
 
         val currentContent: UserContent = getCurrentContent()
         if (previousContent == currentContent) {

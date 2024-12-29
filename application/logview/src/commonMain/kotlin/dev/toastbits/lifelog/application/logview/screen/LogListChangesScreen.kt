@@ -33,7 +33,8 @@ import kotlinx.coroutines.Job
 import org.jetbrains.compose.resources.stringResource
 
 class LogListChangesScreen(
-    private val logDatabase: LogDatabase,
+    private val savedLogDatabase: LogDatabase,
+    private val currentLogDatabase: LogDatabase,
     private val eventChanges: Map<LogEventReference, LogEntityChanges<LogEvent>>,
     private val discardChanges: (LogEventReference) -> Unit
 ): ResponsiveTwoPaneNavigatorScreen(), FullContentScreen {
@@ -61,9 +62,9 @@ class LogListChangesScreen(
         eventChanges.entries.firstOrNull()?.also { (eventReference, eventChanges) ->
             internalNavigator.replaceScreenUpTo(
                 LogEventChangesScreen(
-                    eventReference,
-                    eventChanges,
-                    logDatabase,
+                    eventReference = eventReference,
+                    eventChanges = eventChanges,
+                    savedLogDatabase = savedLogDatabase,
                     onDiscardChanges = ::discardEventChanges
                 )
             ) {
@@ -103,7 +104,8 @@ class LogListChangesScreen(
                         bottom = contentPadding.bottom
                     ),
                 timelineState = currentTimelineState,
-                logDatabase = logDatabase,
+                logDatabase = currentLogDatabase,
+                onAddEvent = null,
                 isEventSelected = {
                     viewingEventScreen?.eventReference == it
                 },
@@ -112,9 +114,9 @@ class LogListChangesScreen(
                 onEventSelected = { eventReference ->
                     internalNavigator.replaceScreenUpTo(
                         LogEventChangesScreen(
-                            eventReference,
-                            eventChanges[eventReference]!!,
-                            logDatabase,
+                            eventReference = eventReference,
+                            eventChanges = eventChanges[eventReference]!!,
+                            savedLogDatabase = savedLogDatabase,
                             onDiscardChanges = ::discardEventChanges
                         )
                     ) {
