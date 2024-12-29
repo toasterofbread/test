@@ -5,7 +5,9 @@ import dev.toastbits.lifelog.application.worker.command.WorkerCommandProgress
 import dev.toastbits.lifelog.application.worker.command.WorkerCommandResponse
 import dev.toastbits.lifelog.application.worker.mapper.WorkerExecutionContext
 import dev.toastbits.lifelog.application.worker.model.TypedWorkerCommandResult
+import dev.toastbits.lifelog.application.worker.model.WorkerCommandResult
 import dev.toastbits.lifelog.application.worker.model.cast
+import dev.toastbits.lifelog.application.worker.model.toResult
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
 
@@ -23,11 +25,17 @@ actual class WorkerClient(
             return@withContext Result.failure(ConcurrentModificationException("WorkerClient does not support simultaneous commands ($command)"))
         }
 
-        val result: TypedWorkerCommandResult<R> =
-            command.execute(context, onProgress).cast()
+        val result: WorkerCommandResult =
+            try {
+                command.execute(context, onProgress)
+            }
+            catch (e: Throwable) {
+                e.toResult()
+            }
+            finally {
+                mutex.unlock()
+            }
 
-        mutex.unlock()
-
-        return@withContext Result.success(result)
+        return@withContext Result.success(result.cast())
     }
 }
