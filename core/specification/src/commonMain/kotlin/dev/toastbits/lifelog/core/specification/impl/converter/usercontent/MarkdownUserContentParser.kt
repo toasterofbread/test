@@ -187,6 +187,13 @@ object MarkdownUserContentParser: UserContentParser {
                             linkOpeningBracket = true
                             return emptyList()
                         }
+                        else {
+                            return (
+                                listOf(UserContent.Part.Single("["))
+                                    + linkLabel!!
+                                    + listOf(UserContent.Part.Single("]"))
+                            ).also { linkLabel = null }
+                        }
                     }
 
                     if (node.type.name.length == 1) {
