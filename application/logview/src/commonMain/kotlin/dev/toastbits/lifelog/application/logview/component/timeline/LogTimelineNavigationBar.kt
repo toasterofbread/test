@@ -6,8 +6,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,10 +27,13 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.components.utils.composable.LoadActionIconButton
+import dev.toastbits.composekit.components.utils.modifier.background
+import dev.toastbits.composekit.components.utils.modifier.border
 import dev.toastbits.composekit.theme.core.ThemeValues
 import dev.toastbits.composekit.theme.core.onAccent
 import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
@@ -106,11 +110,20 @@ private fun StyledButton(
     onAltClick: (suspend () -> Unit)? = null,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    filled: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val theme: ThemeValues = LocalComposeKitTheme.current
-    val accent: Color by animateColorAsState(if (enabled) theme.accent else theme.accent.copy(alpha = 0.5f))
+    val interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
+    val hovered: Boolean by interactionSource.collectIsHoveredAsState()
+
+    val backgroundColour: Color by animateColorAsState(if (hovered) theme.accent else theme.background)
+    val contentColour: Color by animateColorAsState(
+        (if (hovered) theme.onAccent else theme.onBackground)
+            .copy(alpha = if (enabled) 1f else 0.5f)
+    )
+    val borderColour: Color by animateColorAsState(
+        theme.accent.copy(alpha = if (enabled) 1f else 0.5f)
+    )
 
     LoadActionIconButton(
         performLoad = {
@@ -124,18 +137,14 @@ private fun StyledButton(
         hasAltLoadAction = onAltClick != null,
         modifier =
             modifier
-                .run {
-                    if (filled) background(accent, CircleShape)
-                    else border(2.dp, accent, CircleShape)
-                }
+                .hoverable(interactionSource)
+                .background(CircleShape) { backgroundColour }
+                .border(2.dp, CircleShape) { borderColour }
                 .size(IconButtonDefaults.smallContainerSize()),
         enabled = enabled
     ) {
         CompositionLocalProvider(
-            LocalContentColor provides (
-                    if (filled) theme.onAccent
-                    else LocalContentColor.current
-                    ).copy(alpha = accent.alpha)
+            LocalContentColor provides contentColour
         ) {
             content()
         }

@@ -1,9 +1,9 @@
 package dev.toastbits.lifelog.application.logview.component.timeline
 
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,8 +27,10 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.components.platform.composable.BackHandler
+import dev.toastbits.composekit.components.platform.composable.areScrollBarsVisible
 import dev.toastbits.composekit.components.utils.modifier.horizontal
 import dev.toastbits.composekit.util.composable.copy
+import dev.toastbits.composekit.util.composable.thenIf
 import dev.toastbits.lifelog.application.logview.component.timeline.model.LogTimelineScrollTarget
 import dev.toastbits.lifelog.application.logview.component.timeline.model.LogTimelineState
 import dev.toastbits.lifelog.application.logview.model.LogEventReference
@@ -82,7 +84,10 @@ internal fun DefaultLogTimelineColumn(
                 .fillMaxSize()
                 .weight(1f)
         ) {
+            var navigationBarHeight: Dp by remember { mutableStateOf(0.dp) }
             var bottomContentHeight: Dp by remember { mutableStateOf(0.dp) }
+            val scrollBarSpacing: Dp = 10.dp
+            val scrollBarThickness: Dp = 8.dp
 
             LogTimeline(
                 state = timelineState,
@@ -90,6 +95,7 @@ internal fun DefaultLogTimelineColumn(
                 isEventSelected = isEventSelected,
                 modifier = Modifier.matchParentSize(),
                 contentPadding = contentPadding.copy(bottom = bottomContentHeight),
+                scrollBarContentPadding = contentPadding.copy(bottom = navigationBarHeight),
                 scrollTarget = scrollTarget,
                 onCurrentDateIndexChanged = {
                     currentDateIndex = it
@@ -97,7 +103,9 @@ internal fun DefaultLogTimelineColumn(
                 },
                 onEventSelected = onEventSelected,
                 filterEvents = filterEvents,
-                filterKey = filterKey
+                filterKey = filterKey,
+                scrollBarSpacing = scrollBarSpacing,
+                scrollBarThickness = scrollBarThickness
             )
 
             Column(
@@ -109,48 +117,65 @@ internal fun DefaultLogTimelineColumn(
                         }
                     }
             ) {
-                extraFloatingContent()
+                val spacing: Dp = 12.dp
 
-                androidx.compose.animation.AnimatedVisibility(
-                    showSearchBar,
-                    enter = slideInVertically { it / 2 } + fadeIn(),
-                    exit = slideOutVertically { it / 2 } + fadeOut()
+                Column(
+                    Modifier
+                        .padding(contentPadding.horizontal)
+                        .thenIf(areScrollBarsVisible()) {
+                            padding(horizontal = scrollBarSpacing + scrollBarThickness)
+                        }
                 ) {
-                    LogTimelineSearchField(
-                        timelineState,
-                        shouldFocusSearchBar,
-                        onClose = {
-                            setShowSearchBar(false)
-                            timelineState.filterText = null
-                        },
-                        modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(contentPadding.horizontal)
-                    )
+                    extraFloatingContent()
+
+                    androidx.compose.animation.AnimatedVisibility(
+                        showSearchBar,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut()
+                    ) {
+                        LogTimelineSearchField(
+                            timelineState,
+                            shouldFocusSearchBar,
+                            onClose = {
+                                setShowSearchBar(false)
+                                timelineState.filterText = null
+                            },
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = spacing)
+                        )
+                    }
                 }
+
+                LogTimelineNavigationBar(
+                    onAddEvent = onAddEvent,
+                    canScrollUp = timelineState.columnState.canScrollBackward,
+                    canScrollDown = timelineState.columnState.canScrollForward,
+                    searching = showSearchBar,
+                    scrollDateBy = { by ->
+                        val current: Int = currentDateIndex ?: return@LogTimelineNavigationBar
+                        if (by == Int.MAX_VALUE || by == Int.MIN_VALUE) {
+                            scrollTarget = LogTimelineScrollTarget.DateIndex(by)
+                        }
+                        else {
+                            scrollTarget = LogTimelineScrollTarget.DateIndex(current + by)
+                        }
+                    },
+                    showSearchBar = {
+                        setShowSearchBar(true)
+                        shouldFocusSearchBar = true
+                    },
+                    modifier =
+                        Modifier
+                            .onSizeChanged {
+                                with (density) {
+                                    navigationBarHeight = it.height.toDp()
+                                }
+                            }
+                            .padding(contentPadding.copy(top = spacing))
+                )
             }
         }
-
-        LogTimelineNavigationBar(
-            onAddEvent = onAddEvent,
-            canScrollUp = timelineState.columnState.canScrollBackward,
-            canScrollDown = timelineState.columnState.canScrollForward,
-            searching = showSearchBar,
-            scrollDateBy = { by ->
-                val current: Int = currentDateIndex ?: return@LogTimelineNavigationBar
-                if (by == Int.MAX_VALUE || by == Int.MIN_VALUE) {
-                    scrollTarget = LogTimelineScrollTarget.DateIndex(by)
-                }
-                else {
-                    scrollTarget = LogTimelineScrollTarget.DateIndex(current + by)
-                }
-            },
-            showSearchBar = {
-                setShowSearchBar(true)
-                shouldFocusSearchBar = true
-            },
-            modifier = Modifier.padding(contentPadding.copy(top = 0.dp))
-        )
     }
 }

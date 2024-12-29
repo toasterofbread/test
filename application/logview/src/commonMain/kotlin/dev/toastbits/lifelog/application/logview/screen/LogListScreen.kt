@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.components.utils.composable.LoadActionIconButton
 import dev.toastbits.composekit.components.utils.composable.pane.model.InitialPaneRatioSource
 import dev.toastbits.composekit.components.utils.modifier.horizontal
+import dev.toastbits.composekit.components.utils.modifier.vertical
 import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
 import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.ResponsiveTwoPaneNavigatorScreen
@@ -38,6 +39,8 @@ import dev.toastbits.composekit.navigation.screen.Screen
 import dev.toastbits.composekit.theme.core.ThemeValues
 import dev.toastbits.composekit.theme.core.onAccent
 import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
+import dev.toastbits.composekit.util.composable.end
+import dev.toastbits.composekit.util.composable.start
 import dev.toastbits.composekit.util.platform.launchSingle
 import dev.toastbits.lifelog.application.core.FullContentScreen
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseSaver
@@ -158,11 +161,7 @@ class LogListScreen(
                     enter = slideInVertically { it / 2 } + fadeIn(),
                     exit = slideOutVertically { it / 2 } + fadeOut()
                 ) {
-                    ChangesBar(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(contentPadding.horizontal)
-                    )
+                    ChangesBar(Modifier.fillMaxWidth())
                 }
             },
             scrollToItem = remember { derivedStateOf { scrollToItem } }
@@ -218,7 +217,7 @@ class LogListScreen(
         val navigator: Navigator = LocalNavigator.current
 
         Surface(
-            modifier = modifier.padding(15.dp),
+            modifier = modifier,
             shape = MaterialTheme.shapes.small,
             color = theme.accent,
             contentColor = theme.onAccent

@@ -52,8 +52,6 @@ private val WAVE_THICKNESS: Dp = 1.5.dp
 private val WAVE_WAVELENGTH: Dp = 40.dp
 private const val WAVE_SCROLL_SPEED: Float = 0.75f
 private val ITEM_SPACING: Dp = 25.dp
-private val SCROLLBAR_THICKNESS: Dp = 8.dp
-private val SCROLLBAR_SPACING: Dp = 5.dp
 
 @Composable
 internal fun LogTimeline(
@@ -62,10 +60,13 @@ internal fun LogTimeline(
     isEventSelected: (LogEventReference) -> Boolean,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
+    scrollBarContentPadding: PaddingValues = contentPadding,
     scrollTarget: LogTimelineScrollTarget? = null,
     onCurrentDateIndexChanged: ((Int) -> Unit)? = null,
     onEventSelected: ((LogEventReference) -> Unit)? = null,
     filterEvents: ((LogEvent, LogEventReference) -> Boolean)? = null,
+    scrollBarSpacing: Dp = 10.dp,
+    scrollBarThickness: Dp = 8.dp,
     filterKey: Any? = Unit
 ) {
     val theme: ThemeValues = LocalComposeKitTheme.current
@@ -133,11 +134,12 @@ internal fun LogTimeline(
             Modifier.fillMaxSize(),
             state = state.columnState,
             contentPadding = contentPadding,
+            scrollBarContentPadding = scrollBarContentPadding,
             onScrollDelta = { delta, _ ->
                 state.waveOffset -= delta * WAVE_SCROLL_SPEED
             },
-            scrollBarSpacing = SCROLLBAR_SPACING,
-            scrollBarThickness = SCROLLBAR_THICKNESS
+            scrollBarSpacing = scrollBarSpacing,
+            scrollBarThickness = scrollBarThickness
         ) {
             for ((index, item) in timelineItems.withIndex()) {
                 timelineItem(item, state, onEventSelected, isEventSelected)
@@ -149,7 +151,7 @@ internal fun LogTimeline(
                 .matchParentSize()
                 .clipToBounds()
                 .padding(contentPadding)
-                .padding(end = SCROLLBAR_THICKNESS + SCROLLBAR_SPACING)
+                .padding(end = scrollBarSpacing + scrollBarThickness)
                 .zIndex(-1f)
         ) {
             val position: Float =
