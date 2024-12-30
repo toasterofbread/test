@@ -13,10 +13,10 @@ import dev.toastbits.lifelog.application.worker.cache.LocalGitObjectCache
 import dev.toastbits.lifelog.application.worker.mapper.WorkerExecutionContext
 import dev.toastbits.lifelog.application.worker.model.WorkerCommandResult
 import dev.toastbits.lifelog.application.worker.model.toResult
-import dev.toastbits.lifelog.application.worker.model.toWorkerException
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import okio.Path.Companion.toPath
 
 @Serializable
 data class WorkerCommandInMemoryGitCommit(
@@ -26,6 +26,7 @@ data class WorkerCommandInMemoryGitCommit(
     val committer: UserInfo,
     val repositoryUrl: String,
     val branch: GitRef.Branch,
+    val directoryPath: String,
     val gitCredentials: GitCredentials?,
     val fileStructure: SerialisableFileStructure
 ): WorkerCommand {
@@ -33,11 +34,10 @@ data class WorkerCommandInMemoryGitCommit(
         context: WorkerExecutionContext,
         onProgress: (WorkerCommandProgress) -> Unit
     ): WorkerCommandResult {
-        val cache: LocalGitObjectCache? =
+        val cache: LocalGitObjectCache =
             LocalGitObjectCache.getInstance(repositoryUrl, context.platformContext)
                 .getOrElse {
-                    onProgress(WorkerCommandProgress.FailedToCreateLocalGitObjectCache(it.toWorkerException()))
-                    return@getOrElse null
+                    return it.toResult()
                 }
 
         val gitHelper: GitHelper =
@@ -67,24 +67,23 @@ data class WorkerCommandInMemoryGitCommit(
                 message,
                 author,
                 committer,
-                progressListener
+                fileStructureEmbedPath = directoryPath.toPath().normaliseRoot(),
+                progressListener = progressListener
             ).getOrElse {
                 return it.toResult()
             }
 
-        if (cache != null) {
-            val toCommit: Int = cache.countObjectsToCommit()
-            if (toCommit > 0) {
-                onProgress(
-                    Progress(
-                        GitHandlerStage.WritingObjectsToCache,
-                        null,
-                        toCommit.toLong()
-                    )
+        val toCommit: Int = cache.countObjectsToCommit()
+        if (toCommit > 0) {
+            onProgress(
+                Progress(
+                    GitHandlerStage.WritingObjectsToCache,
+                    null,
+                    toCommit.toLong()
                 )
-                withContext(context.ioDispatcher) {
-                    cache.commit()
-                }
+            )
+            withContext(context.ioDispatcher) {
+                cache.commit()
             }
         }
 

@@ -10,8 +10,8 @@ import dev.toastbits.lifelog.core.specification.converter.LogFileConverter
 import dev.toastbits.lifelog.core.specification.converter.ParseAlertData
 import dev.toastbits.lifelog.core.specification.converter.alert.SpecificationLogParseAlert
 import dev.toastbits.lifelog.core.specification.database.LogDataFile
-import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguration
+import dev.toastbits.lifelog.core.specification.database.LogDatabaseData
 import dev.toastbits.lifelog.core.specification.extension.SpecificationExtension
 import dev.toastbits.lifelog.core.specification.impl.converter.usercontent.UserContentParser
 import dev.toastbits.lifelog.core.specification.impl.model.entity.date.LogDateImpl
@@ -34,9 +34,8 @@ class DatabaseFilesParserImpl(
 ): DatabaseFilesParser {
     override suspend fun parseDatabaseFileStructure(
         structure: FileStructure,
-        gitCommitRef: String?,
         onAlert: (ParseAlertData) -> Unit
-    ): LogDatabase = withContext(ioDispatcher) {
+    ): LogDatabaseData = withContext(ioDispatcher) {
         val days: MutableMap<LogDate, List<LogEvent>> = mutableMapOf()
         val data: MutableMap<LogEntityReference, LogDataFile> = mutableMapOf()
 
@@ -62,12 +61,11 @@ class DatabaseFilesParserImpl(
             }
         }
 
-        return@withContext LogDatabase(
+        return@withContext LogDatabaseData(
             configuration,
             days = scope.days,
             data = scope.data,
-            converter = converter,
-            gitCommitHash = gitCommitRef
+            converter = converter
         )
     }
 

@@ -18,16 +18,16 @@ import korlibs.math.roundDecimalPlaces
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration
 
-internal class DatabaseSourceSaveScreen(
-    private val database: LogDatabase,
+internal class DatabaseSourceSaveScreen<T: LogDatabase>(
+    private val database: T,
     private val message: String,
     private val author: UserInfo,
     private val committer: UserInfo,
-    sourceConfiguration: DatabaseSourceConfiguration,
-    private val onProceeded: ((SaveResult) -> Unit)?,
-    private val onSaveFinished: (SaveResult) -> Unit,
+    sourceConfiguration: DatabaseSourceConfiguration<T>,
+    private val onProceeded: ((SaveResult<T>) -> Unit)?,
+    private val onSaveFinished: (SaveResult<T>) -> Unit,
     autoProceed: Boolean = false
-): DatabaseSourceProcessScreen<SaveResult>(
+): DatabaseSourceProcessScreen<SaveResult<T>, T>(
     sourceConfiguration = sourceConfiguration,
     autoProceed = autoProceed,
     textProvider = DatabaseSourceSaveScreenTextProvider,
@@ -37,7 +37,7 @@ internal class DatabaseSourceSaveScreen(
         @Composable
         get() = stringResource(Res.string.database_saver_title)
 
-    override fun getInitialStep(databaseAccessor: DatabaseAccessor): LoadStep<SaveResult> =
+    override fun getInitialStep(databaseAccessor: DatabaseAccessor<T>): LoadStep<SaveResult<T>, T> =
         LoadStepSaveOnline(
             database,
             message,
@@ -45,19 +45,19 @@ internal class DatabaseSourceSaveScreen(
             committer
         )
 
-    override fun canProceedWithResult(result: SaveResult): Boolean =
+    override fun canProceedWithResult(result: SaveResult<T>): Boolean =
         result is SaveResult.Success
 
-    override fun getResultAlerts(result: SaveResult): List<Alert> =
+    override fun getResultAlerts(result: SaveResult<T>): List<Alert> =
         result.alerts
 
     override fun hasUserProceedAction(): Boolean = onProceeded != null
 
-    override fun onUserProceeded(result: SaveResult) {
+    override fun onUserProceeded(result: SaveResult<T>) {
         onProceeded?.invoke(result)
     }
 
-    override fun onProcessFinished(result: SaveResult) {
+    override fun onProcessFinished(result: SaveResult<T>) {
         onSaveFinished(result)
     }
 }

@@ -4,19 +4,19 @@ import dev.toastbits.kogit.memory.handler.GitCommitGenerator
 import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 
-interface DatabaseSaver {
+interface DatabaseSaver<T: LogDatabase> {
     suspend fun saveOnlineDatabase(
-        database: LogDatabase,
+        database: T,
         message: String,
         author: GitCommitGenerator.UserInfo,
         committer: GitCommitGenerator.UserInfo,
         onProgress: (DatabaseAccessor.LoadProgress) -> Unit
-    ): Result<SaveResult>
+    ): Result<SaveResult<T>>
 
-    sealed interface SaveResult {
+    sealed interface SaveResult<T: LogDatabase> {
         val alerts: List<Alert>
 
-        data class Success(val newDatabase: LogDatabase, override val alerts: List<Alert>): SaveResult
-        data class Failure(override val alerts: List<Alert>): SaveResult
+        data class Success<T: LogDatabase>(val newDatabase: T, override val alerts: List<Alert>): SaveResult<T>
+        data class Failure<T: LogDatabase>(override val alerts: List<Alert>): SaveResult<T>
     }
 }

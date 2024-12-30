@@ -18,10 +18,13 @@ import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resource
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_git_name
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_option_branch_description
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_option_branch_title
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_option_directory_description
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_option_directory_title
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_option_name_description
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_option_name_title
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_option_repository_url_description
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_type_in_memory_option_repository_url_title
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.model.InMemoryGitLogDatabase
 import dev.toastbits.lifelog.application.worker.WorkerClient
 import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguration
 import io.ktor.client.HttpClient
@@ -30,7 +33,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.stringResource
 
-object InMemoryGitDatabaseSourceType: DatabaseSourceType<InMemoryGitDatabaseSourceConfiguration> {
+object InMemoryGitDatabaseSourceType: DatabaseSourceType<InMemoryGitDatabaseSourceConfiguration, InMemoryGitLogDatabase> {
     override fun isAvailableOnPlatform(): Boolean = true
 
     override fun createNewConfiguration(): InMemoryGitDatabaseSourceConfiguration =
@@ -44,7 +47,7 @@ object InMemoryGitDatabaseSourceType: DatabaseSourceType<InMemoryGitDatabaseSour
         httpClient: HttpClient,
         ioDispatcher: CoroutineDispatcher,
         workDispatcher: CoroutineDispatcher
-    ): DatabaseAccessor =
+    ): DatabaseAccessor<InMemoryGitLogDatabase> =
         InMemoryGitDatabaseAccessor(workerClient, configuration, databaseConfigurationProvider, gitCredentialsProvider, ioDispatcher)
 
     override fun serialiseConfiguration(configuration: InMemoryGitDatabaseSourceConfiguration): String =
@@ -89,6 +92,14 @@ object InMemoryGitDatabaseSourceType: DatabaseSourceType<InMemoryGitDatabaseSour
                 ),
                 getTitle = { stringResource(Res.string.source_type_in_memory_option_branch_title) },
                 getDescription = { stringResource(Res.string.source_type_in_memory_option_branch_description) }
+            ),
+            TextFieldSettingsItem.ofMutableState(
+                state = configurationState.map(
+                    from = { it.directoryPath },
+                    to = { configurationState.value.copy(directoryPath = it) }
+                ),
+                getTitle = { stringResource(Res.string.source_type_in_memory_option_directory_title) },
+                getDescription = { stringResource(Res.string.source_type_in_memory_option_directory_description) }
             )
         )
     }

@@ -47,7 +47,7 @@ internal fun DatabaseSourceLoadScreenProgressLog(
     finishDuration: Duration?,
     warnings: List<Alert>,
     errors: List<Alert>,
-    databaseAccessor: DatabaseAccessor,
+    databaseAccessor: DatabaseAccessor<*>,
     textProvider: DatabaseSourceProcessScreenTextProvider,
     finishedStepsProgress: List<DatabaseAccessor.LoadProgress>,
     currentProgress: DatabaseAccessor.LoadProgress?,
@@ -118,7 +118,7 @@ internal fun DatabaseSourceLoadScreenProgressLog(
 @Composable
 private fun AlertLine(
     alert: Alert,
-    databaseAccessor: DatabaseAccessor
+    databaseAccessor: DatabaseAccessor<*>
 ) {
     val theme: ThemeValues = LocalComposeKitTheme.current
 
@@ -181,5 +181,5 @@ private fun String.toMarkdownLink(target: String?): String =
     if (target == null) this
     else "[$this]($target)"
 
-private fun Alert.getUri(databaseAccessor: DatabaseAccessor): String? =
+private fun Alert.getUri(databaseAccessor: DatabaseAccessor<*>): String? =
     filePath?.let { databaseAccessor.getFileLineUri(it, lineIndex) }

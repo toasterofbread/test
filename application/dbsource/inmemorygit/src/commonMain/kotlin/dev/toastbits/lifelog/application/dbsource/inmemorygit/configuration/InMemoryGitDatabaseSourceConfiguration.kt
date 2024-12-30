@@ -3,23 +3,26 @@ package dev.toastbits.lifelog.application.dbsource.inmemorygit.configuration
 import androidx.compose.runtime.Composable
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
-import dev.toastbits.lifelog.application.dbsource.inmemorygit.type.InMemoryGitDatabaseSourceType
-import kotlinx.serialization.Serializable
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.Res
-import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_configuration_repository_url_not_http
-import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_configuration_repository_url_not_set
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_configuration_branch_not_set
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.`source_configuration_preview_content_$name_$repositoryUrl_$branch`
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.`source_configuration_preview_title_$name_$repositoryUrl_$branch`
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_configuration_repository_url_not_http
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.source_configuration_repository_url_not_set
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.model.InMemoryGitLogDatabase
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.type.InMemoryGitDatabaseSourceType
+import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.stringResource
 
 @Serializable
 data class InMemoryGitDatabaseSourceConfiguration(
     val name: String = "",
     val repositoryUrl: String = "",
-    val branchName: String = ""
-): DatabaseSourceConfiguration {
-    override fun getType(): DatabaseSourceType<InMemoryGitDatabaseSourceConfiguration> = InMemoryGitDatabaseSourceType
+    val branchName: String = "",
+    val directoryPath: String = "/"
+): DatabaseSourceConfiguration<InMemoryGitLogDatabase> {
+    override fun getType(): DatabaseSourceType<InMemoryGitDatabaseSourceConfiguration, InMemoryGitLogDatabase> =
+        InMemoryGitDatabaseSourceType
 
     @Composable
     override fun getPreviewTitle(): String = (

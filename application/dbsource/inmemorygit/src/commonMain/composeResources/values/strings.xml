@@ -5,6 +5,8 @@
     <string name="source_type_in_memory_option_name_description">In-app display name</string>
     <string name="source_type_in_memory_option_repository_url_title">Repository URL</string>
     <string name="source_type_in_memory_option_repository_url_description">Http Git repository URL</string>
+    <string name="source_type_in_memory_option_directory_title">Directory</string>
+    <string name="source_type_in_memory_option_directory_description">Path to the database directory within the repository</string>
     <string name="source_type_in_memory_option_branch_title">Branch name</string>
     <string name="source_type_in_memory_option_branch_description">Name of branch to pull and push from</string>
 
@@ -28,7 +30,6 @@
     <string name="accessor_progress_writing_objects_to_cache">Writing objects to cache</string>
 
     <string name="accessor_progress_potential_error">An unknown error occurred (could be unrelated)</string>
-    <string name="accessor_progress_failed_to_create_local_git_object_cache">Failed to create local git object cache</string>
     <string name="accessor_progress_waiting_for_worker">Waiting for worker</string>
     <string name="accessor_progress_worker_started">Worker started</string>
 

@@ -3,7 +3,10 @@ package dev.toastbits.lifelog.core.specification.impl.model.entity.date
 import dev.toastbits.lifelog.core.specification.model.UserContent
 import dev.toastbits.lifelog.core.specification.model.entity.LogEntity
 import dev.toastbits.lifelog.core.specification.model.entity.date.LogDate
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 data class LogDateImpl(
     override val date: LocalDate,
@@ -40,5 +43,13 @@ data class LogDateImpl(
         var result = date.hashCode()
         result = 31 * result + ambiguous.hashCode()
         return result
+    }
+
+    companion object {
+        fun now(): LogDateImpl =
+            LogDateImpl(
+                Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date,
+                false
+            )
     }
 }

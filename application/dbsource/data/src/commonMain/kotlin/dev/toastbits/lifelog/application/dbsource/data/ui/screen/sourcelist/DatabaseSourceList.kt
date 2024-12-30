@@ -20,9 +20,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.components.platform.composable.ScrollBarLazyColumn
-import dev.toastbits.lifelog.application.dbsource.data.ui.component.DatabaseSourceConfigurationPreview
-import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
-import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.Res
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_delete_database_source
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.button_delete_database_source_cancel
@@ -30,12 +27,15 @@ import dev.toastbits.lifelog.application.dbsource.data.generated.resources.butto
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.database_source_list_no_sources_added
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.dialog_delete_database_source_title
 import dev.toastbits.lifelog.application.dbsource.data.generated.resources.edit_delete_database_source
+import dev.toastbits.lifelog.application.dbsource.data.ui.component.DatabaseSourceConfigurationPreview
+import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
+import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun DatabaseSourceList(
-    configurations: List<DatabaseSourceConfiguration>,
-    types: List<DatabaseSourceType<*>>,
+    configurations: List<DatabaseSourceConfiguration<*>>,
+    types: List<DatabaseSourceType<*, *>>,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     autoOpenConfigurationIndex: Int? = null,
@@ -108,7 +108,7 @@ internal fun DatabaseSourceList(
 
 @Composable
 private fun SourceRemovalConfirmationDialog(
-    sourceConfiguration: DatabaseSourceConfiguration,
+    sourceConfiguration: DatabaseSourceConfiguration<*>,
     onConfirmed: () -> Unit,
     onCancelled: () -> Unit
 ) {

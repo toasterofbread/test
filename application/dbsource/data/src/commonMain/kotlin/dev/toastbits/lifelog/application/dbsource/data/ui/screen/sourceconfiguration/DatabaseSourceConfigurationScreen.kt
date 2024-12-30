@@ -42,7 +42,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
-internal class DatabaseSourceConfigurationScreen<T: DatabaseSourceConfiguration>(
+internal class DatabaseSourceConfigurationScreen<T: DatabaseSourceConfiguration<*>>(
     private val initialConfiguration: T,
     private val index: Int,
     private val onSaved: suspend (configuration: T, autoOpen: Boolean) -> Unit,
@@ -66,10 +66,10 @@ internal class DatabaseSourceConfigurationScreen<T: DatabaseSourceConfiguration>
             modifier.padding(contentPadding),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            val configurationType: DatabaseSourceType<T> =
+            val configurationType: DatabaseSourceType<T, *> =
                 remember {
                     @Suppress("UNCHECKED_CAST")
-                    initialConfiguration.getType() as DatabaseSourceType<T>
+                    initialConfiguration.getType() as DatabaseSourceType<T, *>
                 }
             val configurationItems: List<SettingsItem> =
                 remember(configurationType) {

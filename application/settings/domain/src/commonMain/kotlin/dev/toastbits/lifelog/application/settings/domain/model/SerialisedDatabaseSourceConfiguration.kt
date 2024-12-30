@@ -4,6 +4,7 @@ import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseS
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.castType
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceTypeRegistry
+import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -12,8 +13,10 @@ data class SerialisedDatabaseSourceConfiguration(
     val serialisedConfiguration: String
 )
 
-fun <C: DatabaseSourceConfiguration> DatabaseSourceTypeRegistry.serialiseConfiguration(configuration: C): SerialisedDatabaseSourceConfiguration {
-    val type: DatabaseSourceType<C> = configuration.castType()
+fun <C: DatabaseSourceConfiguration<T>, T: LogDatabase> DatabaseSourceTypeRegistry.serialiseConfiguration(
+    configuration: C
+): SerialisedDatabaseSourceConfiguration {
+    val type: DatabaseSourceType<C, T> = configuration.castType()
     val typeId: String =
         try {
             getIdOfType(type)
@@ -25,8 +28,10 @@ fun <C: DatabaseSourceConfiguration> DatabaseSourceTypeRegistry.serialiseConfigu
     return SerialisedDatabaseSourceConfiguration(typeId, type.serialiseConfiguration(configuration))
 }
 
-fun DatabaseSourceTypeRegistry.deserialiseConfiguration(serialisedConfiguration: SerialisedDatabaseSourceConfiguration): DatabaseSourceConfiguration {
-    val type: DatabaseSourceType<*> =
+fun DatabaseSourceTypeRegistry.deserialiseConfiguration(
+    serialisedConfiguration: SerialisedDatabaseSourceConfiguration
+): DatabaseSourceConfiguration<*> {
+    val type: DatabaseSourceType<*, *> =
         try {
             getById(serialisedConfiguration.typeId)
         }

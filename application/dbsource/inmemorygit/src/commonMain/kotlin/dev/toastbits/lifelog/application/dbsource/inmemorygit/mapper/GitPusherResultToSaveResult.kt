@@ -6,10 +6,12 @@ import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.Res
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.`git_pusher_response_message_unknown_$text`
 import dev.toastbits.lifelog.application.dbsource.inmemorygit.generated.resources.`git_pusher_response_warning_repository_moved_$to`
-import dev.toastbits.lifelog.core.specification.database.LogDatabase
+import dev.toastbits.lifelog.application.dbsource.inmemorygit.model.InMemoryGitLogDatabase
 import org.jetbrains.compose.resources.getString
 
-internal suspend fun GitPusher.Result.toSaveResult(originalDatabase: LogDatabase): SaveResult {
+internal suspend fun GitPusher.Result.toSaveResult(
+    originalDatabase: InMemoryGitLogDatabase
+): SaveResult<InMemoryGitLogDatabase> {
     val alerts: List<Alert> =
         messages.map {
             when (it) {

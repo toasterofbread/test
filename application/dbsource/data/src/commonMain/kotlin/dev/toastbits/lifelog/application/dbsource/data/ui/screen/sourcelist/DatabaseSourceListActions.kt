@@ -29,7 +29,7 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun DatabaseSourceListActions(
-    types: List<DatabaseSourceType<*>>,
+    types: List<DatabaseSourceType<*, *>>,
     modifier: Modifier = Modifier,
     onTypeSelected: ((Int) -> Unit)? = null
 ) {

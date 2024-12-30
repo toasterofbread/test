@@ -46,6 +46,7 @@ import dev.toastbits.lifelog.application.dbsource.data.ui.component.DatabaseSour
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
+import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration
 
@@ -54,9 +55,9 @@ private val LOG_MIN_WIDTH: Dp = 400.dp
 private val SOURCE_MIN_WIDTH: Dp = 250.dp
 
 @Composable
-internal fun <R> DatabaseSourceProcessor(
-    sourceConfiguration: DatabaseSourceConfiguration,
-    databaseAccessor: DatabaseAccessor,
+internal fun <R, T: LogDatabase> DatabaseSourceProcessor(
+    sourceConfiguration: DatabaseSourceConfiguration<*>,
+    databaseAccessor: DatabaseAccessor<T>,
     textProvider: DatabaseSourceProcessScreenTextProvider,
     loadException: Throwable?,
     finishedStepsProgress: MutableList<DatabaseAccessor.LoadProgress>,

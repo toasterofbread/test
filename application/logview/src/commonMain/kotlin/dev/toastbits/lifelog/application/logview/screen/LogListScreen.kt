@@ -30,8 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.components.utils.composable.LoadActionIconButton
 import dev.toastbits.composekit.components.utils.composable.pane.model.InitialPaneRatioSource
-import dev.toastbits.composekit.components.utils.modifier.horizontal
-import dev.toastbits.composekit.components.utils.modifier.vertical
 import dev.toastbits.composekit.navigation.compositionlocal.LocalNavigator
 import dev.toastbits.composekit.navigation.navigator.Navigator
 import dev.toastbits.composekit.navigation.screen.ResponsiveTwoPaneNavigatorScreen
@@ -39,8 +37,6 @@ import dev.toastbits.composekit.navigation.screen.Screen
 import dev.toastbits.composekit.theme.core.ThemeValues
 import dev.toastbits.composekit.theme.core.onAccent
 import dev.toastbits.composekit.theme.core.ui.LocalComposeKitTheme
-import dev.toastbits.composekit.util.composable.end
-import dev.toastbits.composekit.util.composable.start
 import dev.toastbits.composekit.util.platform.launchSingle
 import dev.toastbits.lifelog.application.core.FullContentScreen
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseSaver
@@ -51,27 +47,25 @@ import dev.toastbits.lifelog.application.logview.generated.resources.`log_view_s
 import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_review_changes
 import dev.toastbits.lifelog.application.logview.generated.resources.log_view_screen_button_save
 import dev.toastbits.lifelog.application.logview.manager.LogDatabaseChangesManager
-import dev.toastbits.lifelog.application.logview.manager.LogDatabaseQueuedChanges
 import dev.toastbits.lifelog.application.logview.model.LogEntityChanges
 import dev.toastbits.lifelog.application.logview.model.LogEventReference
 import dev.toastbits.lifelog.application.logview.model.get
 import dev.toastbits.lifelog.application.logview.model.getOrNull
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
+import dev.toastbits.lifelog.core.specification.impl.model.entity.date.LogDateImpl
 import dev.toastbits.lifelog.core.specification.model.entity.date.LogDate
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-import kotlin.time.Duration
 
-class LogListScreen(
-    initialLogDatabase: LogDatabase,
-    private val logSaveScreenProvider: LogSaveScreenProvider
+class LogListScreen<T: LogDatabase>(
+    initialLogDatabase: T,
+    private val logSaveScreenProvider: LogSaveScreenProvider<T>
 ): ResponsiveTwoPaneNavigatorScreen(), FullContentScreen {
     private data class EventScreen(
         val eventReference: LogEventReference,
@@ -90,8 +84,8 @@ class LogListScreen(
     private var showSearchBar: Boolean by mutableStateOf(false)
     private var scrollToItem: LogEventReference? by mutableStateOf(null)
 
-    private var currentLogDatabase: LogDatabase by mutableStateOf(initialLogDatabase)
-    private var savedLogDatabase: LogDatabase = currentLogDatabase
+    private var currentLogDatabase: T by mutableStateOf(initialLogDatabase)
+    private var savedLogDatabase: T = currentLogDatabase
 
     private val viewingEventScreen: EventScreen?
         get() = currentScreen as EventScreen?
@@ -191,9 +185,9 @@ class LogListScreen(
         }
     }
 
-    private suspend fun addNewLogEvent(date: LogDate = currentLogDatabase.days.keys.maxBy { it.date }) {
+    private suspend fun addNewLogEvent(date: LogDate? = currentLogDatabase.days.keys.maxByOrNull { it.date }) {
         val existingEvents: Int = currentLogDatabase.days[date]?.size ?: 0
-        val eventReference: LogEventReference = LogEventReference(date, existingEvents)
+        val eventReference: LogEventReference = LogEventReference(date ?: LogDateImpl.now(), existingEvents)
 
         eventChanges.applyNewChanges(
             eventReference,
@@ -306,7 +300,7 @@ class LogListScreen(
         navigator.pushScreen(saveScreen)
     }
 
-    private fun onDatabaseSaved(newDatabase: LogDatabase) {
+    private fun onDatabaseSaved(newDatabase: T) {
         currentLogDatabase = newDatabase
         savedLogDatabase = newDatabase
         eventChanges.clear()

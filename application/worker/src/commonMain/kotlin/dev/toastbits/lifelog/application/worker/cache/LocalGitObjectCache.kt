@@ -4,7 +4,9 @@ import app.cash.sqldelight.async.coroutines.awaitAsList
 import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import dev.toastbits.composekit.context.PlatformContext
 import dev.toastbits.kogit.memory.model.GitObject
+import dev.toastbits.kogit.memory.model.GitObjectData
 import dev.toastbits.kogit.memory.model.GitObjectInfo
+import dev.toastbits.kogit.memory.model.GitObjectInfoData
 import dev.toastbits.kogit.memory.model.MutableGitObjectRegistry
 import dev.toastbits.lifelog.application.worker.GitDatabase
 import kotlinx.coroutines.sync.Mutex
@@ -59,9 +61,9 @@ class LocalGitObjectCache private constructor(
                     if (objects.containsKey(obj.hash)) {
                         return@mapNotNull null
                     }
-                    return@mapNotNull GitObjectInfo(obj.hash, obj.type.toGitObjectType())
+                    return@mapNotNull GitObjectInfoData(obj.hash, obj.type.toGitObjectType())
                 }
-            + objects.asSequence().map { GitObjectInfo(it.key, it.value.type) }
+            + objects.asSequence().map { GitObjectInfoData(it.key, it.value.type) }
         )
     }
 
@@ -96,7 +98,7 @@ class LocalGitObjectCache private constructor(
     override suspend fun readObjectOrNull(hash: String): GitObject? = mutex.withLock {
         objects[hash]?.obj
         ?: database.objectQueries.get(repositoryIdentifier, hash).awaitAsOneOrNull()?.let { (dataBase64, type) ->
-            GitObject(base64.decode(dataBase64), type.toGitObjectType(), hash)
+            GitObjectData(base64.decode(dataBase64), type.toGitObjectType(), hash)
         }
     }
 
@@ -116,7 +118,7 @@ class LocalGitObjectCache private constructor(
         if (neededHashes.isNotEmpty()) {
             ret.addAll(
                 database.objectQueries.getMultiple(repositoryIdentifier, neededHashes).awaitAsList().map { (hash, type, dataBase64) ->
-                    GitObject(base64.decode(dataBase64), type.toGitObjectType(), hash)
+                    GitObjectData(base64.decode(dataBase64), type.toGitObjectType(), hash)
                 }
             )
         }

@@ -43,6 +43,7 @@ kotlin {
                 implementation(projects.application.settings.data)
                 implementation(projects.application.logview)
                 implementation(projects.application.worker)
+                implementation(projects.core.specification)
 
                 implementation(projects.extension.media)
                 implementation(projects.extension.mediawatch)

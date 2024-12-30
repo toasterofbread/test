@@ -2,9 +2,10 @@ package dev.toastbits.lifelog.application.dbsource.domain.configuration
 
 import androidx.compose.runtime.Composable
 import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
+import dev.toastbits.lifelog.core.specification.database.LogDatabase
 
-interface DatabaseSourceConfiguration {
-    fun getType(): DatabaseSourceType<*>
+interface DatabaseSourceConfiguration<T: LogDatabase> {
+    fun getType(): DatabaseSourceType<*, T>
 
     @Composable
     fun getPreviewTitle(): String
@@ -17,5 +18,5 @@ interface DatabaseSourceConfiguration {
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <C: DatabaseSourceConfiguration> C.castType(): DatabaseSourceType<C> =
-    getType() as DatabaseSourceType<C>
+fun <C: DatabaseSourceConfiguration<T>, T: LogDatabase> C.castType(): DatabaseSourceType<C, T> =
+    getType() as DatabaseSourceType<C, T>

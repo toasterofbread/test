@@ -9,9 +9,6 @@ sealed interface WorkerCommandProgress {
     data class PotentialError(val message: String): WorkerCommandProgress
 
     @Serializable
-    data class FailedToCreateLocalGitObjectCache(val exception: WorkerException): WorkerCommandProgress
-
-    @Serializable
     data object WaitingForWorker: WorkerCommandProgress
 
     @Serializable

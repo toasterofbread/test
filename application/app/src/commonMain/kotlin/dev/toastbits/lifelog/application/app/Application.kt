@@ -14,16 +14,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEvent
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
 import dev.toastbits.composekit.application.ComposeKitApplication
-import dev.toastbits.composekit.components.platform.composable.onWindowBackPressed
 import dev.toastbits.composekit.context.PlatformContext
-import dev.toastbits.composekit.navigation.screen.Screen
 import dev.toastbits.composekit.settings.PlatformSettings
 import dev.toastbits.composekit.util.composable.copy
 import dev.toastbits.composekit.util.composable.plus
@@ -44,6 +37,7 @@ import dev.toastbits.lifelog.application.settings.domain.model.SerialisedDatabas
 import dev.toastbits.lifelog.application.settings.domain.model.deserialiseConfiguration
 import dev.toastbits.lifelog.application.worker.WorkerClient
 import dev.toastbits.lifelog.application.worker.compositionlocal.LocalWorkerClient
+import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.extension.gdocs.GDocsExtension
 import dev.toastbits.lifelog.extension.gdocs.MediaExtension
 import dev.toastbits.lifelog.extension.mediawatch.MediaWatchExtension
@@ -92,22 +86,27 @@ class Application(
         }
 
         val serialisedSourceConfigurations: List<SerialisedDatabaseSourceConfiguration> = settings.DatabaseSource.DATABASE_SOURCES.get()
-        val autoOpenConfiguration: DatabaseSourceConfiguration =
+        val autoOpenConfiguration: DatabaseSourceConfiguration<*> =
             serialisedSourceConfigurations.getOrNull(autoOpenIndex)?.let {
                 settings.DatabaseSource.sourceTypeRegistry.deserialiseConfiguration(it)
             } ?: return
 
-        val loadScreen: Screen =
-            DatabaseSourceLoadScreen(
-                autoOpenConfiguration,
-                onLoaded = {
-                    navigator.replaceScreen(LogListScreen(it, LogSaveScreenProviderImpl(autoOpenConfiguration)))
-                },
-                autoProceed = true
-            )
-
-        navigator.pushScreen(loadScreen)
+        navigator.pushScreen(createLoadScreen(autoOpenConfiguration))
     }
+
+    private fun <T: LogDatabase> createLoadScreen(autoOpenConfiguration: DatabaseSourceConfiguration<T>) =
+        DatabaseSourceLoadScreen(
+            autoOpenConfiguration,
+            onLoaded = {
+                navigator.replaceScreen(
+                    LogListScreen(
+                        it,
+                        LogSaveScreenProviderImpl(autoOpenConfiguration)
+                    )
+                )
+            },
+            autoProceed = true
+        )
 
     @Composable
     private fun RootContent(modifier: Modifier, contentPadding: PaddingValues) {

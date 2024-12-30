@@ -13,26 +13,30 @@ import dev.toastbits.lifelog.application.worker.mapper.toTransferable
 import dev.toastbits.lifelog.application.worker.model.TransferableFileStructure
 import dev.toastbits.lifelog.application.worker.model.WorkerCommandResult
 import dev.toastbits.lifelog.application.worker.model.toResult
-import dev.toastbits.lifelog.application.worker.model.toWorkerException
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import okio.Path
+import okio.Path.Companion.toPath
+
+fun Path.normaliseRoot(): Path =
+    "/".toPath().resolve(this, normalize = true)
 
 @Serializable
 data class WorkerCommandInMemoryGitClone(
     val repositoryUrl: String,
     val branch: GitRef.Branch,
+    val directoryPath: String,
     val gitCredentials: GitCredentials?
 ): WorkerCommand {
     override suspend fun execute(
         context: WorkerExecutionContext,
         onProgress: (WorkerCommandProgress) -> Unit
     ): WorkerCommandResult {
-        val cache: LocalGitObjectCache? =
+        val cache: LocalGitObjectCache =
             LocalGitObjectCache.getInstance(repositoryUrl, context.platformContext)
                 .getOrElse {
-                    onProgress(WorkerCommandProgress.FailedToCreateLocalGitObjectCache(it.toWorkerException()))
-                    return@getOrElse null
+                    return it.toResult()
                 }
 
         val httpClient: HttpClient = HttpClient()
@@ -47,21 +51,29 @@ data class WorkerCommandInMemoryGitClone(
             credentials = gitCredentials
         )
 
+        val directoryPathPath: Path = directoryPath.toPath().normaliseRoot()
+
         val (headCommit: GitObject, fileStructure: FileStructure) =
-            gitHelper.cloneToFileStructure { stage, part, total ->
+            gitHelper.cloneToFileStructure(
+                shouldProcessTree = { path ->
+                    directoryPathPath.isRoot || directoryPathPath.startsWith(path).also { println("$directoryPathPath startsWith $path = $it") }
+                }
+            ) { stage, part, total ->
                 onProgress(Progress(stage, part, total))
             }.fold(
                 onSuccess = { it },
                 onFailure = { return RuntimeException("Cloning $repositoryUrl:$branch with $gitCredentials failed", it).toResult() }
             )
 
-        if (cache != null) {
-            val toCommit: Int = cache.countObjectsToCommit()
-            if (toCommit > 0) {
-                onProgress(Progress(GitHandlerStage.WritingObjectsToCache, null, toCommit.toLong()))
-                withContext(context.ioDispatcher) {
-                    cache.commit()
-                }
+        if (fileStructure.nodes.isEmpty() && directoryPathPath != "/".toPath()) {
+            return RuntimeException("Repository has no directory matching $directoryPathPath ($directoryPath)").toResult()
+        }
+
+        val toCommit: Int = cache.countObjectsToCommit()
+        if (toCommit > 0) {
+            onProgress(Progress(GitHandlerStage.WritingObjectsToCache, null, toCommit.toLong()))
+            withContext(context.ioDispatcher) {
+                cache.commit()
             }
         }
 
@@ -79,9 +91,20 @@ data class WorkerCommandInMemoryGitClone(
         return WorkerCommandResult.Success(Response(headCommit.hash, transferableFileStructure))
     }
 
+    private fun Path.startsWith(other: Path): Boolean {
+        var path: Path = this.normaliseRoot()
+        val otherNormalised: Path = other.normaliseRoot()
+        while (true) {
+            if (path == otherNormalised) {
+                return true
+            }
+            path = path.parent ?: return false
+        }
+    }
+
     @Serializable
     data class Progress(val stage: GitHandlerStage, val part: Long?, val total: Long?): WorkerCommandProgress
 
     @Serializable
-    data class Response(val headCommitRef: String, val transferFileStructure: TransferableFileStructure): WorkerCommandResponse
+    data class Response(val headCommitHash: String, val transferFileStructure: TransferableFileStructure): WorkerCommandResponse
 }

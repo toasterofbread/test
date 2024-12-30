@@ -31,14 +31,14 @@ import dev.toastbits.lifelog.application.settings.domain.model.serialiseConfigur
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import org.jetbrains.compose.resources.stringResource
 
-class LogSaveScreenProviderImpl(
-    private val sourceConfiguration: DatabaseSourceConfiguration
-): LogSaveScreenProvider {
+class LogSaveScreenProviderImpl<T: LogDatabase>(
+    private val sourceConfiguration: DatabaseSourceConfiguration<T>
+): LogSaveScreenProvider<T> {
     override fun invoke(
-        database: LogDatabase,
+        database: T,
         autoProceed: Boolean,
-        onProceeded: ((DatabaseSaver.SaveResult) -> Unit)?,
-        onSaveFinished: (DatabaseSaver.SaveResult) -> Unit
+        onProceeded: ((DatabaseSaver.SaveResult<T>) -> Unit)?,
+        onSaveFinished: (DatabaseSaver.SaveResult<T>) -> Unit
     ): Screen {
         // TODO
         val user: UserInfo =
@@ -65,13 +65,13 @@ class DatabaseSourceListScreen: Screen {
         val autoOpenIndex: Int by settings.DatabaseSource.AUTO_OPEN_SOURCE_INDEX.observe()
 
         var serialisedSourceConfigurations: List<SerialisedDatabaseSourceConfiguration> by settings.DatabaseSource.DATABASE_SOURCES.observe()
-        val sourceConfigurations: List<DatabaseSourceConfiguration> = remember(serialisedSourceConfigurations) {
+        val sourceConfigurations: List<DatabaseSourceConfiguration<*>> = remember(serialisedSourceConfigurations) {
             serialisedSourceConfigurations.map { serialised ->
                 settings.DatabaseSource.sourceTypeRegistry.deserialiseConfiguration(serialised)
             }
         }
 
-        val sourceTypes: List<DatabaseSourceType<*>> = settings.DatabaseSource.sourceTypeRegistry.getAll().values.toList()
+        val sourceTypes: List<DatabaseSourceType<*, *>> = settings.DatabaseSource.sourceTypeRegistry.getAll().values.toList()
 
         DatabaseSourceList(
             sourceConfigurations,
@@ -80,21 +80,13 @@ class DatabaseSourceListScreen: Screen {
             contentPadding = contentPadding,
             autoOpenConfigurationIndex = autoOpenIndex,
             onSelected = { index ->
-                val sourceConfiguration: DatabaseSourceConfiguration = sourceConfigurations[index]
-                navigator.pushScreen(
-                    DatabaseSourceLoadScreen(
-                        sourceConfiguration,
-                        onLoaded = { database ->
-                            navigator.replaceScreen(LogListScreen(database, LogSaveScreenProviderImpl(sourceConfiguration)))
-                        }
-                    )
-                )
+                openSourceConfiguration(navigator, sourceConfigurations[index])
             },
             onRemoveRequested = { index ->
                 serialisedSourceConfigurations = serialisedSourceConfigurations.toMutableList().apply { removeAt(index) }
             },
             onEditRequested = { index ->
-                val source: DatabaseSourceConfiguration = sourceConfigurations[index]
+                val source: DatabaseSourceConfiguration<*> = sourceConfigurations[index]
                 navigator.pushScreen(
                     DatabaseSourceConfigurationScreen(
                         source,
@@ -121,7 +113,7 @@ class DatabaseSourceListScreen: Screen {
                 )
             },
             onTypeAddRequested = { index ->
-                val type: DatabaseSourceType<*> = sourceTypes[index]
+                val type: DatabaseSourceType<*, *> = sourceTypes[index]
                 navigator.pushScreen(
                     DatabaseSourceConfigurationScreen(
                         type.createNewConfiguration(),
@@ -145,6 +137,25 @@ class DatabaseSourceListScreen: Screen {
                     )
                 )
             }
+        )
+    }
+
+    private fun <T: LogDatabase> openSourceConfiguration(
+        navigator: Navigator,
+        sourceConfiguration: DatabaseSourceConfiguration<T>,
+    ) {
+        navigator.pushScreen(
+            DatabaseSourceLoadScreen(
+                sourceConfiguration,
+                onLoaded = {
+                    navigator.replaceScreen(
+                        LogListScreen(
+                            it,
+                            LogSaveScreenProviderImpl(sourceConfiguration)
+                        )
+                    )
+                }
+            )
         )
     }
 }

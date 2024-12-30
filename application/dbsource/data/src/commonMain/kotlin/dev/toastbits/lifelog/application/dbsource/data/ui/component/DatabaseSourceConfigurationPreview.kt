@@ -45,13 +45,13 @@ import org.jetbrains.compose.resources.stringResource
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun DatabaseSourceConfigurationPreview(
-    configuration: DatabaseSourceConfiguration,
+    configuration: DatabaseSourceConfiguration<*>,
     modifier: Modifier = Modifier,
     autoOpens: Boolean = false,
     onSelected: (() -> Unit)? = null,
     tailItems: @Composable FlowRowScope.() -> Unit = {}
 ) {
-    val type: DatabaseSourceType<*> = configuration.getType()
+    val type: DatabaseSourceType<*, *> = configuration.getType()
     val theme: ThemeValues = LocalComposeKitTheme.current
     val shape: CornerBasedShape = MaterialTheme.shapes.medium
 

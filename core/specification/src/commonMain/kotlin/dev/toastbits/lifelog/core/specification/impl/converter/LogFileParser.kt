@@ -170,7 +170,8 @@ internal class LogFileParser(
         onAlert(
             SpecificationLogParseAlert.UnmatchedEventFormat(
                 line,
-                eventTypes.flatMap { it.prefixes })
+                eventTypes.flatMap { it.prefixes }
+            )
         )
     }
 

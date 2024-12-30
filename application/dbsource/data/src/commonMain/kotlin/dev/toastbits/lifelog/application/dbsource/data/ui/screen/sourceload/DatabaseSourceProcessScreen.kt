@@ -19,6 +19,7 @@ import dev.toastbits.lifelog.application.dbsource.data.ui.util.rememberDatabaseA
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor
 import dev.toastbits.lifelog.application.dbsource.domain.configuration.DatabaseSourceConfiguration
 import dev.toastbits.lifelog.application.dbsource.domain.model.Alert
+import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -26,8 +27,8 @@ import kotlin.time.Duration
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
 
-abstract class DatabaseSourceProcessScreen<R>(
-    private val sourceConfiguration: DatabaseSourceConfiguration,
+abstract class DatabaseSourceProcessScreen<R, T: LogDatabase>(
+    private val sourceConfiguration: DatabaseSourceConfiguration<T>,
     private val textProvider: DatabaseSourceProcessScreenTextProvider,
     private val autoProceed: Boolean = false,
     private val showProceedAndCancel: Boolean = true
@@ -37,7 +38,7 @@ abstract class DatabaseSourceProcessScreen<R>(
     private var currentProgress: DatabaseAccessor.LoadProgress? by mutableStateOf(null)
     private var loadResult: Result<Pair<R, Duration>>? by mutableStateOf(null)
 
-    internal abstract fun getInitialStep(databaseAccessor: DatabaseAccessor): LoadStep<R>
+    internal abstract fun getInitialStep(databaseAccessor: DatabaseAccessor<T>): LoadStep<R, T>
 
     protected abstract fun canProceedWithResult(result: R): Boolean
     protected abstract fun getResultAlerts(result: R): List<Alert>
@@ -56,7 +57,7 @@ abstract class DatabaseSourceProcessScreen<R>(
     @Composable
     override fun Content(modifier: Modifier, contentPadding: PaddingValues) {
         val coroutineScope: CoroutineScope = rememberCoroutineScope()
-        val databaseAccessor: DatabaseAccessor = rememberDatabaseAccessor(sourceConfiguration)
+        val databaseAccessor: DatabaseAccessor<T> = rememberDatabaseAccessor(sourceConfiguration)
 
         LaunchedEffect(Unit) {
             if (loadResult == null && loadJob == null) {
@@ -92,7 +93,7 @@ abstract class DatabaseSourceProcessScreen<R>(
         navigator.navigateBackward()
     }
 
-    private fun CoroutineScope.startLoad(databaseAccessor: DatabaseAccessor) {
+    private fun CoroutineScope.startLoad(databaseAccessor: DatabaseAccessor<T>) {
         loadJob = launchSingle {
             loadResult = null
             finishedStepsProgress.clear()
@@ -118,8 +119,8 @@ abstract class DatabaseSourceProcessScreen<R>(
     }
 
     private suspend fun continueLoad(
-        step: LoadStep<R>,
-        databaseAccessor: DatabaseAccessor,
+        step: LoadStep<R, T>,
+        databaseAccessor: DatabaseAccessor<T>,
         startTime: TimeMark
     ): Result<Pair<R, Duration>> = runCatching {
         val result: LoadStep.ExecuteResult<R> =
@@ -148,8 +149,9 @@ abstract class DatabaseSourceProcessScreen<R>(
             is LoadStep.ExecuteResult.ExceptionThrown -> {
                 throw result.exception
             }
-            is LoadStep.ExecuteResult.NextStep -> {
-                return continueLoad(result.nextStep, databaseAccessor, startTime)
+            is LoadStep.ExecuteResult.NextStep<*, *> -> {
+                @Suppress("UNCHECKED_CAST")
+                return continueLoad(result.nextStep as LoadStep<R, T>, databaseAccessor, startTime)
             }
         }
     }

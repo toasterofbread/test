@@ -11,17 +11,18 @@ import dev.toastbits.lifelog.application.settings.domain.appsettings.AppSettings
 import dev.toastbits.lifelog.application.settings.domain.group.getLogDatabaseConfiguration
 import dev.toastbits.lifelog.application.worker.WorkerClient
 import dev.toastbits.lifelog.application.worker.compositionlocal.LocalWorkerClient
+import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.Dispatchers
 
 @Composable
-fun rememberDatabaseAccessor(sourceConfiguration: DatabaseSourceConfiguration): DatabaseAccessor {
-    val provider: () -> DatabaseAccessor = rememberDatabaseAccessorProvider(sourceConfiguration)
+fun <T: LogDatabase> rememberDatabaseAccessor(sourceConfiguration: DatabaseSourceConfiguration<T>): DatabaseAccessor<T> {
+    val provider: () -> DatabaseAccessor<T> = rememberDatabaseAccessorProvider(sourceConfiguration)
     return remember(provider) { provider() }
 }
 
 @Composable
-fun rememberDatabaseAccessorProvider(sourceConfiguration: DatabaseSourceConfiguration): () -> DatabaseAccessor {
+fun <T: LogDatabase> rememberDatabaseAccessorProvider(sourceConfiguration: DatabaseSourceConfiguration<T>): () -> DatabaseAccessor<T> {
     val workerClient: WorkerClient = LocalWorkerClient.current
     val settings: AppSettings = LocalSettings.current
 

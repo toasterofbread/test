@@ -18,11 +18,11 @@ import korlibs.math.roundDecimalPlaces
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration
 
-class DatabaseSourceLoadScreen(
-    sourceConfiguration: DatabaseSourceConfiguration,
-    private val onLoaded: (LogDatabase) -> Unit,
+class DatabaseSourceLoadScreen<T: LogDatabase>(
+    sourceConfiguration: DatabaseSourceConfiguration<T>,
+    private val onLoaded: (T) -> Unit,
     autoProceed: Boolean = false
-): DatabaseSourceProcessScreen<LogDatabaseParseResult>(
+): DatabaseSourceProcessScreen<LogDatabaseParseResult<T>, T>(
     sourceConfiguration = sourceConfiguration,
     autoProceed = autoProceed,
     textProvider = DatabaseSourceLoadScreenTextProvider
@@ -31,13 +31,13 @@ class DatabaseSourceLoadScreen(
         @Composable
         get() = stringResource(Res.string.database_loader_title)
 
-    override fun getInitialStep(databaseAccessor: DatabaseAccessor): LoadStep<LogDatabaseParseResult> =
-        LoadStepLoadOnline
+    override fun getInitialStep(databaseAccessor: DatabaseAccessor<T>): LoadStep<LogDatabaseParseResult<T>, T> =
+        LoadStepLoadOnline()
 
-    override fun canProceedWithResult(result: LogDatabaseParseResult): Boolean =
+    override fun canProceedWithResult(result: LogDatabaseParseResult<T>): Boolean =
         result.alerts.none { it.alert.severity == LogConvertAlert.Severity.ERROR }
 
-    override fun getResultAlerts(result: LogDatabaseParseResult): List<Alert> =
+    override fun getResultAlerts(result: LogDatabaseParseResult<T>): List<Alert> =
         result.alerts.map {
             Alert(
                 message = it.alert.toString(),
@@ -53,7 +53,7 @@ class DatabaseSourceLoadScreen(
 
     override fun hasUserProceedAction(): Boolean = true
 
-    override fun onUserProceeded(result: LogDatabaseParseResult) {
+    override fun onUserProceeded(result: LogDatabaseParseResult<T>) {
         onLoaded(result.database)
     }
 }

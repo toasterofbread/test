@@ -5,13 +5,16 @@ import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccess
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseSaver.SaveResult
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
 
-internal data class LoadStepSaveOnline(
-    val database: LogDatabase,
+internal data class LoadStepSaveOnline<T: LogDatabase>(
+    val database: T,
     val message: String,
     val author: UserInfo,
     val committer: UserInfo
-): LoadStep<SaveResult> {
-    override suspend fun execute(accessor: DatabaseAccessor, onProgress: (DatabaseAccessor.LoadProgress) -> Unit): LoadStep.ExecuteResult<SaveResult> =
+): LoadStep<SaveResult<T>, T> {
+    override suspend fun execute(
+        accessor: DatabaseAccessor<T>,
+        onProgress: (DatabaseAccessor.LoadProgress) -> Unit,
+    ): LoadStep.ExecuteResult<SaveResult<T>> =
         accessor.saver.saveOnlineDatabase(
             database,
             message,

@@ -23,7 +23,7 @@ import dev.toastbits.lifelog.application.dbsource.domain.type.DatabaseSourceType
 
 @Composable
 fun DatabaseSourceTypePreview(
-    sourceType: DatabaseSourceType<*>,
+    sourceType: DatabaseSourceType<*, *>,
     modifier: Modifier = Modifier,
     onSelect: (() -> Unit)? = null
 ) {

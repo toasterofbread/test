@@ -3,6 +3,7 @@ package dev.toastbits.lifelog.application.logview.manager
 import dev.toastbits.lifelog.application.logview.model.LogEntityChanges
 import dev.toastbits.lifelog.application.logview.model.LogEventReference
 import dev.toastbits.lifelog.core.specification.database.LogDatabase
+import dev.toastbits.lifelog.core.specification.database.copyWithDays
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -90,10 +91,10 @@ internal abstract class LogDatabaseChangesManager(
         jobs.joinAll()
     }
 
-    suspend fun applyToDatabase(logDatabase: LogDatabase): LogDatabase {
+    suspend fun <T: LogDatabase> applyToDatabase(logDatabase: T): T {
         applyAllQueuedChanges()
         queueLock.withLock {
-            return logDatabase.copy(
+            return logDatabase.copyWithDays(
                 days = logDatabase.days.toMutableMap().also { days ->
                     for ((ref, changes) in eventChanges.entries.sortedBy { it.key }) {
                         val events: List<LogEvent> = days[ref.date].orEmpty()

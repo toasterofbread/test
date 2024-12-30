@@ -8,8 +8,8 @@ import dev.toastbits.lifelog.core.accessor.impl.DatabaseFilesParserImpl
 import dev.toastbits.lifelog.core.accessor.reference.LogEntityReferenceGeneratorImpl
 import dev.toastbits.lifelog.core.specification.converter.LogFileConverter
 import dev.toastbits.lifelog.core.specification.converter.ParseAlertData
-import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import dev.toastbits.lifelog.core.specification.database.LogDatabaseConfiguration
+import dev.toastbits.lifelog.core.specification.database.LogDatabaseData
 import dev.toastbits.lifelog.core.specification.impl.converter.LogFileConverterImpl
 import kotlinx.coroutines.CoroutineDispatcher
 
@@ -26,8 +26,7 @@ class LogDatabaseParseHelper(
 
     suspend fun parseFileStructure(
         fileStructure: FileStructure,
-        gitCommitRef: String,
         onAlert: (ParseAlertData) -> Unit
-    ): LogDatabase =
-        parser.parseDatabaseFileStructure(fileStructure, gitCommitRef, onAlert)
+    ): LogDatabaseData =
+        parser.parseDatabaseFileStructure(fileStructure, onAlert)
 }

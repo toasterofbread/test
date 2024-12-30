@@ -5,12 +5,24 @@ import dev.toastbits.lifelog.core.specification.model.entity.date.LogDate
 import dev.toastbits.lifelog.core.specification.model.entity.event.LogEvent
 import dev.toastbits.lifelog.core.specification.model.reference.LogEntityReference
 
-data class LogDatabase(
+interface LogDatabase {
+    val configuration: LogDatabaseConfiguration
+    val converter: LogFileConverter
+    val days: Map<LogDate, List<LogEvent>>
+    val data: Map<LogEntityReference, LogDataFile>
+
+    fun _copyWithDays(days: Map<LogDate, List<LogEvent>>): LogDatabase
+}
+
+@Suppress("UNCHECKED_CAST")
+fun <T: LogDatabase> T.copyWithDays(days: Map<LogDate, List<LogEvent>>): T =
+    _copyWithDays(days) as T
+
+class LogDatabaseData(
     val configuration: LogDatabaseConfiguration,
-    val days: Map<LogDate, List<LogEvent>> = emptyMap(),
-    val data: Map<LogEntityReference, LogDataFile> = emptyMap(),
     val converter: LogFileConverter,
-    val gitCommitHash: String?
+    val days: Map<LogDate, List<LogEvent>>,
+    val data: Map<LogEntityReference, LogDataFile>
 )
 
 sealed interface LogDataFile {

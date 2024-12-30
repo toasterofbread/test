@@ -3,14 +3,15 @@ package dev.toastbits.lifelog.application.dbsource.domain.accessor
 import dev.toastbits.kogit.memory.model.GitObjectInfo
 import dev.toastbits.lifelog.application.dbsource.domain.accessor.DatabaseAccessor.LoadProgress
 import dev.toastbits.lifelog.application.dbsource.domain.model.LogDatabaseParseResult
+import dev.toastbits.lifelog.core.specification.database.LogDatabase
 import okio.Path
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 
-interface DatabaseAccessor {
-    val saver: DatabaseSaver
+interface DatabaseAccessor<T: LogDatabase> {
+    val saver: DatabaseSaver<T>
 
-    suspend fun loadOnlineDatabase(onProgress: (LoadProgress) -> Unit): Result<LogDatabaseParseResult>
+    suspend fun loadOnlineDatabase(onProgress: (LoadProgress) -> Unit): Result<LogDatabaseParseResult<T>>
 
     fun getFileLineUri(filePath: Path, lineIndex: UInt?): String?
 
